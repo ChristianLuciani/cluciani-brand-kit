@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.1 — 2026-10-22
+
+- Tooling: `vitest` fijado a 4.0.18 (npm 10 falla al resolver 4.1.10 con
+  `edgesOut`) + `package-lock.json`; CI usa `npm ci`. **Assets sin cambios**
+  (idénticos a v1.0.0).
+
 ## v1.0.0 — 2026-10-22
 
 Primera versión canónica del brand kit, importada desde `cv-cluciani`

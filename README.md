@@ -26,22 +26,22 @@ tag, nunca `main`: los assets de una versión no cambian.
 jsDelivr sirve el repo público con caché inmutable por tag:
 
 ```
-https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.0.0/assets/logo/logo-aurea-1024-dark.png
-https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.0.0/assets/logo/logo-aurea-1024-light.png
+https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.0.1/assets/logo/logo-aurea-1024-dark.png
+https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.0.1/assets/logo/logo-aurea-1024-light.png
 ```
 
 Ejemplo para el README de perfil (HTML, controla el tamaño en GitHub):
 
 ```html
 <p align="center">
-  <img width="320" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.0.0/assets/logo/logo-aurea-1024-dark.png" alt="Christian Luciani">
+  <img width="320" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.0.1/assets/logo/logo-aurea-1024-dark.png" alt="Christian Luciani">
 </p>
 ```
 
 ### Raw de GitHub
 
 ```
-https://raw.githubusercontent.com/ChristianLuciani/cluciani-brand-kit/v1.0.0/assets/logo/logo-aurea-1024-dark.png
+https://raw.githubusercontent.com/ChristianLuciani/cluciani-brand-kit/v1.0.1/assets/logo/logo-aurea-1024-dark.png
 ```
 
 ### Nomenclatura
