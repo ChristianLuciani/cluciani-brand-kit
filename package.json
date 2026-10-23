@@ -1,0 +1,16 @@
+{
+  "name": "cluciani-brand-kit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Brand kit canónico de Christian Luciani: logo triángulo-espiral, assets, generador y manual. Todos los derechos reservados.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "vitest run",
+    "logo:generate": "node tools/logo/generate-logo.mjs",
+    "logo:verify": "node tools/logo/verify-dom-fidelity.mjs"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.10"
+  }
+}
