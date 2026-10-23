@@ -12,7 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install --no-audit --no-fund
+          cache: npm
+      - run: npm ci
       - run: npm test
       # El gate de fidelidad (npm run logo:verify) necesita Chrome; su
       # cableado en CI es el issue #59 del repo cv-cluciani.
