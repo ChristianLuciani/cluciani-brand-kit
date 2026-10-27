@@ -13,7 +13,7 @@
  *   · og-image 1200×630 (dark + nombre)
  *
  * Uso: node tools/logo/generate-logo.mjs [--only-aurea|--only-base]
- *      [--out assets/logo] (o LOGO_OUT env)
+ *      [--only-favicon] [--out assets/logo] (o LOGO_OUT env)
  */
 import { execFileSync } from "node:child_process";
 import { accessSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
@@ -21,6 +21,7 @@ import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   config, buildGeometry, buildSky, constellationPoints, segStyle, cPathD, cBand, starSpec, seeded,
+  faviconFrame, NOVA_CORE_BOOST,
 } from "./geometry.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -50,12 +51,19 @@ function chromeScreenshot(chrome, htmlFile, outPng, { w, h, transparent = false 
   mkdirSync(dirname(outPng), { recursive: true });
   const args = [
     "--headless", "--disable-gpu", "--no-first-run", "--hide-scrollbars",
+    // perfil dentro de TMP: Chrome no siempre puede crear uno único en el
+    // TMPDIR del host (sandbox del harness) y falla antes de renderizar.
+    `--user-data-dir=${join(TMP, "profile")}`,
+    "--disable-breakpad", "--disable-crash-reporter",
     "--force-device-scale-factor=1",
     "--virtual-time-budget=800",
     "--window-size=" + w + "," + h,
     "--screenshot=" + outPng,
     `file://${htmlFile}`,
   ];
+  // Chrome headless dentro de un sandbox externo (DSH, CI restringido) no
+  // puede inicializar su propio sandbox: opt-in explícito, nunca default.
+  if (process.env.CHROME_NO_SANDBOX === "1") args.unshift("--no-sandbox");
   if (transparent) args.push("--default-background-color=00000000");
   // timeout: un Chrome headless colgado no debe colgar el pipeline entero
   execFileSync(chrome, args, { stdio: ["ignore", "ignore", "ignore"], timeout: 180_000 });
@@ -147,7 +155,7 @@ const layerBackground = (sky) => {
    al origen. Es tratamiento de render: el spec de la animación (#53) no
    cambia; #55 puede espejarlo ahí si se quiere. */
 const BRAND = {
-  novaCoreBoost: 2,       // px de core extra para la supernova
+  novaCoreBoost: NOVA_CORE_BOOST, // único dueño del valor: geometry.mjs
   brightCoreScale: 0.78,  // -22% en las bright de las aristas
   brightHaloScale: 0.85,  // su halo también baja proporcional
 };
@@ -293,43 +301,41 @@ ${nightHalo(70, 35, 560)}
 </style></head><body><div id="halo"></div>${inline}<div id="name">${first}${rest.length ? `<br>${rest.join(" ")}` : ""}</div><div id="domain">christianluciani.github.io</div></body></html>`;
 };
 
-/* favicon simplificado: la C (firma) + supernova, recortados al bbox con
-   padding — el mark completo es ilegible <24px (review fresco PR #58).
-   viewBox cuadrado computado del contenido real de la C, no hardcodeado. */
-const faviconDoc = (g, cfg) => {
-  const pts = constellationPoints(g.segs);
-  const nums = cPathD(g.segs).match(/-?[\d.]+/g).map(Number);
-  const cPts = [];
-  for (let i = 0; i < nums.length; i += 2) cPts.push({ x: nums[i], y: nums[i + 1] });
-  const all = [pts[0], ...cPts]; // supernova + los 3 puntos de la C
-  const xs = all.map((p) => p.x), ys = all.map((p) => p.y);
-  const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
-  const pad = span * 0.14 + 12;
-  const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-  const side = span + pad * 2;
-  const band = cBand(g.segs, cfg.cWidth, { corner: cfg.cFinish.cornerCut });
-  const sp = starSpec(0, pts.length, cfg.constellation);
+/* favicon simplificado: la C (firma) + supernova, recortados al CONTORNO
+   REAL y con el icono llenando el tile — el mark completo es ilegible
+   <24px (review fresco PR #58). A 16/32px el 12% de respiro del mark deja
+   el símbolo flotando; acá el tile ES el marco (≥90% de ocupación) y la
+   barra se engrosa ×2 (`FAVICON` en geometry.mjs).
+   `variant: "teal"` produce la opción de tile lleno: fondo teal (acento/
+   links del sitio) + C en night, porque el oro sobre teal no contrasta. */
+const faviconDoc = (g, cfg, { variant = "plain" } = {}) => {
+  const frame = faviconFrame(g.segs, cfg, { background: variant === "teal" });
+  const { band, sp, coreR, viewBox: vb, side, ink, background } = frame;
+  const label = background ? "C de Christian — favicon sobre tile teal" : "C de Christian — favicon simplificado";
+  const title = background ? "C — espiral de conocimiento (favicon, tile teal)" : "C — espiral de conocimiento (favicon)";
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!-- GENERADO por tools/logo/generate-logo.mjs — NO EDITAR A MANO -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="${n2(cx - side / 2)} ${n2(cy - side / 2)} ${n2(side)} ${n2(side)}" role="img" aria-label="C de Christian — favicon simplificado">
-  <title>C — espiral de conocimiento (favicon)</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="${n2(vb.x)} ${n2(vb.y)} ${n2(side)} ${n2(side)}" role="img" aria-label="${label}">
+  <title>${title}</title>
 ${filterDefs()}
-  <g id="logo-supernova" data-name="Supernova">
-    <circle cx="${n2(pts[0].x)}" cy="${n2(pts[0].y)}" r="${n2(sp.glowR * 3.2)}" fill="url(#halo-nova)" color="${sp.color}"/>
-    <circle cx="${n2(pts[0].x)}" cy="${n2(pts[0].y)}" r="${n2(sp.glowR * 1.9)}" fill="url(#halo-nova)" color="${sp.color}"/>
-    <circle cx="${n2(pts[0].x)}" cy="${n2(pts[0].y)}" r="${n2(sp.coreR + BRAND.novaCoreBoost)}" fill="${sp.color}" opacity="1"/>
+${background ? `  <rect x="${n2(vb.x)}" y="${n2(vb.y)}" width="${n2(side)}" height="${n2(side)}" fill="${background}"/>\n` : ""}  <g id="logo-supernova" data-name="Supernova">
+    <circle cx="${n2(g.segs[0].a.x)}" cy="${n2(g.segs[0].a.y)}" r="${n2(sp.glowR * 3.2)}" fill="url(#halo-nova)" color="${ink}"/>
+    <circle cx="${n2(g.segs[0].a.x)}" cy="${n2(g.segs[0].a.y)}" r="${n2(sp.glowR * 1.9)}" fill="url(#halo-nova)" color="${ink}"/>
+    <circle cx="${n2(g.segs[0].a.x)}" cy="${n2(g.segs[0].a.y)}" r="${n2(coreR)}" fill="${ink}" opacity="1"/>
   </g>
   <g id="logo-c-triespiral" data-name="C TriSpiral">
-    <path d="${band.outline}" fill="${cfg.colors.c}"/>
+    <path d="${band.outline}" fill="${ink}"/>
   </g>
 </svg>`;
 };
 
 function main() {
+  const onlyFavicon = argv.includes("--only-favicon");
   const versions = argv.includes("--only-base") ? ["base"] : argv.includes("--only-aurea") ? ["aurea"] : ["aurea", "base"];
   const chrome = pickChrome();
   mkdirSync(OUT, { recursive: true });
   mkdirSync(TMP, { recursive: true });
+  rmSync(join(TMP, "profile"), { recursive: true, force: true }); // lock viejo de un Chrome caído
 
   for (const version of versions) {
     const cfg = config(version);
@@ -344,6 +350,25 @@ function main() {
       written.push(name);
     };
 
+    /* favicon tile-first: 16/32 legibles por diseño, no por suerte.
+       Dos variantes: transparente (la C dorada) y tile teal lleno. */
+    for (const fv of [
+      { suffix: "", variant: "plain" },
+      { suffix: "-teal", variant: "teal" },
+    ]) {
+      const base = `favicon-${version}${fv.suffix}`;
+      const doc = faviconDoc(g, cfg, { variant: fv.variant });
+      writeFileSync(join(OUT, `${base}.svg`), doc, "utf8");
+      written.push(`${base}.svg`);
+      for (const s of [16, 32]) {
+        shoot(`${base}-${s}.png`, squarePage(doc, s, "transparent"), { w: s, transparent: true });
+      }
+    }
+    if (onlyFavicon) {
+      console.log(`✅ ${version}: ${written.length} favicons → ${OUT}`);
+      continue;
+    }
+
     /* SVG masters (night = hero/animation; light = superficies claras) */
     const layersSvg = svgDoc(g, cfg, sky, { settled: false });
     const settledSvg = svgDoc(g, cfg, sky, { settled: true });
@@ -351,7 +376,6 @@ function main() {
     const layersLightSvg = svgDoc(g, cfg, sky, { settled: false, surface: "light" });
     const settledLightSvg = svgDoc(g, cfg, sky, { settled: true, surface: "light" });
     const lockupLightSvg = svgDoc(g, cfg, sky, { settled: false, typography: true, surface: "light" });
-    const favSvg = faviconDoc(g, cfg);
     for (const [name, doc] of [
       [`logo-${version}-layers.svg`, layersSvg],
       [`logo-${version}-settled.svg`, settledSvg],
@@ -359,7 +383,6 @@ function main() {
       [`logo-${version}-layers-light.svg`, layersLightSvg],
       [`logo-${version}-settled-light.svg`, settledLightSvg],
       [`logo-${version}-lockup-light.svg`, lockupLightSvg],
-      [`favicon-${version}.svg`, favSvg],
     ]) {
       writeFileSync(join(OUT, name), doc, "utf8");
       written.push(name);
@@ -379,10 +402,7 @@ function main() {
       shoot(`logo-${version}-${label}-light.png`, printPage(layersLightSvg, w, h, "light"), { w, h, transparent: false });
     }
 
-    /* favicon simplificado (16/32: legible por diseño, no por suerte) + apple-touch */
-    for (const s of [16, 32]) {
-      shoot(`favicon-${version}-${s}.png`, squarePage(favSvg, s, "transparent"), { w: s, transparent: true });
-    }
+    /* apple-touch (180, fondo night) */
     shoot(`apple-touch-icon-${version}.png`, squarePage(settledSvg, 180, "night"), { w: 180, transparent: false });
 
     /* og-image 1200×630 (dark + nombre) — usa el MARK puro (sin typography) */

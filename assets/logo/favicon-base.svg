@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- GENERADO por tools/logo/generate-logo.mjs — NO EDITAR A MANO -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="93.04 105.54 532.44 532.44" role="img" aria-label="C de Christian — favicon simplificado">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="125.8 142.29 458.94 458.94" role="img" aria-label="C de Christian — favicon simplificado">
   <title>C — espiral de conocimiento (favicon)</title>
   <defs>
     <radialGradient id="halo-star" cx="50%" cy="50%" r="50%">
@@ -17,11 +17,11 @@
     </radialGradient>
   </defs>
   <g id="logo-supernova" data-name="Supernova">
-    <circle cx="400" cy="418" r="44.8" fill="url(#halo-nova)" color="#ffb3a0"/>
-    <circle cx="400" cy="418" r="26.6" fill="url(#halo-nova)" color="#ffb3a0"/>
-    <circle cx="400" cy="418" r="6.2" fill="#ffb3a0" opacity="1"/>
+    <circle cx="400" cy="418" r="44.8" fill="url(#halo-nova)" color="#c9a84c"/>
+    <circle cx="400" cy="418" r="26.6" fill="url(#halo-nova)" color="#c9a84c"/>
+    <circle cx="400" cy="418" r="6.2" fill="#c9a84c" opacity="1"/>
   </g>
   <g id="logo-c-triespiral" data-name="C TriSpiral">
-    <path d="M 515.7131218803206 565.4490710381966 L 215.05855346880753 510.72209749170935 Q 212.69735213034346 510.29229725993247 214.16629953463902 508.394352707683 L 471.26878234057676 176.2066547789452 A 5 5 0 0 0 463.36068003953744 170.08604059438036 L 196.18713493982975 515.2859932573114 Q 194.71818753553418 517.1839378095608 197.07938887399825 517.6137380413377 L 513.9222875812502 575.2874099484635 A 5 5 0 0 0 515.7131218803206 565.4490710381966 Z" fill="#c9a84c"/>
+    <path d="M 516.6085390298558 560.5299015830631 L 224.04813576621234 507.2762772168951 Q 221.68693442774827 506.8464769851182 223.15588183204383 504.9485324328688 L 475.2228334910965 179.2669618712276 A 10 10 0 0 0 459.4066288890177 167.02573350209795 L 187.19755264242488 518.7318135321256 Q 185.72860523812932 520.629758084375 188.0898065765934 521.0595583161519 L 513.026870431715 580.2065794035971 A 10 10 0 0 0 516.6085390298558 560.5299015830631 Z" fill="#c9a84c"/>
   </g>
 </svg>

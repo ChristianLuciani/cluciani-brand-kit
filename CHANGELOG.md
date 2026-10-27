@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **Favicon**: el icono llena el tile (~91%, antes ~75% de alto y ~56% de
+  ancho) y la barra se engrosa ×2 sólo en el icono (`FAVICON` en
+  `geometry.mjs`); el viewBox se computa del contorno real de la barra. Se
+  agrega la variante **`-teal`** (fondo `#00c9c0` + C en night, 9.7:1) como
+  opción de tile lleno. Regeneración selectiva: `npm run logo:favicons`.
+- **Tooling**: `--only-favicon`, perfil de Chrome dentro de `TMP` y
+  `CHROME_NO_SANDBOX=1` opt-in para sandboxes externos.
+
 ## v1.0.1 — 2026-10-22
 
 - Tooling: `vitest` fijado a 4.0.18 (npm 10 falla al resolver 4.1.10 con

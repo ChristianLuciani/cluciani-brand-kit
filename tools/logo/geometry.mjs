@@ -40,6 +40,21 @@ export const C_FINISH = {
   cornerCut: 2.4, // recorte de cada lado de la esquina (se une con quadratic; no es un radio)
 };
 
+/* ── favicon: tratamiento de icono, no geometría nueva ──
+   El favicon no es el mark a escala: a 16/32 px la barra de 10 se lee como
+   una hebra y el 12% de respiro del mark deja el símbolo flotando en el
+   tile. El icono, en cambio, ES el tile: la marca ocupa ≥90% del cuadrado
+   (padRatio 5% por lado) y la barra se engrosa ×2 SOLO acá (widthScale).
+   `background` es la variante de tile lleno: fondo teal (el acento/links
+   del sitio) con la C en night — el oro sobre teal da 1.1:1 de contraste
+   y desaparece; night sobre teal da 9.7:1. Es una variante GENERADA, no
+   un recoloreo a mano: la C dorada sigue siendo la firma en el mark. */
+export const FAVICON = {
+  padRatio: 0.05, // margen por lado, como fracción del lado mayor del mark
+  widthScale: 2,  // grosor de la barra del icono vs cWidth del mark
+  background: { color: "#00c9c0", ink: "#050810" },
+};
+
 /* CONFIG de aurea7.html (base v10 = misma sin mode/galaxy/timing fast) */
 export const CONFIG_AUREA = {
   geometry: {
@@ -65,6 +80,7 @@ export const CONFIG_AUREA = {
     c: "#c9a84c",
   },
   cFinish: C_FINISH,
+  favicon: FAVICON,
   constellation: {
     palette: ["#ff8a70", "#ff6f5e", "#ffb49e", "#f6d7c4", "#cfe0ff"],
     dissolve: 680,
@@ -97,6 +113,7 @@ export const CONFIG_BASE = {
     c: "#c9a84c",
   },
   cFinish: C_FINISH,
+  favicon: FAVICON,
   constellation: {
     palette: ["#ff8a70", "#ff6f5e", "#ffb49e", "#f6d7c4", "#cfe0ff"],
     dissolve: 680,
@@ -144,6 +161,10 @@ export function starSpec(j, total, C) {
     d1: (-(rnd() * 2.2)).toFixed(2), d2: (-(rnd() * 3.1)).toFixed(2),
   };
 }
+
+/* jerarquía de protagonismo: la supernova gana +2px de core sobre el spec
+   (tratamiento de render, no cambia la geometría de referencia). */
+export const NOVA_CORE_BOOST = 2;
 
 /* ── geometría del espiral (verbatim de aurea7.html, buildGeometry) ──
    10 puntos: centro → B0 C0 A0 → B1 C1 A1 → B2 C2 A2 (t = vuelta/fracción)
@@ -433,4 +454,43 @@ function buildSkyV10(C) {
 /* puntos de la constelación de vértices: centro + cada vértice del espiral */
 export function constellationPoints(segs) {
   return [segs[0].a, ...segs.map((s) => s.b)];
+}
+
+/* ── encuadre del favicon: el icono llena el tile ──
+   El viewBox se computa del CONTORNO REAL de la barra (no de la línea
+   central, que dejaba el borde fuera) + el core de la supernova. Luego se
+   agrega `padRatio` por lado: el mark ocupa 1/(1+2·padRatio) ≈ 91% del
+   cuadrado. `background` devuelve el color del tile lleno y la tinta de la
+   C para esa variante (night sobre teal); sin background, la C va en oro. */
+export function faviconFrame(segs, cfg, { background = false } = {}) {
+  const f = cfg.favicon;
+  const width = cfg.cWidth * f.widthScale;
+  const band = cBand(segs, width, { cornerCut: cfg.cFinish.cornerCut });
+  const pts = constellationPoints(segs);
+  const sp = starSpec(0, pts.length, cfg.constellation);
+  const coreR = sp.coreR + NOVA_CORE_BOOST;
+  const xs = [], ys = [];
+  const add = (x, y) => { xs.push(x); ys.push(y); };
+  // la supernova (núcleo) y los terminales circulares de B/A (radio h)
+  add(pts[0].x - coreR, pts[0].y - coreR);
+  add(pts[0].x + coreR, pts[0].y + coreR);
+  for (const p of [band.B, band.A]) {
+    add(p.x - band.h, p.y - band.h);
+    add(p.x + band.h, p.y + band.h);
+  }
+  for (const p of [band.miter.Xo, band.miter.Xi]) add(p.x, p.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const span = Math.max(maxX - minX, maxY - minY);
+  const pad = span * f.padRatio;
+  const side = span + pad * 2;
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  return {
+    band, sp, coreR, width,
+    pad, side, span,
+    occupancy: span / side, // fracción del tile que ocupa el mark
+    viewBox: { x: cx - side / 2, y: cy - side / 2, w: side, h: side },
+    background: background ? f.background.color : null,
+    ink: background ? f.background.ink : cfg.colors.c,
+  };
 }
