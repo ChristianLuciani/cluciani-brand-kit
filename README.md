@@ -10,7 +10,7 @@ sus assets generados, el generador paramétrico y el manual de marca.
 ## Contenido
 
 ```
-assets/logo/          # 68 assets generados (SVG, PNG, print, favicon, og)
+assets/logo/          # 66 assets generados (SVG, PNG, print, favicon, og)
 docs/logo.md          # manual de marca (símbolo, paleta, construcción, uso)
 tools/logo/           # geometry.mjs (fuente de verdad), generador, tests, gate
 proposals/            # HTML de la animación aprobada (fuente de diseño)
@@ -55,7 +55,7 @@ https://raw.githubusercontent.com/ChristianLuciani/cluciani-brand-kit/v1.0.1/ass
 | `logo-aurea-settled.svg` / `-light.svg` | estado final (sin estrellas de vértices) |
 | `logo-aurea-lockup.svg` / `-light.svg` | mark + tipografía (800×940) |
 | `logo-aurea-print-{a4\|a3}{,-dark,-light}.png` | 300 dpi |
-| `favicon-aurea.svg`, `favicon-aurea-{16,32}.png` | favicon: la C llena el tile (sin fondo) |
+| `favicon-aurea.svg`, `favicon-aurea-32.png` | favicon sin fondo: C dorada, sólo 32/SVG (a 16 no se aprecia; para 16 usá `-teal`) |
 | `favicon-aurea-teal.svg`, `favicon-aurea-teal-{16,32}.png` | favicon con tile teal `#00c9c0` y C en night (máximo contraste) |
 | `favicon-aurea-teal-gold.svg`, `favicon-aurea-teal-gold-32.png` | tile teal + C con el acabado ámbar→oro→luz (32/SVG; sin 16, no se aprecia) |
 | `apple-touch-icon-aurea.png`, `og-image-aurea.png` | 180 / 1200×630 |
@@ -85,8 +85,8 @@ Requisitos: Node 20+ y Chrome/Chromium. En Linux/CI, apuntá `CHROME_PATH`.
 ```bash
 npm install
 npm test                    # invariantes de geometría
-npm run logo:generate       # regenera los 68 assets (áurea + base)
-npm run logo:favicons       # sólo favicons (16/32, 3 variantes; teal-gold sin 16)
+npm run logo:generate       # regenera los 66 assets (áurea + base)
+npm run logo:favicons       # sólo favicons (16 sólo -teal; 32 las 3)
 CHROME_PATH=/usr/bin/google-chrome npm run logo:verify   # gate ≡ DOM aprobado
 ```
 

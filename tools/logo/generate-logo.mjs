@@ -382,11 +382,14 @@ function main() {
 
     /* favicon tile-first: 16/32 legibles por diseño, no por suerte.
        Tres variantes: transparente, tile teal (night) y tile teal con la C
-       en sus colores (acabado del mark). Esta última NO se rasteriza a
-       16px: el oro sobre teal no se aprecia a ese tamaño (decisión del
-       operador, 2026-10-27); se publica en 32 y SVG. */
+       en sus colores (acabado del mark). Las dos que no se leen a 16 px no
+       se rasterizan a ese tamaño (decisión del operador, 2026-10-27):
+       · transparente: el oro sin fondo no se aprecia sobre cualquier tab;
+         queda SVG + 32 para night/negro/transparente/blanco controlados.
+       · -teal-gold: el oro sobre teal no se aprecia a 16; queda SVG + 32.
+       Para 16 px el favicon robusto es `-teal` (tile opaco). */
     for (const fv of [
-      { suffix: "", variant: "plain", sizes: [16, 32] },
+      { suffix: "", variant: "plain", sizes: [32] },
       { suffix: "-teal", variant: "teal", sizes: [16, 32] },
       { suffix: "-teal-gold", variant: "teal-gold", sizes: [32] },
     ]) {
