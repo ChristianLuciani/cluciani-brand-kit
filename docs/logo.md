@@ -130,8 +130,8 @@ tile. El icono **es** el tile: se genera con `faviconFrame()` desde
 | Parámetro | Valor | Efecto |
 |---|---|---|
 | `padRatio` | 0.05 | margen por lado = 5% del lado mayor del contorno; el mark ocupa ~91% del cuadrado |
-| `widthScale` | 2 | barra del icono = 2 × `cWidth` (20 en el lienzo 800) |
-| `novaCoreScale` | 2 | el punto de la supernova ×2: el core del mark (6.2) es subpíxel a 16 px |
+| `widthScale` | 4 | barra del icono = 4 × `cWidth` (40 en el lienzo 800) |
+| `novaCoreScale` | 4 | el punto de la supernova ×4 (core 6.2 → 24.8): a 16 px el original es subpíxel |
 | `background.color` | `#00c9c0` | tile teal de las variantes `-teal` / `-teal-gold` (acento/links del sitio) |
 | `background.ink` | `#050810` | C de la variante teal: night sobre teal = 9.7:1 |
 
@@ -227,7 +227,7 @@ light, además, se omite `logo-background` y los halos de la constelación
 |---|---|---|
 | **full** (layers) | constelación de vértices en pico + cielo + galaxia | hero, og-image, prints, masters |
 | **settled** | el mark completo (espiral + C + supernova + cielo) SIN las estrellas de vértices — el estado final de la animación | contextos medianos |
-| **favicon** (simplificado) | la C del mark (mismo contorno, terminales y esquinas) **en oro plano**, sin bisel ni bloom, + supernova ×2; el icono llena el tile (~91%) y la barra se engrosa ×2. Variantes **`-teal`** (tile + C night) y **`-teal-gold`** (tile + C con el acabado del mark) | favicon 16/32, contextos <24px |
+| **favicon** (simplificado) | la C del mark (mismo contorno, terminales y esquinas) **en oro plano**, sin bisel ni bloom, + supernova ×4; el icono llena el tile (~91%) y la barra se engrosa ×4. Variantes **`-teal`** (tile + C night) y **`-teal-gold`** (tile + C con el acabado del mark) | favicon 16/32, contextos <24px |
 
 ## 7. Uso correcto
 

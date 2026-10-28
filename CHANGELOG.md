@@ -3,7 +3,7 @@
 ## Unreleased
 
 - **Favicon**: el icono llena el tile (~91%, antes ~75% de alto y ~56% de
-  ancho), la barra se engrosa ×2 y el punto de la supernova ×2 sólo en el
+  ancho), la barra se engrosa ×4 y el punto de la supernova ×4 sólo en el
   icono (`FAVICON` en `geometry.mjs`); el viewBox se computa del contorno
   real de la barra. Variantes de tile lleno: **`-teal`** (fondo `#00c9c0` +
   C en night, 9.7:1) y **`-teal-gold`** (fondo teal + C con el acabado

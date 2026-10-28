@@ -320,8 +320,8 @@ ${nightHalo(70, 35, 560)}
    REAL y con el icono llenando el tile — el mark completo es ilegible
    <24px (review fresco PR #58). A 16/32px el 12% de respiro del mark deja
    el símbolo flotando; acá el tile ES el marco (≥90% de ocupación) y la
-   barra se engrosa ×2 (`FAVICON` en geometry.mjs). El core de la
-   supernova también se escala ×2: a 16px el punto del mark es subpíxel.
+   barra se engrosa ×4 (`FAVICON` en geometry.mjs). El core de la
+   supernova también se escala ×4: a 16px el punto del mark es subpíxel.
    Variantes:
      · plain      — sin fondo, C en oro plano
      · teal       — tile teal + C en night (máximo contraste)

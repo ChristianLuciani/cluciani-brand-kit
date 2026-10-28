@@ -239,7 +239,7 @@ describe("faviconFrame() — el icono llena el tile", () => {
   it("la barra del icono es cWidth × widthScale y ocupa ≥90% del tile", () => {
     const f = faviconFrame(g.segs, cfg);
     expect(f.width).toBe(cfg.cWidth * FAVICON.widthScale);
-    expect(f.width).toBe(20);
+    expect(f.width).toBe(40);
     expect(f.band.h).toBeCloseTo(f.width / 2, 6);
     expect(f.occupancy).toBeGreaterThan(0.89);
     expect(f.occupancy).toBeLessThan(0.95);

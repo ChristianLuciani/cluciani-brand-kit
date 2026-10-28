@@ -44,15 +44,17 @@ export const C_FINISH = {
    El favicon no es el mark a escala: a 16/32 px la barra de 10 se lee como
    una hebra y el 12% de respiro del mark deja el símbolo flotando en el
    tile. El icono, en cambio, ES el tile: la marca ocupa ≥90% del cuadrado
-   (padRatio 5% por lado) y la barra se engrosa ×2 SOLO acá (widthScale).
+   (padRatio 5% por lado), la barra se engrosa ×4 y el punto de la supernova
+   ×4 SOLO acá (widthScale / novaCoreScale): a 16/32 px la barra de 10 y el
+   core de 6.2 son subpíxel.
    `background` es la variante de tile lleno: fondo teal (el acento/links
    del sitio) con la C en night — el oro sobre teal da 1.1:1 de contraste
    y desaparece; night sobre teal da 9.7:1. Es una variante GENERADA, no
    un recoloreo a mano: la C dorada sigue siendo la firma en el mark. */
 export const FAVICON = {
   padRatio: 0.05, // margen por lado, como fracción del lado mayor del mark
-  widthScale: 2,  // grosor de la barra del icono vs cWidth del mark
-  novaCoreScale: 2, // el punto de la supernova ×2: a 16px el core del mark es subpíxel
+  widthScale: 4,  // grosor de la barra del icono vs cWidth del mark
+  novaCoreScale: 4, // el punto de la supernova ×4: a 16px el core del mark es subpíxel
   background: { color: "#00c9c0", ink: "#050810" },
 };
 
