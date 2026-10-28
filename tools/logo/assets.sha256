@@ -1,0 +1,93 @@
+# assets/logo — manifiesto de paridad (sha256)
+#
+# Generado por tools/logo/verify-assets.mjs --from-source --write.
+# NO editar a mano: los hashes son la evidencia de que estos archivos son
+# byte-idénticos a la fuente canónica. Cambiar un asset sin regenerar el
+# manifiesto (o regenerar el manifiesto sin que el asset cambie) rompe el
+# gate de CI a propósito.
+#
+# source_repo: ChristianLuciani/christianluciani.github.io
+# source_ref: 8c2a11032a2d37abe7d8b36844c23e4292953348
+# source_path: assets/brand/logo
+#
+# Secciones:
+#   mirror — existe en la fuente y es byte-idéntico (52)
+#   diverged — existe en la fuente y acá es distinto a propósito (4)
+#   local — propio del brand kit, no existe en la fuente (10)
+#   retired — existe en la fuente y acá NO se publica (2)
+
+# --- mirror — existe en la fuente y es byte-idéntico (52) ---
+cb720d8345c9e760d0a010e6d3e93533e6c6a496ec3d0bbc5c11c7bcef3651ea  assets/logo/apple-touch-icon-aurea.png
+8e7c415a78165d99e654e894baf42d7405a5af27bbae2a5cb1e12a90c506feaf  assets/logo/apple-touch-icon-base.png
+36be73e7270c7ab5df2c5dd39fc032350f3f21f55943cecd0613fe183a5fa53c  assets/logo/logo-aurea-1024-dark.png
+4119edd71f9b4374fb7067ed422c3879c158fe05827edcdb98957628478931bc  assets/logo/logo-aurea-1024-light.png
+a39c91b69217cbd1f588abb53fac260b2729adc278ba8ab7c2d736a2168cfcb6  assets/logo/logo-aurea-1024.png
+8eee4b3e4a4d43a228e824aab4f01a5e8d364e49452b4456e538dad4ea992d15  assets/logo/logo-aurea-2048-dark.png
+81f0408904c80fba4b12510d19d416ecd0a6b557b50d2c147333272d1d0a7e15  assets/logo/logo-aurea-2048-light.png
+688076ec73626270aa10aa76b417187821a15f80742f2edb22767ac77616202d  assets/logo/logo-aurea-2048.png
+0900e11ab06db21a9e731cb219e06b175048da62731fb011fe2d7c5b1c3fe955  assets/logo/logo-aurea-4096-dark.png
+10637eeaa46006566c81a715c06fe61336521c0643b0fa910aae14c857e97a09  assets/logo/logo-aurea-4096-light.png
+141424e62a0d8b311c04102a1850e240b41f12f5e9a835d9ff9be0185d7e61ef  assets/logo/logo-aurea-4096.png
+55e581847107072232c2e79572e43b1c055e08ab82d485b91f2c56793b8a1823  assets/logo/logo-aurea-512-dark.png
+f9ea4c33c14bbf2c90a4a6965b6f5703f1b79d063dff0a87df78a94370907459  assets/logo/logo-aurea-512-light.png
+7d42f76dc0a4ea4599b5b2f728cdff91ca6291319a64f8519a1497c615bf0bc0  assets/logo/logo-aurea-512.png
+fb5c566646c740ab97dd5efaf50f764f43d268e6dbeef38d8eab6b69fb59731d  assets/logo/logo-aurea-layers-light.svg
+db59098e6c70237cb0d27d3c1d0123fe7c6bbc9e31616b33211f81594bd70a6c  assets/logo/logo-aurea-layers.svg
+3e9ed2ab876a03c6e6fb1c5e4a2ef341237cee063bb4484fa6bf81224e82a567  assets/logo/logo-aurea-lockup-light.svg
+7d894293615a50aa3ebf1efe1b6b0e73aa78229d931adfe749a78fb85dbf26df  assets/logo/logo-aurea-lockup.svg
+b5b74992ef074b5354602116887db715af39424855e9f414fa480b1e8eeb97d7  assets/logo/logo-aurea-print-a3-dark.png
+ebd7a6c080bf9b248b1250baa87f27434d270f8345fb51a2a2ba95884ec670d7  assets/logo/logo-aurea-print-a3-light.png
+677c75301a1e55efb2df5664c2b15b5692c29c0f5ee3dd728ac688dddd71c124  assets/logo/logo-aurea-print-a3.png
+8bf8d06015298c977a23d1e3b29b93390c58a9d46b4e7c4e102c4aa727e65b64  assets/logo/logo-aurea-print-a4-dark.png
+f899f1873d96baaa840dcd027e8dcd043e41e34f7393b28039be43f65fdd458d  assets/logo/logo-aurea-print-a4-light.png
+13f9e9bb15447852155da47a9366f55890fdf607ea1776ae7be4295d822ae71a  assets/logo/logo-aurea-print-a4.png
+4c2ee57726fece1dcceb699aa299f86cdfb90477d1ce5fe71fa4f3121f11cd29  assets/logo/logo-aurea-settled-light.svg
+8e32c39860bcc82a03370e381d5b0205f51a69ad1f88c186abc04f22d5e27198  assets/logo/logo-aurea-settled.svg
+ec8f8379ef6a00f353e047682749b3b0ff290f4f34e5b04bd1ab1c9ffc9d6d5a  assets/logo/logo-base-1024-dark.png
+b89c08f30b2feb96090a263b131110589629bd25c4f467db4588d62a4a9fa22e  assets/logo/logo-base-1024-light.png
+ce93f779a420cbd267d787a59186218117bb0f3bb0eba324d47e313e0d09e9a9  assets/logo/logo-base-1024.png
+4c9e820f3826ac006626566424aa3ceba7f8d3a96ee3c8d68e5c9015ac82afe8  assets/logo/logo-base-2048-dark.png
+2f15a43782b01d4b0a8050125e11b2b62fd02ab1916c99637ce438e26562479a  assets/logo/logo-base-2048-light.png
+73ba9433f86fff24c735b7c541f3c34cb45c6131de2e8b3865559ac3f3cbae56  assets/logo/logo-base-2048.png
+6117763c7a610cbe667e7c25f4595e3787c48c75c199af70ed6e138d1500f544  assets/logo/logo-base-4096-dark.png
+f69d546db5eb39433a8d1d97f2474a53335a57daf51eac298424e5e0c003739c  assets/logo/logo-base-4096-light.png
+874cbce8653586ff7dfb2dae08e96d7954c871b41f0e7bb8670a8a545941049e  assets/logo/logo-base-4096.png
+6fa068f331e2f05e1006eed91e5ef94400cad23dfc35efe7bec21b79d3593fb3  assets/logo/logo-base-512-dark.png
+4387444ff228c915cea3770cf97f9c85fb5f0814c5ecc6ec228e9fd675834561  assets/logo/logo-base-512-light.png
+ca72e4d85e8a0f0918b645384589992152eaef6875681c397ff5b224fdd9cb52  assets/logo/logo-base-512.png
+382370fd643fe936178d823f74b400f065f7e370dffbbddaad870343cdbbd7fb  assets/logo/logo-base-layers-light.svg
+0af3a7cc5d87b4febf090bf01453426b3abae4998aa5bc82290ba53b3723d30c  assets/logo/logo-base-layers.svg
+331b442c33ace13930906db3ee82023af0639046248c48fd7eea1b2868ed467d  assets/logo/logo-base-lockup-light.svg
+d5c7fbb1191f1a977607c2f569c99b1bc10bb652697f20ca4401f63473f63865  assets/logo/logo-base-lockup.svg
+196109125b0a9cea2227d2d4e22c603a41a27b6b9492591ad10dee31937be757  assets/logo/logo-base-print-a3-dark.png
+4867097ce8b91968ff8743e0d33a26d94b613bd21a95972e5cbb51f4faa04abd  assets/logo/logo-base-print-a3-light.png
+260d59bf6c70457a9cdc0d81360f15ed159f7c508cbe009831318a8b4660d7eb  assets/logo/logo-base-print-a3.png
+a4644ecde070d89d2329cf62609961c533a8f2d70a05f43231e56f0522db681b  assets/logo/logo-base-print-a4-dark.png
+d26e363a1c3bfeffd9ae2740cf23a12ba0e9dd7c4634fdaceba31642931004b4  assets/logo/logo-base-print-a4-light.png
+1a2a19cefacc24f8ebda33bf622d8e301907a89f55ddb005e0b5cdeab9c88fd7  assets/logo/logo-base-print-a4.png
+7d1ef274be77c3264f62a2e094115f92afde99165a78bec7826dfb82301df528  assets/logo/logo-base-settled-light.svg
+b2b762ede7e62a7d60632121243b95ac87bb4829913e6810070192d949c1e9c7  assets/logo/logo-base-settled.svg
+a8573a5a87c04bc1ed3b9a11e041f19948f34a13e4411abc36191ce211086ad3  assets/logo/og-image-aurea.png
+8ec392ac8ee21410c9fa7b29fc93a5b55489d1ee63116ab4aba6fd5838a5213b  assets/logo/og-image-base.png
+
+# --- diverged — existe en la fuente y acá es distinto a propósito (4) ---
+362e5b1ad656edcd92586ac235cdb4a05e85e52a8c97f8edb542547829c119ec  assets/logo/favicon-aurea-32.png
+3763673ae2945b84ade5ef2bb0b1a45f416f64f95595ec728b73352241995766  assets/logo/favicon-aurea.svg
+8df644ea5b8a84461be378c552b95ebb1399771cd89c020d2f145cf882304b19  assets/logo/favicon-base-32.png
+d13c421c5bfc720139e02a17eda1eb323ceb53a3127dc986faa595f4f4a82a22  assets/logo/favicon-base.svg
+
+# --- local — propio del brand kit, no existe en la fuente (10) ---
+e71aa6d4f359211a24539681a5b0cb8f6e5fa91b872680cb9505cdc1319654e1  assets/logo/favicon-aurea-teal-16.png
+5f979f7ecb176290e178cda3ac4f6e6a8192749942482afca63ce894459de05a  assets/logo/favicon-aurea-teal-32.png
+2b4c7ce4956fd659f2b5c05ee5afc0b18971a72b4abe3893c75ee8934a75180e  assets/logo/favicon-aurea-teal-gold-32.png
+f31f130435ee39e29809198a2aac87414cdaf266cb65b940ae47d9b94e464e0d  assets/logo/favicon-aurea-teal-gold.svg
+f4683ee033cc31a096bf7e5fc7834c912f87401490d1e82e2fef41746d6a26be  assets/logo/favicon-aurea-teal.svg
+d17bc0935eca3ba4836b86566c84d565691d9a9b12dc7a06d51542f9d8d827cd  assets/logo/favicon-base-teal-16.png
+47b9d9a9c8001fba85a68b4175c70c0a62f9928b22d801d21d67017035e19585  assets/logo/favicon-base-teal-32.png
+f316da21d8593da9d3a1e989a0313b4775601af0355e258657a6932da42f7857  assets/logo/favicon-base-teal-gold-32.png
+d2604538559b41b9ae67b1e1fdac968e9c5cc9c86b389722b854a20a2964c66e  assets/logo/favicon-base-teal-gold.svg
+f18fd7bce75d3d1dd07401d9d411646918d45415074f4486222e1092937f54f5  assets/logo/favicon-base-teal.svg
+
+# --- retired — de la fuente, no se publican acá (2) ---
+# retired: assets/logo/favicon-aurea-16.png
+# retired: assets/logo/favicon-base-16.png

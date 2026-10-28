@@ -1,7 +1,14 @@
 # cluciani-brand-kit
 
-Brand kit canónico de **Christian Luciani**: el logo del triángulo-espiral,
-sus assets generados, el generador paramétrico y el manual de marca.
+Brand kit canónico de **Christian Luciani**: **Espirángulo**, el mark del
+triángulo-espiral, sus assets generados, el generador paramétrico y el manual
+de marca.
+
+**Espirángulo** (espiral + triángulo) es el **nombre del mark** — el símbolo
+ratificado por el operador el **2026-10-27** (issue #3). Nombra el símbolo, no
+el wordmark: «Christian Luciani» en la tipografía del lockup sigue siendo el
+nombre de marca (§5 del manual), no el nombre del logo. El nombre no toca la
+geometría ni el acabado de la C — eso es alcance del issue #1.
 
 > **Todos los derechos reservados.** Este repositorio no es open source: no se
 > concede ninguna licencia de uso. Ver [LICENSE](LICENSE) y
@@ -10,10 +17,11 @@ sus assets generados, el generador paramétrico y el manual de marca.
 ## Contenido
 
 ```
-assets/logo/          # 66 assets generados (SVG, PNG, print, favicon, og)
-docs/logo.md          # manual de marca (símbolo, paleta, construcción, uso)
-tools/logo/           # geometry.mjs (fuente de verdad), generador, tests, gate
-proposals/            # HTML de la animación aprobada (fuente de diseño)
+assets/logo/               # 66 assets generados (SVG, PNG, print, favicon, og)
+docs/logo.md               # manual de marca (símbolo, paleta, construcción, uso)
+tools/logo/                # geometry.mjs (fuente de verdad), generador, tests, gate
+tools/logo/assets.sha256   # manifiesto de paridad de assets/logo (sha256)
+proposals/                 # HTML de la animación aprobada (fuente de diseño)
 ```
 
 La versión canónica se publica por **tags** (`v1.0.0`, …). Consumí siempre un
@@ -96,12 +104,38 @@ CI restringido), agregá `CHROME_NO_SANDBOX=1` al comando de generación.
 El manual completo —paleta, construcción, capas, usos correctos e incorrectos—
 está en [docs/logo.md](docs/logo.md).
 
+## Paridad de assets — el último logo
+
+`assets/logo/` es la copia canónica de la fuente del logo,
+`ChristianLuciani/christianluciani.github.io` › `assets/brand/logo/`.
+`tools/logo/assets.sha256` fija el sha256 de cada archivo y declara su origen;
+CI verifica en cada push que el árbol coincida con el manifiesto, sin red:
+
+```bash
+node tools/logo/verify-assets.mjs                 # offline: assets/logo/ ≡ manifiesto
+node tools/logo/verify-assets.mjs --from-source   # red: drift contra la fuente
+```
+
+Composición vigente (la imprime el propio comando): **66 archivos** —
+**52** byte-idénticos a la fuente @ `8c2a110`, **4** divergentes a propósito
+(`favicon-{aurea,base}{,-32}.{svg,png}`: la familia de favicons con tile lleno
+que este repo adelantó en #4; la fuente todavía tiene la versión previa),
+**10** propios de este repo (los `favicon-*-teal*`, que la fuente aún no tiene)
+y **2** retirados (`favicon-{aurea,base}-16.png` transparentes, retirados en
+#4: a 16 px sólo se publica `-teal`).
+
+El manifiesto se re-deriva con `--from-source --write`, que falla si algún
+archivo diverge sin estar declarado (`--diverge` / `--retire`): nunca bendice
+un cambio silencioso. El ref de la fuente va **pineado al commit**, no a
+`main`.
+
 ## Estado de la animación
 
-`proposals/logo-triangulo-espiral/aurea7.html` es la animación aprobada y
-todavía dibuja la C plana. El acabado de barra (bisel, marco, terminales) vive
-en los assets; espejarlo en la animación es trabajo pendiente del issue #55
-del repo `cv-cluciani`.
+`proposals/logo-triangulo-espiral/aurea7.html` es la animación aprobada y ya
+refleja el acabado del mark: dibuja la C como banda con bisel y la revela con
+una máscara sobre el path central, conservando el timing del trazado (sync del
+acabado, issue #1). La integración en el sitio es el issue #56 de
+`cv-cluciani`.
 
 ## Contacto
 

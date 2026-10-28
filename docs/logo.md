@@ -1,5 +1,11 @@
-# Manual de marca — Logo Triángulo-Espiral
+# Manual de marca — Espirángulo (logo Triángulo-Espiral)
 
+> **Nombre del mark:** **Espirángulo** (espiral + triángulo), ratificado por el
+> operador el **2026-10-27** (issue #3). Nombra el **símbolo** —el mark del
+> triángulo-espiral—, no el wordmark: «Christian Luciani» en la tipografía del
+> lockup (§5) es el nombre de marca, no el nombre del logo. El nombre no cambia
+> geometría, paleta ni assets; el acabado de la C es alcance del issue #1.
+>
 > **Fuente única de verdad:** la geometría vive paramétrica en
 > `tools/logo/geometry.mjs` (puerto verificado 1:1 contra el DOM aprobado de
 > `proposals/logo-triangulo-espiral/aurea7.html` — gate
@@ -13,7 +19,7 @@
 
 ## 1. El símbolo
 
-Espiral de conocimiento acumulativo: un triángulo que nace en el
+Espirángulo: espiral de conocimiento acumulativo — un triángulo que nace en el
 origen —la supernova— y gira creciendo en generaciones hasta la C final en
 plena intensidad (triángulo abierto = evolución en curso). Con
 nodos-estrella en cada vértice: el símbolo es una constelación que se
@@ -334,7 +340,50 @@ Sólo áurea/base: `--only-aurea` / `--only-base`
 Salida alternativa: `LOGO_OUT=<dir>` o `--out <dir>`
 Sandbox externo que bloquea el sandbox de Chrome: `CHROME_NO_SANDBOX=1`
 Gate de fidelidad: `npm run logo:verify` (requiere Chrome; `CHROME_PATH` para Linux/CI)
+Gate de paridad de assets: `node tools/logo/verify-assets.mjs`
 Tests: `npm test`
+
+### 10.1 Paridad con la fuente — el último logo
+
+`assets/logo/` es la copia canónica de `ChristianLuciani/christianluciani.github.io`
+› `assets/brand/logo/` (la fuente del logo). El manifiesto
+`tools/logo/assets.sha256` fija el sha256 de cada archivo y declara su origen;
+el gate de CI compara el árbol local contra el manifiesto **sin red**.
+
+| Origen | Qué significa |
+|---|---|
+| `mirror` | existe en la fuente y es byte-idéntico (sha256) |
+| `diverged` | existe en la fuente y acá es distinto a propósito: el brand kit adelanta un cambio y se verifica que **siga** divergiendo |
+| `local` | propio del brand kit, no existe en la fuente |
+| `retired` | existe en la fuente y acá **no** se publica (declarado con su razón) |
+
+Composición vigente (la imprime el gate): **66 archivos** — **52** espejados
+de la fuente @ `8c2a110`, **4** divergentes, **10** propios y **2** retirados.
+
+- **Divergentes** (`favicon-{aurea,base}{,-32}.{svg,png}`): la familia de
+  favicons con tile lleno de #4; la fuente todavía tiene la versión previa.
+  Cuando se sincronice allá, pasan a `mirror` (el gate lo exige: falla si un
+  `diverged` deja de divergir).
+- **Propios** (`favicon-*-teal*`): el tile teal y su variante dorada, que la
+  fuente aún no tiene.
+- **Retirados** (`favicon-{aurea,base}-16.png` transparentes, retirados en #4):
+  a 16 px sólo se publica `-teal`.
+
+```bash
+node tools/logo/verify-assets.mjs                 # offline (lo que corre CI)
+node tools/logo/verify-assets.mjs --from-source   # red: drift contra la fuente
+node tools/logo/verify-assets.mjs --from-source --write   # re-deriva el manifiesto
+```
+
+`--from-source` necesita red (`api.github.com`, `raw.githubusercontent.com`;
+`GITHUB_TOKEN` opcional para el rate limit) y **falla** si aparece un archivo
+sin declarar, si un `mirror` difiere o si la fuente ya coincide con un
+`diverged`. Un cambio intencional se declara con `--diverge <path>` /
+`--retire <path>` —nunca a mano— y se justifica en el CHANGELOG y en el PR.
+El ref de la fuente se pinea al **commit** (`8c2a110…`), no a `main`.
+La fuente puede sumar documentación en esa carpeta (p. ej.
+`assets/brand/logo/README.md`, posterior al pin): no es un asset — al re-derivar
+contra un ref que la incluya se declara con `--retire`.
 
 **Nota sobre los print 300dpi**: el PNG está dimensionado para 300dpi
 (A4 = 2480×3508 px ≙ 210×297 mm; A3 = 3508×4961 ≙ 297×420 mm) pero Chrome

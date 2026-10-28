@@ -15,5 +15,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # Paridad de assets contra la fuente del logo (issue #3). Verifica el
+      # árbol local contra el manifiesto commiteado (tools/logo/assets.sha256):
+      # sin red, hermético. La re-derivación contra la fuente es
+      # `--from-source` y se corre a mano cuando se agrega o cambia un asset.
+      - run: node tools/logo/verify-assets.mjs
       # El gate de fidelidad (npm run logo:verify) necesita Chrome; su
       # cableado en CI es el issue #59 del repo cv-cluciani.

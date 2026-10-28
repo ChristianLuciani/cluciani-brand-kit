@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+### Espirángulo — nombre del mark y paridad de assets (issue #3)
+
+**Espirángulo** (espiral + triángulo) es el nombre ratificado del **mark** por
+el operador el **2026-10-27**. Nombra el símbolo, no el wordmark: «Christian
+Luciani» en la tipografía del lockup sigue siendo el nombre de marca. No toca
+geometría, paleta ni un solo asset (`assets/` sin diff) y no reabre el alcance
+del issue #1 (acabado de la C).
+
+- **README y manual** (`README.md`, `docs/logo.md`): el nombre entra en la
+  intro y en el título del manual, con la distinción mark ≠ wordmark. La §10.1
+  nueva documenta la paridad con la fuente.
+- **Gate de paridad** (`tools/logo/verify-assets.mjs`, nuevo + manifiesto
+  `tools/logo/assets.sha256`): sin red, verifica que `assets/logo/` coincide
+  con el manifiesto (sha256 por archivo + origen declarado: `mirror` /
+  `diverged` / `local` / `retired`). Con `--from-source` re-deriva la verdad de
+  `ChristianLuciani/christianluciani.github.io` › `assets/brand/logo/` y falla
+  ante cualquier drift, incluida una divergencia sin declarar. CI lo corre en
+  cada push; `npm test` cubre la lógica del instrumento y fija la composición.
+- **Composición** (la imprime el gate): **66 archivos** — **52** espejados de
+  la fuente @ `8c2a110`, **4** divergentes (favicons de tile lleno de #4, que
+  la fuente todavía no tiene), **10** propios (`favicon-*-teal*`) y **2**
+  retirados (`favicon-{aurea,base}-16.png` transparentes, #4). Si la
+  composición cambia, el test falla hasta actualizar README, manual y este
+  CHANGELOG en el mismo PR.
+- **README — corrección de una afirmación vencida**: «Estado de la animación»
+  decía que `aurea7.html` todavía dibujaba la C plana; el sync del acabado
+  (#1) ya la dibuja como banda con máscara. Se corrige el texto, no la
+  animación.
+- Release: misma ventana que #1; versión y tag los decide el operador.
+
+### Sync del acabado de la C (issue #1)
+
 Sync del acabado de la C desde `cv-cluciani` `main` @ `8c2a110` (issue #1;
 PRs #64/#65/#66 de ese repo). **Assets sin cambios**: `assets/logo/` ya
 tenía el acabado (idénticos a v1.0.1); cambian animación, gate y manual.
