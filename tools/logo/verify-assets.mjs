@@ -15,6 +15,7 @@
  *   diverged  existe en la fuente y acá difiere a propósito; lleva una razón
  *   local     propio del brand kit, no existe en la fuente; lleva una razón
  *   retired   existe en la fuente y acá NO se publica; lleva una razón
+ *   dropped   se publicó acá y se dejó de publicar (no viene de la fuente)
  *
  * Los tres orígenes que no pueden re-derivarse de la fuente son declaraciones
  * explícitas: `--from-source --write` NO puede mover sus bytes. Para re-anclar
@@ -65,6 +66,8 @@ Comandos:
                                      brand kit, ausente en la fuente.
                    --retire <path>   Declara un archivo de la fuente que acá no
                                      se publica.
+                   --drop <path>     Declara un archivo propio que se dejó de
+                                     publicar (se borró de assets/logo/).
                    --reason <texto>  Motivo (PR/issue) por defecto para las
                                      declaraciones sin motivo inline. Toda
                                      declaración exige motivo: queda escrito en
@@ -73,7 +76,8 @@ Comandos:
   --help, -h       Esta ayuda.
 
 Un cambio de bytes en un local/diverged sin declararlo hace fallar --write, y
-el modo offline lo detecta igual contra el manifiesto commiteado.`;
+el modo offline lo detecta igual contra el manifiesto commiteado. Borrar un
+archivo tampoco es mudo: sin --drop --write falla y nombra el huérfano.`;
 
 const die = (msg, code = 1) => {
   console.error(msg);
@@ -92,6 +96,7 @@ const SECTION_TITLE = {
   diverged: 'diverged — existe en la fuente y acá es distinto a propósito',
   local: 'local — propio del brand kit, no existe en la fuente',
   retired: 'retired — existe en la fuente y acá NO se publica',
+  dropped: 'dropped — se publicó acá y se dejó de publicar (no viene de la fuente)',
 };
 
 /**
@@ -107,6 +112,7 @@ export function parseManifest(text) {
     source: { repo: DEFAULTS.repo, ref: null, path: DEFAULTS.path },
     entries: [],
     retired: [],
+    dropped: [],
   };
   const headerCounts = new Map();
   let section = null;
@@ -118,7 +124,7 @@ export function parseManifest(text) {
     if (line.startsWith('#')) {
       const body = line.replace(/^#\s?/, '');
 
-      const sec = body.match(/^---\s*(mirror|diverged|local|retired)\b(.*)$/);
+      const sec = body.match(/^---\s*(mirror|diverged|local|retired|dropped)\b(.*)$/);
       if (sec) {
         section = sec[1];
         const count = sec[2].match(/\((\d+)\)\s*(?:---)?\s*$/);
@@ -126,17 +132,19 @@ export function parseManifest(text) {
         continue;
       }
 
-      if (body.startsWith('retired:')) {
-        const rest = body.slice('retired:'.length).trim();
+      const claim = body.match(/^(retired|dropped):(.*)$/);
+      if (claim) {
+        const kind = claim[1];
+        const rest = claim[2].trim();
         const sepIndex = rest.indexOf(' — ');
         const path = (sepIndex === -1 ? rest : rest.slice(0, sepIndex)).trim();
         const reason = sepIndex === -1 ? '' : rest.slice(sepIndex + 3).trim();
         validatePath(path, i);
-        if (!reason) throw new Error(`manifiesto: línea ${i + 1}: retiro sin razón: ${path}`);
-        if (manifest.retired.some((r) => r.path === path)) {
-          throw new Error(`manifiesto: retiro duplicado: ${path}`);
+        if (!reason) throw new Error(`manifiesto: línea ${i + 1}: ${kind} sin razón: ${path}`);
+        if (manifest[kind].some((r) => r.path === path)) {
+          throw new Error(`manifiesto: ${kind} duplicado: ${path}`);
         }
-        manifest.retired.push({ path, reason });
+        manifest[kind].push({ path, reason });
         continue;
       }
 
@@ -148,8 +156,8 @@ export function parseManifest(text) {
     const entry = line.match(/^([0-9a-f]{64}) {2}(\S+)(?: {2}# (\S.*))?$/);
     if (!entry) throw new Error(`manifiesto: línea ${i + 1} inválida: ${line}`);
     if (!section) throw new Error(`manifiesto: línea ${i + 1} fuera de sección: ${line}`);
-    if (section === 'retired') {
-      throw new Error(`manifiesto: línea ${i + 1}: los retiros son líneas «# retired:», no entradas`);
+    if (section === 'retired' || section === 'dropped') {
+      throw new Error(`manifiesto: línea ${i + 1}: «${section}» usa «# ${section}: <path> — <razón>», no entradas`);
     }
     const [, hash, path, reason] = entry;
     validatePath(path, i);
@@ -166,11 +174,21 @@ export function parseManifest(text) {
     if (manifest.retired.some((r) => r.path === entry.path)) {
       throw new Error(`manifiesto: ${entry.path} está retirado y declarado a la vez`);
     }
+    if (manifest.dropped.some((r) => r.path === entry.path)) {
+      throw new Error(`manifiesto: ${entry.path} está dropeado y declarado a la vez`);
+    }
+  }
+  for (const d of manifest.dropped) {
+    if (manifest.retired.some((r) => r.path === d.path)) {
+      throw new Error(`manifiesto: ${d.path} no puede ser dropped y retired a la vez`);
+    }
   }
 
   for (const [name, declared] of headerCounts) {
     const actual =
-      name === 'retired' ? manifest.retired.length : manifest.entries.filter((e) => e.origin === name).length;
+      name === 'retired' || name === 'dropped'
+        ? manifest[name].length
+        : manifest.entries.filter((e) => e.origin === name).length;
     if (actual !== declared) {
       throw new Error(
         `manifiesto: el encabezado de «${name}» declara ${declared} y hay ${actual} (¿editaste a mano?)`,
@@ -193,7 +211,7 @@ function validatePath(path, lineIndex) {
   }
 }
 
-export function renderManifest({ source, mirror, diverged, local, retired }) {
+export function renderManifest({ source, mirror, diverged, local, retired, dropped }) {
   const groups = { mirror, diverged, local };
   const lines = [
     `# ${ASSETS_DIR} — manifiesto de paridad (sha256)`,
@@ -208,10 +226,11 @@ export function renderManifest({ source, mirror, diverged, local, retired }) {
     `# source_ref: ${source.ref}`,
     `# source_path: ${source.path}`,
     '#',
-    '# mirror se re-deriva de la fuente. diverged/local/retired son',
+    '# mirror se re-deriva de la fuente. diverged/local/retired/dropped son',
     '# declaraciones explícitas con razón (PR/issue): --from-source --write no',
-    '# puede mover sus bytes; re-anclarlos exige --diverge/--local/--retire con',
-    '# --reason. Los conteos de cada encabezado los valida el parser.',
+    '# puede mover sus bytes ni borrarlas; re-anclar o retirar exige',
+    '# --diverge/--local/--retire/--drop con motivo. Los conteos de cada',
+    '# encabezado los valida el parser.',
     '',
   ];
 
@@ -223,9 +242,12 @@ export function renderManifest({ source, mirror, diverged, local, retired }) {
     lines.push('');
   }
 
-  lines.push(`# --- ${SECTION_TITLE.retired} (${retired.length}) ---`);
-  for (const r of retired) lines.push(`# retired: ${r.path} — ${r.reason}`);
-  lines.push('');
+  for (const kind of ['retired', 'dropped']) {
+    const list = kind === 'retired' ? retired : dropped;
+    lines.push(`# --- ${SECTION_TITLE[kind]} (${list.length}) ---`);
+    for (const r of list) lines.push(`# ${kind}: ${r.path} — ${r.reason}`);
+    lines.push('');
+  }
   return lines.join('\n');
 }
 
@@ -262,6 +284,7 @@ export function diffManifest(manifest, localTree) {
     changed: [],
     extra: [],
     resurrected: [],
+    droppedBack: [],
     counts: { mirror: 0, diverged: 0, local: 0 },
   };
 
@@ -277,8 +300,15 @@ export function diffManifest(manifest, localTree) {
   for (const r of manifest.retired) {
     if (localTree.has(r.path)) result.resurrected.push(r.path);
   }
+  for (const r of manifest.dropped ?? []) {
+    if (localTree.has(r.path)) result.droppedBack.push(r.path);
+  }
   result.ok =
-    !result.missing.length && !result.changed.length && !result.extra.length && !result.resurrected.length;
+    !result.missing.length &&
+    !result.changed.length &&
+    !result.extra.length &&
+    !result.resurrected.length &&
+    !result.droppedBack.length;
   return result;
 }
 
@@ -293,6 +323,7 @@ export function formatDiff(result) {
   block('hash distinto al manifiesto', result.changed);
   block('presente en el árbol y no declarado', result.extra);
   block('retirado del brand kit y reaparece', result.resurrected);
+  block('dropeado del brand kit y reaparece', result.droppedBack);
   return lines.join('\n');
 }
 
@@ -317,6 +348,12 @@ async function download(url) {
   const res = await fetch(url, { headers: authHeaders('application/octet-stream') });
   if (!res.ok) throw new Error(`descarga ${res.status} en ${url}`);
   return Buffer.from(await res.arrayBuffer());
+}
+
+/** Resuelve una rama/tag/sha corto al sha completo del commit (red). */
+async function resolveRef(repo, ref) {
+  const commit = await githubJson(`https://api.github.com/repos/${repo}/commits/${ref}`);
+  return commit.sha;
 }
 
 /** Map<nombre de archivo, sha256> de la fuente en `ref` (red). */
@@ -352,7 +389,7 @@ async function loadManifest({ tolerant = false } = {}) {
   try {
     text = await readFile(join(ROOT, MANIFEST), 'utf8');
   } catch {
-    if (tolerant) return { meta: {}, source: { ...DEFAULTS, ref: null }, entries: [], retired: [] };
+    if (tolerant) return { meta: {}, source: { ...DEFAULTS, ref: null }, entries: [], retired: [], dropped: [] };
     die(`✖ no existe ${MANIFEST}: generálo con --from-source --write`);
   }
   try {
@@ -370,7 +407,7 @@ async function verify() {
   const result = diffManifest(manifest, tree);
 
   console.log(
-    `${ASSETS_DIR}: ${tree.size} archivos · ${result.counts.mirror} espejados · ${result.counts.diverged} divergentes · ${result.counts.local} propios · ${manifest.retired.length} retirados`,
+    `${ASSETS_DIR}: ${tree.size} archivos · ${result.counts.mirror} espejados · ${result.counts.diverged} divergentes · ${result.counts.local} propios · ${manifest.retired.length} retirados · ${manifest.dropped.length} dropeados`,
   );
   console.log(`fuente: ${describeSource(manifest.source)}`);
 
@@ -382,15 +419,26 @@ async function fromSource({ ref, write, declarations }) {
   const manifest = await loadManifest({ tolerant: Boolean(ref) });
   const source = { ...manifest.source, ref: ref ?? manifest.source.ref };
   if (!source.ref) die('✖ no hay ref de la fuente: pasá --ref <sha>');
+  // El pin siempre queda en un commit, nunca en una rama móvil.
+  source.ref = await resolveRef(source.repo, source.ref);
 
   const previous = new Map(manifest.entries.map((e) => [e.path, e]));
   const declaredNow = new Map(declarations.map((d) => [d.path, d]));
   const retired = new Map(manifest.retired.map((r) => [r.path, r.reason]));
+  const dropped = new Map(manifest.dropped.map((r) => [r.path, r.reason]));
 
   for (const { path, origin, reason } of declarations) {
     if (!path.startsWith(`${ASSETS_DIR}/`)) die(`✖ ${origin} fuera de ${ASSETS_DIR}/: ${path}`, 2);
-    if (origin === 'retire') retired.set(path, reason);
-    else retired.delete(path);
+    if (origin === 'retire') {
+      retired.set(path, reason);
+      dropped.delete(path);
+    } else if (origin === 'drop') {
+      dropped.set(path, reason);
+      retired.delete(path);
+    } else {
+      retired.delete(path);
+      dropped.delete(path);
+    }
   }
 
   console.log(`fuente: ${describeSource(source)} — derivando hashes (red)…`);
@@ -410,6 +458,21 @@ async function fromSource({ ref, write, declarations }) {
       problems.push(`retirado y la fuente no lo tiene: ${path} (quitá el retiro)`);
     }
   }
+  for (const [path, why] of dropped) {
+    if (sourceFiles.has(baseName(path))) {
+      problems.push(`dropeado pero la fuente lo tiene: ${path} (usá --retire; un dropeado no viene de la fuente)`);
+    }
+  }
+
+  // Borrar un archivo tampoco puede ser mudo: toda entrada declarada que ya no
+  // está en el árbol exige una declaración (--drop si era propio, --retire si
+  // viene de la fuente). `previous` es la memoria de lo que se publicaba.
+  for (const [path] of previous) {
+    if (tree.has(path) || declaredNow.has(path)) continue;
+    problems.push(
+      `desapareció sin declarar: ${path} (--drop "<path>=<motivo>" si se deja de publicar; --retire si viene de la fuente)`,
+    );
+  }
 
   for (const name of [...sourceFiles.keys()].sort()) {
     const path = `${ASSETS_DIR}/${name}`;
@@ -427,6 +490,10 @@ async function fromSource({ ref, write, declarations }) {
     }
     if (retired.has(path)) {
       problems.push(`retirado y presente a la vez: ${path} (quitá el retiro o el archivo)`);
+      continue;
+    }
+    if (dropped.has(path)) {
+      problems.push(`dropeado y presente a la vez: ${path} (quitá el drop o el archivo)`);
       continue;
     }
     if (origin === 'mirror') {
@@ -465,6 +532,10 @@ async function fromSource({ ref, write, declarations }) {
     const prev = previous.get(path);
     const declared = declaredNow.get(path);
     if (declared?.origin === 'retire') continue; // ya reportado arriba como retiro + presencia
+    if (dropped.has(path)) {
+      problems.push(`dropeado y presente a la vez: ${path} (quitá el drop o el archivo)`);
+      continue;
+    }
     if (prev?.origin === 'mirror') {
       problems.push(`declarado mirror y la fuente ya no lo tiene: ${path}`);
       continue;
@@ -485,7 +556,7 @@ async function fromSource({ ref, write, declarations }) {
   }
 
   console.log(
-    `fuente: ${sourceFiles.size} archivos · local: ${tree.size} · espejados: ${groups.mirror.length} · divergentes: ${groups.diverged.length} · propios: ${groups.local.length} · retirados: ${retired.size}`,
+    `fuente: ${sourceFiles.size} archivos · local: ${tree.size} · espejados: ${groups.mirror.length} · divergentes: ${groups.diverged.length} · propios: ${groups.local.length} · retirados: ${retired.size} · dropeados: ${dropped.size}`,
   );
 
   if (problems.length) {
@@ -500,15 +571,28 @@ async function fromSource({ ref, write, declarations }) {
     retired: [...retired]
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([path, why]) => ({ path, reason: why })),
+    dropped: [...dropped]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([path, why]) => ({ path, reason: why })),
   });
 
   const current = await readFile(join(ROOT, MANIFEST), 'utf8').catch(() => null);
-  if (current === text) {
-    console.log('✔ la fuente no derivó: el manifiesto ya está al día');
+  const withoutRef = (t) => t?.replace(/^# source_ref:.*$/m, '') ?? null;
+  if (withoutRef(current) === withoutRef(text)) {
+    if (current === text) {
+      console.log('✔ la fuente no derivó: el manifiesto ya está al día');
+    } else if (write) {
+      await writeFile(join(ROOT, MANIFEST), text);
+      console.log(`✔ contenido igual; ${MANIFEST} re-pineado a ${source.ref.slice(0, 7)}`);
+    } else {
+      console.log(
+        `✔ la fuente no derivó respecto de lo declarado (el ref se movió: ${source.ref.slice(0, 7)}; el pin sigue en el manifiesto)`,
+      );
+    }
     return;
   }
   if (!write) {
-    console.log('· el manifiesto quedaría distinto (¿ref o fecha nuevos?): corré con --write');
+    console.log('· el manifiesto quedaría distinto: corré con --write');
     return;
   }
   await writeFile(join(ROOT, MANIFEST), text);
@@ -524,7 +608,7 @@ async function main(argv) {
     return;
   }
 
-  const values = { '--ref': [], '--retire': [], '--diverge': [], '--local': [], '--reason': [] };
+  const values = { '--ref': [], '--retire': [], '--drop': [], '--diverge': [], '--local': [], '--reason': [] };
   const flags = new Set();
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
@@ -558,13 +642,14 @@ async function main(argv) {
     ...values['--diverge'].map((v) => parseDeclaration(v, 'diverged')),
     ...values['--local'].map((v) => parseDeclaration(v, 'local')),
     ...values['--retire'].map((v) => parseDeclaration(v, 'retire')),
+    ...values['--drop'].map((v) => parseDeclaration(v, 'drop')),
   ];
 
   if (flags.has('--write') && !flags.has('--from-source')) {
     die('✖ --write sólo tiene sentido con --from-source (nunca se escribe sin la fuente)', 2);
   }
   if (declarations.length && !flags.has('--write')) {
-    die('✖ --diverge/--local/--retire exigen --from-source --write', 2);
+    die('✖ --diverge/--local/--retire/--drop exigen --from-source --write', 2);
   }
   const withoutReason = declarations.filter((d) => !d.reason);
   if (withoutReason.length) {

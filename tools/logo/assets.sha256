@@ -7,13 +7,14 @@
 # gate de CI a propósito.
 #
 # source_repo: ChristianLuciani/christianluciani.github.io
-# source_ref: 8c2a11032a2d37abe7d8b36844c23e4292953348
+# source_ref: a0d3ab9858862ce7e1dc0fd0727d311aadb4c9c3
 # source_path: assets/brand/logo
 #
-# mirror se re-deriva de la fuente. diverged/local/retired son
+# mirror se re-deriva de la fuente. diverged/local/retired/dropped son
 # declaraciones explícitas con razón (PR/issue): --from-source --write no
-# puede mover sus bytes; re-anclarlos exige --diverge/--local/--retire con
-# --reason. Los conteos de cada encabezado los valida el parser.
+# puede mover sus bytes ni borrarlas; re-anclar o retirar exige
+# --diverge/--local/--retire/--drop con motivo. Los conteos de cada
+# encabezado los valida el parser.
 
 # --- mirror — existe en la fuente y es byte-idéntico (52) ---
 cb720d8345c9e760d0a010e6d3e93533e6c6a496ec3d0bbc5c11c7bcef3651ea  assets/logo/apple-touch-icon-aurea.png
@@ -87,6 +88,9 @@ f316da21d8593da9d3a1e989a0313b4775601af0355e258657a6932da42f7857  assets/logo/fa
 d2604538559b41b9ae67b1e1fdac968e9c5cc9c86b389722b854a20a2964c66e  assets/logo/favicon-base-teal-gold.svg  # PR #4: variante propia del brand kit (tile teal); no existe en la fuente
 f18fd7bce75d3d1dd07401d9d411646918d45415074f4486222e1092937f54f5  assets/logo/favicon-base-teal.svg  # PR #4: variante propia del brand kit (tile teal); no existe en la fuente
 
-# --- retired — existe en la fuente y acá NO se publica (2) ---
+# --- retired — existe en la fuente y acá NO se publica (3) ---
 # retired: assets/logo/favicon-aurea-16.png — PR #4: a 16 px el oro sin fondo no se aprecia; a 16 sólo se publica -teal
 # retired: assets/logo/favicon-base-16.png — PR #4: a 16 px el oro sin fondo no se aprecia; a 16 sólo se publica -teal
+# retired: assets/logo/README.md — README de la carpeta de assets en la fuente: es documentación, no un asset del brand kit
+
+# --- dropped — se publicó acá y se dejó de publicar (no viene de la fuente) (0) ---

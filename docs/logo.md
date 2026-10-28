@@ -366,9 +366,12 @@ el gate de CI compara el árbol local contra el manifiesto **sin red**.
 | `diverged` | existe en la fuente y acá es distinto a propósito | no: exige razón |
 | `local` | propio del brand kit, no existe en la fuente | no: exige razón |
 | `retired` | existe en la fuente y acá **no** se publica | no: exige razón |
+| `dropped` | se publicó acá y se dejó de publicar (no viene de la fuente) | no: exige razón |
+
+<!-- composición: 66/52/4/10/3/0 (total/mirror/diverged/local/retired/dropped) -->
 
 Composición vigente (la imprime el gate): **66 archivos** — **52** espejados
-de la fuente @ `8c2a110`, **4** divergentes, **10** propios y **2** retirados.
+de la fuente, **4** divergentes, **10** propios y **3** retirados.
 
 - **Divergentes** (`favicon-{aurea,base}{,-32}.{svg,png}`): la familia de
   favicons con tile lleno de #4; la fuente todavía tiene la versión previa.
@@ -377,7 +380,10 @@ de la fuente @ `8c2a110`, **4** divergentes, **10** propios y **2** retirados.
 - **Propios** (`favicon-*-teal*`): el tile teal y su variante dorada, que la
   fuente aún no tiene.
 - **Retirados** (`favicon-{aurea,base}-16.png` transparentes, retirados en #4):
-  a 16 px sólo se publica `-teal`.
+  a 16 px sólo se publica `-teal`; y `README.md` de la carpeta de assets en la
+  fuente, que es documentación y no un asset.
+- **Dropeados**: hoy ninguno. Es el camino declarado para dejar de publicar un
+  archivo propio sin que el borrado sea mudo.
 
 ```bash
 node tools/logo/verify-assets.mjs                 # offline (lo que corre CI)
@@ -390,16 +396,18 @@ node tools/logo/verify-assets.mjs --from-source --write   # re-deriva el manifie
 archivo que acá falta, si un `mirror` difiere, si la fuente ya coincide con un
 `diverged` o si aparece un archivo sin declarar.
 
-**Nada se declara a mano.** Los tres orígenes sin verdad externa se declaran en
-el manifiesto con su razón (PR/issue) y el hash **no** se puede mover sin
-volver a declararlos: `--from-source --write` sólo re-ancla un `local` o un
-`diverged` cuando la misma invocación lo declara con `--local`/`--diverge` y un
-motivo, y lo deja escrito en el diff.
+**Nada se declara a mano.** Los cuatro orígenes sin verdad externa se declaran
+en el manifiesto con su razón (PR/issue); `--from-source --write` no puede
+mover sus bytes ni **borrarlos**: sólo re-ancla un `local`/`diverged` cuando la
+misma invocación lo declara con `--local`/`--diverge` y un motivo, y un archivo
+borrado exige `--drop` (propio) o `--retire` (de la fuente). Todo queda escrito
+en el diff del manifiesto.
 
 ```bash
 node tools/logo/verify-assets.mjs --from-source --write \
   --diverge "assets/logo/favicon-aurea.svg=<PR/issue y por qué>" \
-  --retire  "assets/logo/favicon-aurea-16.png=<PR/issue y por qué>"
+  --retire  "assets/logo/favicon-aurea-16.png=<PR/issue y por qué>" \
+  --drop    "assets/logo/favicon-propio-viejo.png=<PR/issue y por qué>"
 ```
 
 Los conteos `(n)` de los encabezados del manifiesto **no son decorativos**: el
@@ -410,11 +418,12 @@ exige razón en cada `diverged`/`local`/`retired`.
 prueba que el árbol es *el declarado*, no que la fuente no haya avanzado. La
 frescura contra la fuente es **manual**:
 `node tools/logo/verify-assets.mjs --from-source --ref main`, al tocar assets o
-al revisar el pin. Estado conocido: la fuente en `main` ya sumó
-`assets/brand/logo/README.md` (documentación en la carpeta de assets, posterior
-al pin) y `--from-source --ref main` falla a propósito hasta re-pinear; ese
-archivo se declara con `--retire` porque no es un asset. El ref se pinea al
-**commit** (`8c2a110…`), no a `main`.
+al revisar el pin; hoy está **verde**. La comparación es de **contenido**: si
+`main` avanza sin tocar los assets, el chequeo sigue verde y avisa que el pin
+quedó atrás (re-pinear es un acto explícito, `--ref main --write`). En cuanto
+la fuente sume, cambie o borre un asset, falla. El `README.md` de la carpeta de
+assets de la fuente está declarado `retired` porque es documentación, no un
+asset. El `source_ref` del manifiesto se pinea a un **commit**, nunca a `main`.
 
 **Regenerar.** `npm run logo:generate` re-renderiza desde `geometry.mjs`; si
 Chrome produce bytes distintos a los de la fuente, el gate lo marca como

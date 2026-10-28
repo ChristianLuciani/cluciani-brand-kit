@@ -116,30 +116,32 @@ node tools/logo/verify-assets.mjs                 # offline: assets/logo/ ≡ ma
 node tools/logo/verify-assets.mjs --from-source   # red: drift contra la fuente
 ```
 
+<!-- composición: 66/52/4/10/3/0 (total/mirror/diverged/local/retired/dropped) -->
+
 Composición vigente (la imprime el propio comando): **66 archivos** —
-**52** byte-idénticos a la fuente @ `8c2a110`, **4** divergentes a propósito
+**52** byte-idénticos a la fuente, **4** divergentes a propósito
 (`favicon-{aurea,base}{,-32}.{svg,png}`: la familia de favicons con tile lleno
 que este repo adelantó en #4; la fuente todavía tiene la versión previa),
 **10** propios de este repo (los `favicon-*-teal*`, que la fuente aún no tiene)
-y **2** retirados (`favicon-{aurea,base}-16.png` transparentes, retirados en
-#4: a 16 px sólo se publica `-teal`).
+y **3** retirados (`favicon-{aurea,base}-16.png` transparentes, retirados en
+#4 — a 16 px sólo se publica `-teal` — y el `README.md` de la carpeta de assets
+en la fuente, que es documentación, no un asset).
 
-`mirror` se re-deriva de la fuente. `diverged`, `local` y `retired` son
-declaraciones explícitas **con razón** (PR/issue) escrita en el manifiesto:
-`--from-source --write` no puede mover sus bytes; re-anclar uno exige
-declararlo de nuevo con `--diverge`/`--local`/`--retire` y un motivo. Un byte
-cambiado sin declaración hace fallar tanto el modo offline como `--write`.
-El ref de la fuente va **pineado al commit**, no a `main`.
+`mirror` se re-deriva de la fuente. `diverged`, `local`, `retired` y `dropped`
+son declaraciones explícitas **con razón** (PR/issue) escrita en el manifiesto:
+`--from-source --write` no puede mover sus bytes **ni borrarlos**; re-anclar o
+retirar exige declararlo de nuevo con `--diverge`/`--local`/`--retire`/`--drop`
+y un motivo. Un byte cambiado o un archivo borrado sin declaración hacen fallar
+tanto el modo offline como `--write`. El ref de la fuente va **pineado al
+commit**, no a `main`.
 
 **Límite declarado — verde ≠ último logo.** El step de CI corre sólo el modo
 offline: demuestra que el árbol es *el declarado*, **no** que la fuente no haya
-avanzado. La frescura contra la fuente es **manual**, con
-`node tools/logo/verify-assets.mjs --from-source` (y `--ref main` para ver si
-la fuente se movió), y se corre al tocar assets o al revisar el pin. Estado
-conocido: la fuente en `main` ya agregó `assets/brand/logo/README.md` después
-de `8c2a110`, así que `--from-source --ref main` falla a propósito hasta que se
-re-pinee (esa carpeta mezcla assets con documentación; se declara con
-`--retire` al re-derivar).
+avanzado. La frescura contra la fuente es **manual**
+(`node tools/logo/verify-assets.mjs --from-source --ref main`), y se corre al
+tocar assets o al revisar el pin; hoy está **verde** (el árbol de assets de la
+fuente no cambió y su `README.md` está declarado como retirado). En cuanto la
+fuente sume, cambie o borre un asset, el chequeo falla.
 
 **Regenerar.** `npm run logo:generate` re-renderiza desde `geometry.mjs`; si
 Chrome produce bytes distintos a los de la fuente, el gate lo va a marcar como

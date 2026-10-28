@@ -10,7 +10,7 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const DIGEST_A = 'a'.repeat(64);
 const DIGEST_B = 'b'.repeat(64);
 
-const manifestText = ({ mirror = [], diverged = [], local = [], retired = [] }) =>
+const manifestText = ({ mirror = [], diverged = [], local = [], retired = [], dropped = [] }) =>
   [
     '# source_repo: owner/src',
     '# source_ref: deadbeef',
@@ -28,6 +28,9 @@ const manifestText = ({ mirror = [], diverged = [], local = [], retired = [] }) 
     `# --- retired (${retired.length}) ---`,
     ...retired.map(([path, reason = 'motivo']) => `# retired: ${path} — ${reason}`),
     '',
+    `# --- dropped (${dropped.length}) ---`,
+    ...dropped.map(([path, reason = 'motivo']) => `# dropped: ${path} — ${reason}`),
+    '',
   ].join('\n');
 
 describe('parseManifest', () => {
@@ -41,6 +44,7 @@ describe('parseManifest', () => {
           ['assets/logo/d.png', 'a 16 px no se lee'],
           ['assets/logo/e.png', 'sin uso'],
         ],
+        dropped: [['assets/logo/f.png', 'se dejó de publicar']],
       }),
     );
 
@@ -54,6 +58,7 @@ describe('parseManifest', () => {
       { path: 'assets/logo/d.png', reason: 'a 16 px no se lee' },
       { path: 'assets/logo/e.png', reason: 'sin uso' },
     ]);
+    expect(m.dropped).toEqual([{ path: 'assets/logo/f.png', reason: 'se dejó de publicar' }]);
   });
 
   it('rechaza una entrada fuera de sección', () => {
@@ -97,7 +102,7 @@ describe('parseManifest', () => {
 
   it('exige razón y path válido en los retiros, sin duplicados', () => {
     expect(() => parseManifest(manifestText({ retired: [['assets/logo/x.png', '']] }))).toThrow(
-      /retiro sin razón/,
+      /retired sin razón/,
     );
     expect(() => parseManifest(manifestText({ retired: [['README.md', 'fuera']] }))).toThrow(
       /fuera de assets\/logo/,
@@ -111,7 +116,31 @@ describe('parseManifest', () => {
           ],
         }),
       ),
-    ).toThrow(/retiro duplicado/);
+    ).toThrow(/retired duplicado/);
+  });
+
+  it('exige razón y unicidad en dropped, y no admite dropped+retired', () => {
+    expect(() => parseManifest(manifestText({ dropped: [['assets/logo/x.png', '']] }))).toThrow(
+      /dropped sin razón/,
+    );
+    expect(() =>
+      parseManifest(
+        manifestText({
+          dropped: [
+            ['assets/logo/x.png', 'uno'],
+            ['assets/logo/x.png', 'dos'],
+          ],
+        }),
+      ),
+    ).toThrow(/dropped duplicado/);
+    expect(() =>
+      parseManifest(
+        manifestText({
+          retired: [['assets/logo/x.png', 'viene de la fuente']],
+          dropped: [['assets/logo/x.png', 'propio']],
+        }),
+      ),
+    ).toThrow(/dropped y retired a la vez/);
   });
 
   it('valida los conteos de los encabezados (no son decorativos)', () => {
@@ -132,6 +161,7 @@ describe('renderManifest / parseManifest', () => {
       diverged: [{ path: 'assets/logo/b.svg', hash: DIGEST_B, origin: 'diverged', reason: 'PR #4' }],
       local: [{ path: 'assets/logo/c.svg', hash: DIGEST_A, origin: 'local', reason: 'tile teal' }],
       retired: [{ path: 'assets/logo/d.png', reason: 'no se publica' }],
+      dropped: [{ path: 'assets/logo/e.png', reason: 'se dejó de publicar' }],
     };
     const text = renderManifest(model);
 
@@ -142,6 +172,7 @@ describe('renderManifest / parseManifest', () => {
       { path: 'assets/logo/c.svg', hash: DIGEST_A, origin: 'local', reason: 'tile teal' },
     ]);
     expect(parseManifest(text).retired).toEqual([{ path: 'assets/logo/d.png', reason: 'no se publica' }]);
+    expect(parseManifest(text).dropped).toEqual([{ path: 'assets/logo/e.png', reason: 'se dejó de publicar' }]);
   });
 
   // renderManifest toma listas planas; el parse devuelve entradas tipadas.
@@ -151,7 +182,14 @@ describe('renderManifest / parseManifest', () => {
       m.entries
         .filter((e) => e.origin === origin)
         .map((e) => ({ path: e.path, hash: e.hash, origin, reason: e.reason }));
-    return { source: m.source, mirror: by('mirror'), diverged: by('diverged'), local: by('local'), retired: m.retired };
+    return {
+      source: m.source,
+      mirror: by('mirror'),
+      diverged: by('diverged'),
+      local: by('local'),
+      retired: m.retired,
+      dropped: m.dropped,
+    };
   }
 });
 
@@ -196,6 +234,16 @@ describe('diffManifest', () => {
     t.set('assets/logo/intruso.png', DIGEST_A);
     const result = diffManifest(model(), t);
     expect(result.extra).toEqual(['assets/logo/intruso.png']);
+  });
+
+  it('detecta un dropeado que reaparece', () => {
+    const modelDropped = parseManifest(
+      manifestText({ dropped: [['assets/logo/z.png', 'se dejó de publicar']] }),
+    );
+    const t = new Map([['assets/logo/z.png', DIGEST_A]]);
+    const result = diffManifest(modelDropped, t);
+    expect(result.droppedBack).toEqual(['assets/logo/z.png']);
+    expect(result.ok).toBe(false);
   });
 
   it('detecta un retirado que reaparece', () => {
@@ -251,10 +299,14 @@ describe('manifiesto commiteado contra assets/logo', () => {
   });
 
   // Un número publicado en varias superficies tiene que moverse en todas a la
-  // vez: se deriva la composición del manifiesto y se contrasta contra cada
-  // superficie que la publica (README, manual y CHANGELOG; los encabezados del
-  // manifiesto los valida el parser). Si una cifra cambia legítimamente, se
-  // actualizan TODAS en el mismo PR; si no, este test falla nombrando el archivo.
+  // vez. Tres guardas por superficie (README, manual, CHANGELOG):
+  //   1. línea canónica `<!-- composición: T/M/D/L/R/D -->` con la composición
+  //      derivada del manifiesto;
+  //   2. TODAS las frases `**N archivos**` —no sólo la primera— con los cuatro
+  //      conteos en orden;
+  //   3. TODO total publicado (`N archivos` / `N assets`, en negrita o no)
+  //      igual al total. Si un doc necesita citar otro número de archivos
+  //      (p. ej. los de la fuente), que no use la palabra «archivos/assets».
   it('los números publicados son los derivados del manifiesto', async () => {
     const { manifest, tree, result } = await load();
     const derived = {
@@ -263,27 +315,46 @@ describe('manifiesto commiteado contra assets/logo', () => {
       diverged: result.counts.diverged,
       local: result.counts.local,
       retired: manifest.retired.length,
+      dropped: manifest.dropped.length,
     };
+    const canonical = [
+      derived.total,
+      derived.mirror,
+      derived.diverged,
+      derived.local,
+      derived.retired,
+      derived.dropped,
+    ].join('/');
     const hint = (path) =>
       `${path}: la composición publicada no coincide con el manifiesto ` +
       `(${JSON.stringify(derived)}); actualizala en todas las superficies en el mismo PR`;
 
     for (const path of ['README.md', 'docs/logo.md', 'CHANGELOG.md']) {
       const text = await readFile(join(ROOT, path), 'utf8');
-      const anchor = text.match(/\*\*(\d+) archivos\*\*/);
-      expect(anchor, `${path}: falta la línea «**<total> archivos**» con la composición`).toBeTruthy();
-      expect(Number(anchor[1]), hint(path)).toBe(derived.total);
 
-      // Los cuatro conteos van en orden —espejados, divergentes, propios,
-      // retirados— en negrita, después del total.
-      const tail = text.slice(anchor.index, anchor.index + 700);
-      const published = [...tail.matchAll(/\*\*(\d+)\*\*/g)].map((m) => Number(m[1]));
-      expect(published.slice(0, 4), hint(path)).toEqual([
-        derived.mirror,
-        derived.diverged,
-        derived.local,
-        derived.retired,
-      ]);
+      const marker = text.match(/<!--\s*composición:\s*(\d+(?:\/\d+){5})\b/);
+      expect(marker, `${path}: falta la línea canónica «<!-- composición: T/M/D/L/R/D -->»`).toBeTruthy();
+      expect(marker[1], hint(path)).toBe(canonical);
+
+      const anchors = [...text.matchAll(/\*\*(\d+) archivos\*\*/g)];
+      expect(anchors.length, `${path}: falta la frase «**<total> archivos**»`).toBeGreaterThan(0);
+      for (const anchor of anchors) {
+        const tail = text.slice(anchor.index, anchor.index + 700);
+        const published = [...tail.matchAll(/\*\*(\d+)\*\*/g)].map((m) => Number(m[1]));
+        expect([Number(anchor[1]), ...published.slice(0, 4)], hint(path)).toEqual([
+          derived.total,
+          derived.mirror,
+          derived.diverged,
+          derived.local,
+          derived.retired,
+        ]);
+      }
+
+      for (const total of text.matchAll(/(\d+)\s+(?:archivos|assets)\b/g)) {
+        expect(Number(total[1]), `${path}: «${total[0]}» no coincide con el total ${derived.total}`).toBe(
+          derived.total,
+        );
+      }
     }
   });
 });
