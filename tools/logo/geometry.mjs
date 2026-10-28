@@ -52,6 +52,7 @@ export const C_FINISH = {
 export const FAVICON = {
   padRatio: 0.05, // margen por lado, como fracción del lado mayor del mark
   widthScale: 2,  // grosor de la barra del icono vs cWidth del mark
+  novaCoreScale: 2, // el punto de la supernova ×2: a 16px el core del mark es subpíxel
   background: { color: "#00c9c0", ink: "#050810" },
 };
 
@@ -458,17 +459,18 @@ export function constellationPoints(segs) {
 
 /* ── encuadre del favicon: el icono llena el tile ──
    El viewBox se computa del CONTORNO REAL de la barra (no de la línea
-   central, que dejaba el borde fuera) + el core de la supernova. Luego se
+   central, que dejaba el borde fuera) + el core de la supernova (escalado
+   por `novaCoreScale`: a 16px el punto del mark es subpíxel). Luego se
    agrega `padRatio` por lado: el mark ocupa 1/(1+2·padRatio) ≈ 91% del
    cuadrado. `background` devuelve el color del tile lleno y la tinta de la
    C para esa variante (night sobre teal); sin background, la C va en oro. */
-export function faviconFrame(segs, cfg, { background = false } = {}) {
+export function faviconFrame(segs, cfg, { background = false, ink } = {}) {
   const f = cfg.favicon;
   const width = cfg.cWidth * f.widthScale;
   const band = cBand(segs, width, { cornerCut: cfg.cFinish.cornerCut });
   const pts = constellationPoints(segs);
   const sp = starSpec(0, pts.length, cfg.constellation);
-  const coreR = sp.coreR + NOVA_CORE_BOOST;
+  const coreR = (sp.coreR + NOVA_CORE_BOOST) * f.novaCoreScale;
   const xs = [], ys = [];
   const add = (x, y) => { xs.push(x); ys.push(y); };
   // la supernova (núcleo) y los terminales circulares de B/A (radio h)
@@ -485,12 +487,13 @@ export function faviconFrame(segs, cfg, { background = false } = {}) {
   const pad = span * f.padRatio;
   const side = span + pad * 2;
   const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  const bg = background ? f.background.color : null;
   return {
     band, sp, coreR, width,
     pad, side, span,
     occupancy: span / side, // fracción del tile que ocupa el mark
     viewBox: { x: cx - side / 2, y: cy - side / 2, w: side, h: side },
-    background: background ? f.background.color : null,
-    ink: background ? f.background.ink : cfg.colors.c,
+    background: bg,
+    ink: ink ?? (bg ? f.background.ink : cfg.colors.c), // tinta plana de la C
   };
 }

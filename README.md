@@ -10,7 +10,7 @@ sus assets generados, el generador paramétrico y el manual de marca.
 ## Contenido
 
 ```
-assets/logo/          # 64 assets generados (SVG, PNG, print, favicon, og)
+assets/logo/          # 70 assets generados (SVG, PNG, print, favicon, og)
 docs/logo.md          # manual de marca (símbolo, paleta, construcción, uso)
 tools/logo/           # geometry.mjs (fuente de verdad), generador, tests, gate
 proposals/            # HTML de la animación aprobada (fuente de diseño)
@@ -56,20 +56,26 @@ https://raw.githubusercontent.com/ChristianLuciani/cluciani-brand-kit/v1.0.1/ass
 | `logo-aurea-lockup.svg` / `-light.svg` | mark + tipografía (800×940) |
 | `logo-aurea-print-{a4\|a3}{,-dark,-light}.png` | 300 dpi |
 | `favicon-aurea.svg`, `favicon-aurea-{16,32}.png` | favicon: la C llena el tile (sin fondo) |
-| `favicon-aurea-teal.svg`, `favicon-aurea-teal-{16,32}.png` | favicon con tile teal `#00c9c0` y C en night (opción de color) |
+| `favicon-aurea-teal.svg`, `favicon-aurea-teal-{16,32}.png` | favicon con tile teal `#00c9c0` y C en night (máximo contraste) |
+| `favicon-aurea-teal-gold.svg`, `favicon-aurea-teal-gold-{16,32}.png` | tile teal + C con el acabado ámbar→oro→luz del mark |
 | `apple-touch-icon-aurea.png`, `og-image-aurea.png` | 180 / 1200×630 |
 
 La versión **áurea** es la canónica; `base` se conserva como referencia
 comparativa. Sobre blanco usá siempre `-light`: la variante night deja un halo
 verdoso.
 
-Favicon con tile teal (opción de color, §3.2 del manual). Los favicons teal
+Favicon con tile teal (opciones de color, §3.2 del manual). Los favicons teal
 todavía no están en `v1.0.1`: reemplazá `<tag>` por el tag que publique esta
 versión.
 
 ```html
+<!-- máximo contraste: C en night -->
 <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@<tag>/assets/logo/favicon-aurea-teal.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@<tag>/assets/logo/favicon-aurea-teal-32.png">
+
+<!-- la C con sus colores (acabado ámbar→oro→luz) -->
+<link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@<tag>/assets/logo/favicon-aurea-teal-gold.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@<tag>/assets/logo/favicon-aurea-teal-gold-32.png">
 ```
 
 ## Regenerar
@@ -79,8 +85,8 @@ Requisitos: Node 20+ y Chrome/Chromium. En Linux/CI, apuntá `CHROME_PATH`.
 ```bash
 npm install
 npm test                    # invariantes de geometría
-npm run logo:generate       # regenera los 64 assets (áurea + base)
-npm run logo:favicons       # sólo favicons (16/32, normal + tile teal)
+npm run logo:generate       # regenera los 70 assets (áurea + base)
+npm run logo:favicons       # sólo favicons (16/32, 3 variantes)
 CHROME_PATH=/usr/bin/google-chrome npm run logo:verify   # gate ≡ DOM aprobado
 ```
 

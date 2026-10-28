@@ -131,14 +131,23 @@ tile. El icono **es** el tile: se genera con `faviconFrame()` desde
 |---|---|---|
 | `padRatio` | 0.05 | margen por lado = 5% del lado mayor del contorno; el mark ocupa ~91% del cuadrado |
 | `widthScale` | 2 | barra del icono = 2 × `cWidth` (20 en el lienzo 800) |
-| `background.color` | `#00c9c0` | tile teal de la variante `-teal` (acento/links del sitio) |
+| `novaCoreScale` | 2 | el punto de la supernova ×2: el core del mark (6.2) es subpíxel a 16 px |
+| `background.color` | `#00c9c0` | tile teal de las variantes `-teal` / `-teal-gold` (acento/links del sitio) |
 | `background.ink` | `#050810` | C de la variante teal: night sobre teal = 9.7:1 |
 
 El viewBox se computa del **contorno real** de la barra (terminales y
 vértice incluidos), no de la línea central: el borde no queda fuera del
-encuadre. La variante `-teal` existe porque el oro `#c9a84c` sobre teal da
-1.1:1 y desaparece; usa la C en night. Es una variante **generada** para el
-icono, no un recoloreo de la C del mark (que sigue siendo dorada).
+encuadre. Hay tres variantes:
+
+- **sin fondo** (`favicon-{aurea|base}.svg`): la C en oro plano, para
+  fondos ya resueltos.
+- **`-teal`**: fondo teal + C en night. Es la de máximo contraste (9.7:1).
+- **`-teal-gold`**: fondo teal + la C **con el acabado del mark**
+  (bisel ámbar→oro→luz) y la supernova coral. El oro `#c9a84c` sobre teal
+  da 1.1:1 de luminancia; a 16/32 px la forma se sostiene por el bisel y la
+  diferencia de tono, no por contraste de texto (validar sobre el soporte
+  final). Es una variante **generada** para el icono, no un recoloreo de la
+  C del mark (que sigue siendo dorada en `logo-*`).
 
 ## 4. Construcción geométrica
 
@@ -218,7 +227,7 @@ light, además, se omite `logo-background` y los halos de la constelación
 |---|---|---|
 | **full** (layers) | constelación de vértices en pico + cielo + galaxia | hero, og-image, prints, masters |
 | **settled** | el mark completo (espiral + C + supernova + cielo) SIN las estrellas de vértices — el estado final de la animación | contextos medianos |
-| **favicon** (simplificado) | la C del mark (mismo contorno, terminales y esquinas) **en oro plano**, sin bisel ni bloom, + supernova; el icono llena el tile (~91%) y la barra se engrosa ×2; variante **`-teal`** con tile teal y C en night | favicon 16/32, contextos <24px |
+| **favicon** (simplificado) | la C del mark (mismo contorno, terminales y esquinas) **en oro plano**, sin bisel ni bloom, + supernova ×2; el icono llena el tile (~91%) y la barra se engrosa ×2. Variantes **`-teal`** (tile + C night) y **`-teal-gold`** (tile + C con el acabado del mark) | favicon 16/32, contextos <24px |
 
 ## 7. Uso correcto
 
@@ -230,7 +239,8 @@ light, además, se omite `logo-background` y los halos de la constelación
   blanco. Sobre blanco el oro del bisel tiene contraste bajo por diseño
   (marca gráfica, no texto): validar el contraste sobre el soporte final
   cuando el logo conviva con texto u otros elementos de información.
-- **Favicon**: transparente (la C dorada) o **tile teal** `-teal` sobre
+- **Favicon**: transparente (la C dorada), **`-teal`** (tile + C night,
+  máximo contraste) o **`-teal-gold`** (tile + C con sus colores) sobre
   contextos donde el icono compite con muchos favicons; el tile ES el marco,
   no se le suma respiro (§3.2).
 - **Tamaño mínimo**: 24 px de alto para el mark completo. Los favicons 16/32
@@ -248,9 +258,9 @@ light, además, se omite `logo-background` y los halos de la constelación
 
 - ❌ Rotar, estirar o reflectar el símbolo.
 - ❌ Recolorear la C a mano o aplanar su bisel (el oro es la firma; el
-  acabado ámbar→oro→luz se genera desde `cFinish`). La variante `-teal`
-  del favicon no es una excepción a mano: se genera desde `FAVICON` y la C
-  dorada sigue siendo la firma en el mark.
+  acabado ámbar→oro→luz se genera desde `cFinish`). Las variantes `-teal` y
+  `-teal-gold` del favicon no son excepciones a mano: se generan desde
+  `FAVICON` y la C dorada sigue siendo la firma en el mark.
 - ❌ Dibujar el símbolo a mano: **siempre regenerar** (`node
   tools/logo/generate-logo.mjs`).
 - ❌ Editar los SVG/PNG generados — son OUTPUT; la fuente es `geometry.mjs`.
@@ -294,6 +304,8 @@ assets/logo/
   favicon-{aurea|base}-{16|32}.png
   favicon-{aurea|base}-teal.svg        # tile teal + C night
   favicon-{aurea|base}-teal-{16|32}.png
+  favicon-{aurea|base}-teal-gold.svg   # tile teal + C con el acabado del mark
+  favicon-{aurea|base}-teal-gold-{16|32}.png
   apple-touch-icon-{aurea|base}.png   # 180, fondo night
   og-image-{aurea|base}.png           # 1200×630 dark + nombre
 ```

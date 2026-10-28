@@ -16,7 +16,7 @@
  *      [--only-favicon] [--out assets/logo] (o LOGO_OUT env)
  */
 import { execFileSync } from "node:child_process";
-import { accessSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { accessSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -49,11 +49,13 @@ const pickChrome = () => {
 
 function chromeScreenshot(chrome, htmlFile, outPng, { w, h, transparent = false } = {}) {
   mkdirSync(dirname(outPng), { recursive: true });
+  // perfil ÚNICO por captura: Chrome no siempre puede crear uno en el TMPDIR
+  // del host (sandbox del harness) y reutilizar el mismo perfil entre
+  // invocaciones se cuelga (lock/estado sucio). Se borra al terminar.
+  const profile = mkdtempSync(join(TMP, "profile-"));
   const args = [
     "--headless", "--disable-gpu", "--no-first-run", "--hide-scrollbars",
-    // perfil dentro de TMP: Chrome no siempre puede crear uno único en el
-    // TMPDIR del host (sandbox del harness) y falla antes de renderizar.
-    `--user-data-dir=${join(TMP, "profile")}`,
+    `--user-data-dir=${profile}`,
     "--disable-breakpad", "--disable-crash-reporter",
     "--force-device-scale-factor=1",
     "--virtual-time-budget=800",
@@ -66,7 +68,11 @@ function chromeScreenshot(chrome, htmlFile, outPng, { w, h, transparent = false 
   if (process.env.CHROME_NO_SANDBOX === "1") args.unshift("--no-sandbox");
   if (transparent) args.push("--default-background-color=00000000");
   // timeout: un Chrome headless colgado no debe colgar el pipeline entero
-  execFileSync(chrome, args, { stdio: ["ignore", "ignore", "ignore"], timeout: 180_000 });
+  try {
+    execFileSync(chrome, args, { stdio: ["ignore", "ignore", "ignore"], timeout: 180_000 });
+  } finally {
+    rmSync(profile, { recursive: true, force: true });
+  }
 }
 
 /* ── capas SVG (estrellas congeladas en pico; halo = glifo de marca) ──
@@ -109,9 +115,9 @@ const filterDefs = () => `  <defs>
    operador, 2026-10-22) y no se usa. */
 const C_IDS = { p1: "c-perp-1", p2: "c-perp-2", t1: "c-tint-1", t2: "c-tint-2" };
 
-const cDefs = (g, cfg, surface) => {
+const cDefs = (g, cfg, surface, { width = cfg.cWidth } = {}) => {
   const f = cfg.cFinish;
-  const band = cBand(g.segs, cfg.cWidth, { cornerCut: f.cornerCut });
+  const band = cBand(g.segs, width, { cornerCut: f.cornerCut });
   const stops = (arr) => arr.map((s) =>
     `<stop offset="${n2(s.offset * 100)}%" stop-color="${s.color}"/>`).join("");
   const perp = (id, axis) =>
@@ -205,6 +211,22 @@ const layerSpiral = (g, cfg) => {
   return `  <g id="logo-spiral" data-name="Spiral" stroke-linecap="round" fill="none">\n${lines}\n  </g>`;
 };
 
+/* relleno de la barra con el acabado ámbar→oro→luz: dos mitades recortadas
+   por la bisectriz, cada una con su bisel + su barrido. Compartido por el
+   mark (`layerC`) y por el favicon `-teal-gold`. */
+const cBandFills = (band) => {
+  const rows = [];
+  for (const k of [1, 2]) {
+    rows.push(
+      `    <g clip-path="url(#c-clip-${k})">`,
+      `      <path d="${band.outline}" fill="url(#${C_IDS["p" + k]})"/>`,
+      `      <path d="${band.outline}" fill="url(#${C_IDS["t" + k]})"/>`,
+      `    </g>`
+    );
+  }
+  return rows.join("\n");
+};
+
 const layerC = (g, cfg, { surface = "night" } = {}) => {
   const f = cfg.cFinish;
   const band = cBand(g.segs, cfg.cWidth, { cornerCut: f.cornerCut });
@@ -215,14 +237,7 @@ const layerC = (g, cfg, { surface = "night" } = {}) => {
   }
   const filter = surface === "light" ? ' filter="url(#c-shadow)"' : "";
   rows.push(`  <g id="logo-c-triespiral" data-name="C TriSpiral"${filter}>`);
-  for (const k of [1, 2]) {
-    rows.push(
-      `    <g clip-path="url(#c-clip-${k})">`,
-      `      <path d="${band.outline}" fill="url(#${C_IDS["p" + k]})"/>`,
-      `      <path d="${band.outline}" fill="url(#${C_IDS["t" + k]})"/>`,
-      `    </g>`
-    );
-  }
+  rows.push(cBandFills(band));
   rows.push(`  </g>`);
   return rows.join("\n");
 };
@@ -305,27 +320,43 @@ ${nightHalo(70, 35, 560)}
    REAL y con el icono llenando el tile — el mark completo es ilegible
    <24px (review fresco PR #58). A 16/32px el 12% de respiro del mark deja
    el símbolo flotando; acá el tile ES el marco (≥90% de ocupación) y la
-   barra se engrosa ×2 (`FAVICON` en geometry.mjs).
-   `variant: "teal"` produce la opción de tile lleno: fondo teal (acento/
-   links del sitio) + C en night, porque el oro sobre teal no contrasta. */
+   barra se engrosa ×2 (`FAVICON` en geometry.mjs). El core de la
+   supernova también se escala ×2: a 16px el punto del mark es subpíxel.
+   Variantes:
+     · plain      — sin fondo, C en oro plano
+     · teal       — tile teal + C en night (máximo contraste)
+     · teal-gold  — tile teal + C con el acabado ámbar→oro→luz del mark
+                    (los colores de la firma; el teal compite en luminancia)
+   El viewBox es el mismo en las tres: sólo cambia la tinta/fondo. */
 const faviconDoc = (g, cfg, { variant = "plain" } = {}) => {
-  const frame = faviconFrame(g.segs, cfg, { background: variant === "teal" });
+  const teal = variant === "teal" || variant === "teal-gold";
+  const finish = variant === "teal-gold";
+  const frame = faviconFrame(g.segs, cfg, {
+    background: teal,
+    ink: variant === "teal" ? "#050810" : cfg.colors.c,
+  });
   const { band, sp, coreR, viewBox: vb, side, ink, background } = frame;
-  const label = background ? "C de Christian — favicon sobre tile teal" : "C de Christian — favicon simplificado";
-  const title = background ? "C — espiral de conocimiento (favicon, tile teal)" : "C — espiral de conocimiento (favicon)";
+  const dot = finish ? sp.color : ink;
+  const label = finish ? "C de Christian — favicon sobre tile teal, C dorada"
+    : background ? "C de Christian — favicon sobre tile teal"
+      : "C de Christian — favicon simplificado";
+  const title = finish ? "C — espiral de conocimiento (favicon, tile teal + C dorada)"
+    : background ? "C — espiral de conocimiento (favicon, tile teal)"
+      : "C — espiral de conocimiento (favicon)";
+  const cBlock = finish
+    ? `  <g id="logo-c-triespiral" data-name="C TriSpiral">\n${cBandFills(band)}\n  </g>`
+    : `  <g id="logo-c-triespiral" data-name="C TriSpiral">\n    <path d="${band.outline}" fill="${ink}"/>\n  </g>`;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!-- GENERADO por tools/logo/generate-logo.mjs — NO EDITAR A MANO -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="${n2(vb.x)} ${n2(vb.y)} ${n2(side)} ${n2(side)}" role="img" aria-label="${label}">
   <title>${title}</title>
 ${filterDefs()}
-${background ? `  <rect x="${n2(vb.x)}" y="${n2(vb.y)}" width="${n2(side)}" height="${n2(side)}" fill="${background}"/>\n` : ""}  <g id="logo-supernova" data-name="Supernova">
-    <circle cx="${n2(g.segs[0].a.x)}" cy="${n2(g.segs[0].a.y)}" r="${n2(sp.glowR * 3.2)}" fill="url(#halo-nova)" color="${ink}"/>
-    <circle cx="${n2(g.segs[0].a.x)}" cy="${n2(g.segs[0].a.y)}" r="${n2(sp.glowR * 1.9)}" fill="url(#halo-nova)" color="${ink}"/>
-    <circle cx="${n2(g.segs[0].a.x)}" cy="${n2(g.segs[0].a.y)}" r="${n2(coreR)}" fill="${ink}" opacity="1"/>
+${finish ? cDefs(g, cfg, "teal", { width: frame.width }) + "\n" : ""}${background ? `  <rect x="${n2(vb.x)}" y="${n2(vb.y)}" width="${n2(side)}" height="${n2(side)}" fill="${background}"/>\n` : ""}  <g id="logo-supernova" data-name="Supernova">
+    <circle cx="${n2(g.segs[0].a.x)}" cy="${n2(g.segs[0].a.y)}" r="${n2(sp.glowR * 3.2)}" fill="url(#halo-nova)" color="${dot}"/>
+    <circle cx="${n2(g.segs[0].a.x)}" cy="${n2(g.segs[0].a.y)}" r="${n2(sp.glowR * 1.9)}" fill="url(#halo-nova)" color="${dot}"/>
+    <circle cx="${n2(g.segs[0].a.x)}" cy="${n2(g.segs[0].a.y)}" r="${n2(coreR)}" fill="${dot}" opacity="1"/>
   </g>
-  <g id="logo-c-triespiral" data-name="C TriSpiral">
-    <path d="${band.outline}" fill="${ink}"/>
-  </g>
+${cBlock}
 </svg>`;
 };
 
@@ -335,7 +366,6 @@ function main() {
   const chrome = pickChrome();
   mkdirSync(OUT, { recursive: true });
   mkdirSync(TMP, { recursive: true });
-  rmSync(join(TMP, "profile"), { recursive: true, force: true }); // lock viejo de un Chrome caído
 
   for (const version of versions) {
     const cfg = config(version);
@@ -351,10 +381,12 @@ function main() {
     };
 
     /* favicon tile-first: 16/32 legibles por diseño, no por suerte.
-       Dos variantes: transparente (la C dorada) y tile teal lleno. */
+       Tres variantes: transparente, tile teal (night) y tile teal con la C
+       en sus colores (acabado del mark). */
     for (const fv of [
       { suffix: "", variant: "plain" },
       { suffix: "-teal", variant: "teal" },
+      { suffix: "-teal-gold", variant: "teal-gold" },
     ]) {
       const base = `favicon-${version}${fv.suffix}`;
       const doc = faviconDoc(g, cfg, { variant: fv.variant });

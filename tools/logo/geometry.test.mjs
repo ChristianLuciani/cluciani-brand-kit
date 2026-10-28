@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import {
   CONFIG_AUREA, CONFIG_BASE, config, buildGeometry, buildSky,
   constellationPoints, segStyle, cPathD, cBand, seeded, starSpec,
-  FAVICON, faviconFrame,
+  FAVICON, faviconFrame, NOVA_CORE_BOOST,
 } from "./geometry.mjs";
 
 const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
@@ -267,12 +267,23 @@ describe("faviconFrame() — el icono llena el tile", () => {
     }
   });
 
+  it("el core de la supernova se escala para leerse a 16px", () => {
+    const f = faviconFrame(g.segs, cfg);
+    const sp = starSpec(0, constellationPoints(g.segs).length, cfg.constellation);
+    expect(f.coreR).toBeCloseTo((sp.coreR + NOVA_CORE_BOOST) * FAVICON.novaCoreScale, 6);
+    expect(f.coreR).toBeGreaterThan(sp.coreR + NOVA_CORE_BOOST);
+  });
+
   it("tinta: oro en transparente, night sobre el tile teal", () => {
     expect(faviconFrame(g.segs, cfg).ink).toBe(cfg.colors.c);
     expect(faviconFrame(g.segs, cfg).background).toBeNull();
     const teal = faviconFrame(g.segs, cfg, { background: true });
     expect(teal.background).toBe("#00c9c0");
     expect(teal.ink).toBe("#050810");
+    // variante teal-gold: mismo tile, pero la C conserva su tinta dorada
+    const gold = faviconFrame(g.segs, cfg, { background: true, ink: cfg.colors.c });
+    expect(gold.background).toBe("#00c9c0");
+    expect(gold.ink).toBe(cfg.colors.c);
   });
 
   it("determinista y sirve para base y áurea", () => {

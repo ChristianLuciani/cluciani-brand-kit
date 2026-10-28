@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GENERADO por tools/logo/generate-logo.mjs — NO EDITAR A MANO -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="125.8 142.29 458.94 458.94" role="img" aria-label="C de Christian — favicon sobre tile teal, C dorada">
+  <title>C — espiral de conocimiento (favicon, tile teal + C dorada)</title>
+  <defs>
+    <radialGradient id="halo-star" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="0.28"/>
+      <stop offset="30%" stop-color="currentColor" stop-opacity="0.09"/>
+      <stop offset="65%" stop-color="currentColor" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="halo-nova" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="0.16"/>
+      <stop offset="40%" stop-color="currentColor" stop-opacity="0.05"/>
+      <stop offset="75%" stop-color="currentColor" stop-opacity="0.01"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <defs>
+    <linearGradient id="c-perp-1" gradientUnits="userSpaceOnUse" x1="516.61" y1="560.53" x2="513.03" y2="580.21"><stop offset="0%" stop-color="#fffbe6"/><stop offset="16%" stop-color="#f8e4a8"/><stop offset="50%" stop-color="#ddb04a"/><stop offset="84%" stop-color="#b1852c"/><stop offset="100%" stop-color="#8f661c"/></linearGradient>
+    <linearGradient id="c-perp-2" gradientUnits="userSpaceOnUse" x1="459.41" y1="167.03" x2="475.22" y2="179.27"><stop offset="0%" stop-color="#fffbe6"/><stop offset="16%" stop-color="#f8e4a8"/><stop offset="50%" stop-color="#ddb04a"/><stop offset="84%" stop-color="#b1852c"/><stop offset="100%" stop-color="#8f661c"/></linearGradient>
+    <linearGradient id="c-tint-1" gradientUnits="userSpaceOnUse" x1="516.61" y1="560.53" x2="221.69" y2="506.85">
+      <stop offset="0%" stop-color="#d99a2b" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#d99a2b" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="c-tint-2" gradientUnits="userSpaceOnUse" x1="221.69" y1="506.85" x2="475.22" y2="179.27">
+      <stop offset="0%" stop-color="#fffbe6" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#fffbe6" stop-opacity="0.32"/>
+    </linearGradient>
+    <clipPath id="c-clip-1"><path d="M -916.795330654322 943.2410881862143 L 1324.2108703201995 84.23514688327901 L 1753.7138409716672 1204.7382473705397 L -487.2923600028544 2063.744188673475 Z"/></clipPath>
+    <clipPath id="c-clip-2"><path d="M -916.795330654322 943.2410881862143 L 1324.2108703201995 84.23514688327901 L 894.7078996687319 -1036.2679536039818 L -1346.2983013057897 -177.26201230104652 Z"/></clipPath>
+
+
+  </defs>
+  <rect x="125.8" y="142.29" width="458.94" height="458.94" fill="#00c9c0"/>
+  <g id="logo-supernova" data-name="Supernova">
+    <circle cx="400" cy="418" r="44.8" fill="url(#halo-nova)" color="#ffb3a0"/>
+    <circle cx="400" cy="418" r="26.6" fill="url(#halo-nova)" color="#ffb3a0"/>
+    <circle cx="400" cy="418" r="12.4" fill="#ffb3a0" opacity="1"/>
+  </g>
+  <g id="logo-c-triespiral" data-name="C TriSpiral">
+    <g clip-path="url(#c-clip-1)">
+      <path d="M 516.6085390298558 560.5299015830631 L 224.04813576621234 507.2762772168951 Q 221.68693442774827 506.8464769851182 223.15588183204383 504.9485324328688 L 475.2228334910965 179.2669618712276 A 10 10 0 0 0 459.4066288890177 167.02573350209795 L 187.19755264242488 518.7318135321256 Q 185.72860523812932 520.629758084375 188.0898065765934 521.0595583161519 L 513.026870431715 580.2065794035971 A 10 10 0 0 0 516.6085390298558 560.5299015830631 Z" fill="url(#c-perp-1)"/>
+      <path d="M 516.6085390298558 560.5299015830631 L 224.04813576621234 507.2762772168951 Q 221.68693442774827 506.8464769851182 223.15588183204383 504.9485324328688 L 475.2228334910965 179.2669618712276 A 10 10 0 0 0 459.4066288890177 167.02573350209795 L 187.19755264242488 518.7318135321256 Q 185.72860523812932 520.629758084375 188.0898065765934 521.0595583161519 L 513.026870431715 580.2065794035971 A 10 10 0 0 0 516.6085390298558 560.5299015830631 Z" fill="url(#c-tint-1)"/>
+    </g>
+    <g clip-path="url(#c-clip-2)">
+      <path d="M 516.6085390298558 560.5299015830631 L 224.04813576621234 507.2762772168951 Q 221.68693442774827 506.8464769851182 223.15588183204383 504.9485324328688 L 475.2228334910965 179.2669618712276 A 10 10 0 0 0 459.4066288890177 167.02573350209795 L 187.19755264242488 518.7318135321256 Q 185.72860523812932 520.629758084375 188.0898065765934 521.0595583161519 L 513.026870431715 580.2065794035971 A 10 10 0 0 0 516.6085390298558 560.5299015830631 Z" fill="url(#c-perp-2)"/>
+      <path d="M 516.6085390298558 560.5299015830631 L 224.04813576621234 507.2762772168951 Q 221.68693442774827 506.8464769851182 223.15588183204383 504.9485324328688 L 475.2228334910965 179.2669618712276 A 10 10 0 0 0 459.4066288890177 167.02573350209795 L 187.19755264242488 518.7318135321256 Q 185.72860523812932 520.629758084375 188.0898065765934 521.0595583161519 L 513.026870431715 580.2065794035971 A 10 10 0 0 0 516.6085390298558 560.5299015830631 Z" fill="url(#c-tint-2)"/>
+    </g>
+  </g>
+</svg>
