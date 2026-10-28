@@ -1,16 +1,10 @@
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 
-import {
-  diffManifest,
-  formatDiff,
-  hashTree,
-  parseManifest,
-  renderManifest,
-} from './verify-assets.mjs';
+import { diffManifest, formatDiff, hashTree, parseManifest, renderManifest } from './verify-assets.mjs';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const DIGEST_A = 'a'.repeat(64);
@@ -22,38 +16,44 @@ const manifestText = ({ mirror = [], diverged = [], local = [], retired = [] }) 
     '# source_ref: deadbeef',
     '# source_path: assets/brand/logo',
     '',
-    '# --- mirror (1) ---',
+    `# --- mirror (${mirror.length}) ---`,
     ...mirror.map(([hash, path]) => `${hash}  ${path}`),
     '',
-    '# --- diverged (1) ---',
-    ...diverged.map(([hash, path]) => `${hash}  ${path}`),
+    `# --- diverged (${diverged.length}) ---`,
+    ...diverged.map(([hash, path, reason = 'motivo']) => `${hash}  ${path}  # ${reason}`),
     '',
-    '# --- local (0) ---',
-    ...local.map(([hash, path]) => `${hash}  ${path}`),
+    `# --- local (${local.length}) ---`,
+    ...local.map(([hash, path, reason = 'motivo']) => `${hash}  ${path}  # ${reason}`),
     '',
-    '# --- retired (2) ---',
-    ...retired.map((path) => `# retired: ${path}`),
+    `# --- retired (${retired.length}) ---`,
+    ...retired.map(([path, reason = 'motivo']) => `# retired: ${path} — ${reason}`),
     '',
   ].join('\n');
 
 describe('parseManifest', () => {
-  it('lee secciones, procedencia y retiros', () => {
+  it('lee secciones, procedencia, razones y retiros', () => {
     const m = parseManifest(
       manifestText({
         mirror: [[DIGEST_A, 'assets/logo/a.svg']],
-        diverged: [[DIGEST_B, 'assets/logo/b.svg']],
-        local: [[DIGEST_A, 'assets/logo/c.svg']],
-        retired: ['assets/logo/d.png', 'assets/logo/e.png'],
+        diverged: [[DIGEST_B, 'assets/logo/b.svg', 'PR #4: divergente']],
+        local: [[DIGEST_A, 'assets/logo/c.svg', 'PR #4: propio']],
+        retired: [
+          ['assets/logo/d.png', 'a 16 px no se lee'],
+          ['assets/logo/e.png', 'sin uso'],
+        ],
       }),
     );
 
     expect(m.source).toEqual({ repo: 'owner/src', ref: 'deadbeef', path: 'assets/brand/logo' });
-    expect(m.entries.map((e) => [e.path, e.origin])).toEqual([
-      ['assets/logo/a.svg', 'mirror'],
-      ['assets/logo/b.svg', 'diverged'],
-      ['assets/logo/c.svg', 'local'],
+    expect(m.entries.map((e) => [e.path, e.origin, e.reason])).toEqual([
+      ['assets/logo/a.svg', 'mirror', null],
+      ['assets/logo/b.svg', 'diverged', 'PR #4: divergente'],
+      ['assets/logo/c.svg', 'local', 'PR #4: propio'],
     ]);
-    expect(m.retired).toEqual(['assets/logo/d.png', 'assets/logo/e.png']);
+    expect(m.retired).toEqual([
+      { path: 'assets/logo/d.png', reason: 'a 16 px no se lee' },
+      { path: 'assets/logo/e.png', reason: 'sin uso' },
+    ]);
   });
 
   it('rechaza una entrada fuera de sección', () => {
@@ -62,8 +62,8 @@ describe('parseManifest', () => {
 
   it('rechaza un path duplicado', () => {
     const text = manifestText({ mirror: [[DIGEST_A, 'assets/logo/a.svg']] }).replace(
-      '# --- diverged (1) ---',
-      `${DIGEST_A}  assets/logo/a.svg\n# --- diverged (1) ---`,
+      '# --- diverged (0) ---',
+      `${DIGEST_A}  assets/logo/a.svg\n# --- diverged (0) ---`,
     );
     expect(() => parseManifest(text)).toThrow(/duplicado/);
   });
@@ -71,7 +71,7 @@ describe('parseManifest', () => {
   it('rechaza un archivo retirado y declarado a la vez', () => {
     const text = manifestText({
       mirror: [[DIGEST_A, 'assets/logo/a.svg']],
-      retired: ['assets/logo/a.svg'],
+      retired: [['assets/logo/a.svg']],
     });
     expect(() => parseManifest(text)).toThrow(/retirado y declarado/);
   });
@@ -81,6 +81,46 @@ describe('parseManifest', () => {
       /fuera de assets\/logo/,
     );
   });
+
+  it('exige razón en diverged y local', () => {
+    const sinRazon = manifestText({ diverged: [[DIGEST_B, 'assets/logo/b.svg']] }).replace(
+      '  # motivo',
+      '',
+    );
+    expect(() => parseManifest(sinRazon)).toThrow(/diverged sin razón/);
+    const localSinRazon = manifestText({ local: [[DIGEST_B, 'assets/logo/c.svg']] }).replace(
+      '  # motivo',
+      '',
+    );
+    expect(() => parseManifest(localSinRazon)).toThrow(/local sin razón/);
+  });
+
+  it('exige razón y path válido en los retiros, sin duplicados', () => {
+    expect(() => parseManifest(manifestText({ retired: [['assets/logo/x.png', '']] }))).toThrow(
+      /retiro sin razón/,
+    );
+    expect(() => parseManifest(manifestText({ retired: [['README.md', 'fuera']] }))).toThrow(
+      /fuera de assets\/logo/,
+    );
+    expect(() =>
+      parseManifest(
+        manifestText({
+          retired: [
+            ['assets/logo/x.png', 'uno'],
+            ['assets/logo/x.png', 'dos'],
+          ],
+        }),
+      ),
+    ).toThrow(/retiro duplicado/);
+  });
+
+  it('valida los conteos de los encabezados (no son decorativos)', () => {
+    const text = manifestText({ mirror: [[DIGEST_A, 'assets/logo/a.svg']] }).replace(
+      '# --- mirror (1) ---',
+      '# --- mirror (2) ---',
+    );
+    expect(() => parseManifest(text)).toThrow(/declara 2 y hay 1/);
+  });
 });
 
 describe('renderManifest / parseManifest', () => {
@@ -88,24 +128,29 @@ describe('renderManifest / parseManifest', () => {
     const source = { repo: 'owner/src', ref: 'deadbeef', path: 'assets/brand/logo' };
     const model = {
       source,
-      mirror: [{ path: 'assets/logo/a.svg', hash: DIGEST_A }],
-      diverged: [{ path: 'assets/logo/b.svg', hash: DIGEST_B }],
-      local: [{ path: 'assets/logo/c.svg', hash: DIGEST_A }],
-      retired: ['assets/logo/d.png'],
+      mirror: [{ path: 'assets/logo/a.svg', hash: DIGEST_A, origin: 'mirror', reason: null }],
+      diverged: [{ path: 'assets/logo/b.svg', hash: DIGEST_B, origin: 'diverged', reason: 'PR #4' }],
+      local: [{ path: 'assets/logo/c.svg', hash: DIGEST_A, origin: 'local', reason: 'tile teal' }],
+      retired: [{ path: 'assets/logo/d.png', reason: 'no se publica' }],
     };
     const text = renderManifest(model);
+
     expect(renderManifest(parseManifestModel(text))).toBe(text);
     expect(parseManifest(text).entries).toEqual([
-      { path: 'assets/logo/a.svg', hash: DIGEST_A, origin: 'mirror' },
-      { path: 'assets/logo/b.svg', hash: DIGEST_B, origin: 'diverged' },
-      { path: 'assets/logo/c.svg', hash: DIGEST_A, origin: 'local' },
+      { path: 'assets/logo/a.svg', hash: DIGEST_A, origin: 'mirror', reason: null },
+      { path: 'assets/logo/b.svg', hash: DIGEST_B, origin: 'diverged', reason: 'PR #4' },
+      { path: 'assets/logo/c.svg', hash: DIGEST_A, origin: 'local', reason: 'tile teal' },
     ]);
+    expect(parseManifest(text).retired).toEqual([{ path: 'assets/logo/d.png', reason: 'no se publica' }]);
   });
 
   // renderManifest toma listas planas; el parse devuelve entradas tipadas.
   function parseManifestModel(text) {
     const m = parseManifest(text);
-    const by = (origin) => m.entries.filter((e) => e.origin === origin).map((e) => ({ path: e.path, hash: e.hash }));
+    const by = (origin) =>
+      m.entries
+        .filter((e) => e.origin === origin)
+        .map((e) => ({ path: e.path, hash: e.hash, origin, reason: e.reason }));
     return { source: m.source, mirror: by('mirror'), diverged: by('diverged'), local: by('local'), retired: m.retired };
   }
 });
@@ -116,7 +161,7 @@ describe('diffManifest', () => {
       manifestText({
         mirror: [[DIGEST_A, 'assets/logo/a.svg']],
         diverged: [[DIGEST_B, 'assets/logo/b.svg']],
-        retired: ['assets/logo/d.png'],
+        retired: [['assets/logo/d.png']],
       }),
     );
   const tree = () =>
@@ -192,31 +237,53 @@ describe('hashTree', () => {
 });
 
 describe('manifiesto commiteado contra assets/logo', () => {
-  it('el árbol real coincide con tools/logo/assets.sha256', async () => {
-    const { readFile } = await import('node:fs/promises');
+  const load = async () => {
     const manifest = parseManifest(await readFile(join(ROOT, 'tools/logo/assets.sha256'), 'utf8'));
     const tree = await hashTree(ROOT, 'assets/logo');
+    return { manifest, tree, result: diffManifest(manifest, tree) };
+  };
 
-    const result = diffManifest(manifest, tree);
+  it('el árbol real coincide con tools/logo/assets.sha256', async () => {
+    const { manifest, tree, result } = await load();
     expect(result.ok, formatDiff(result)).toBe(true);
     expect(manifest.entries.length).toBe(tree.size);
     expect(result.counts.mirror + result.counts.diverged + result.counts.local).toBe(manifest.entries.length);
   });
 
-  // Composición publicada en README.md («66 assets»), docs/logo.md §10 y
-  // CHANGELOG.md. Si un asset cambia de categoría, esta aserción falla a
-  // propósito: actualizá las tres superficies y este bloque en el MISMO PR.
-  it('la composición publicada no derivó', async () => {
-    const { readFile } = await import('node:fs/promises');
-    const manifest = parseManifest(await readFile(join(ROOT, 'tools/logo/assets.sha256'), 'utf8'));
-    const tree = await hashTree(ROOT, 'assets/logo');
-    const result = diffManifest(manifest, tree);
-    const hint = 'composición publicada en README/docs/CHANGELOG: si el cambio es legítimo, actualizá las tres y este test en el mismo PR';
+  // Un número publicado en varias superficies tiene que moverse en todas a la
+  // vez: se deriva la composición del manifiesto y se contrasta contra cada
+  // superficie que la publica (README, manual y CHANGELOG; los encabezados del
+  // manifiesto los valida el parser). Si una cifra cambia legítimamente, se
+  // actualizan TODAS en el mismo PR; si no, este test falla nombrando el archivo.
+  it('los números publicados son los derivados del manifiesto', async () => {
+    const { manifest, tree, result } = await load();
+    const derived = {
+      total: tree.size,
+      mirror: result.counts.mirror,
+      diverged: result.counts.diverged,
+      local: result.counts.local,
+      retired: manifest.retired.length,
+    };
+    const hint = (path) =>
+      `${path}: la composición publicada no coincide con el manifiesto ` +
+      `(${JSON.stringify(derived)}); actualizala en todas las superficies en el mismo PR`;
 
-    expect(result.counts.mirror, hint).toBe(52);
-    expect(result.counts.diverged, hint).toBe(4);
-    expect(result.counts.local, hint).toBe(10);
-    expect(manifest.retired.length, hint).toBe(2);
-    expect(tree.size, hint).toBe(66);
+    for (const path of ['README.md', 'docs/logo.md', 'CHANGELOG.md']) {
+      const text = await readFile(join(ROOT, path), 'utf8');
+      const anchor = text.match(/\*\*(\d+) archivos\*\*/);
+      expect(anchor, `${path}: falta la línea «**<total> archivos**» con la composición`).toBeTruthy();
+      expect(Number(anchor[1]), hint(path)).toBe(derived.total);
+
+      // Los cuatro conteos van en orden —espejados, divergentes, propios,
+      // retirados— en negrita, después del total.
+      const tail = text.slice(anchor.index, anchor.index + 700);
+      const published = [...tail.matchAll(/\*\*(\d+)\*\*/g)].map((m) => Number(m[1]));
+      expect(published.slice(0, 4), hint(path)).toEqual([
+        derived.mirror,
+        derived.diverged,
+        derived.local,
+        derived.retired,
+      ]);
+    }
   });
 });

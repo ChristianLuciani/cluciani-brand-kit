@@ -124,18 +124,36 @@ que este repo adelantó en #4; la fuente todavía tiene la versión previa),
 y **2** retirados (`favicon-{aurea,base}-16.png` transparentes, retirados en
 #4: a 16 px sólo se publica `-teal`).
 
-El manifiesto se re-deriva con `--from-source --write`, que falla si algún
-archivo diverge sin estar declarado (`--diverge` / `--retire`): nunca bendice
-un cambio silencioso. El ref de la fuente va **pineado al commit**, no a
-`main`.
+`mirror` se re-deriva de la fuente. `diverged`, `local` y `retired` son
+declaraciones explícitas **con razón** (PR/issue) escrita en el manifiesto:
+`--from-source --write` no puede mover sus bytes; re-anclar uno exige
+declararlo de nuevo con `--diverge`/`--local`/`--retire` y un motivo. Un byte
+cambiado sin declaración hace fallar tanto el modo offline como `--write`.
+El ref de la fuente va **pineado al commit**, no a `main`.
+
+**Límite declarado — verde ≠ último logo.** El step de CI corre sólo el modo
+offline: demuestra que el árbol es *el declarado*, **no** que la fuente no haya
+avanzado. La frescura contra la fuente es **manual**, con
+`node tools/logo/verify-assets.mjs --from-source` (y `--ref main` para ver si
+la fuente se movió), y se corre al tocar assets o al revisar el pin. Estado
+conocido: la fuente en `main` ya agregó `assets/brand/logo/README.md` después
+de `8c2a110`, así que `--from-source --ref main` falla a propósito hasta que se
+re-pinee (esa carpeta mezcla assets con documentación; se declara con
+`--retire` al re-derivar).
+
+**Regenerar.** `npm run logo:generate` re-renderiza desde `geometry.mjs`; si
+Chrome produce bytes distintos a los de la fuente, el gate lo va a marcar como
+`declarado mirror y difiere de la fuente`. El camino sancionado es regenerar
+**en la fuente** (`cv-cluciani`) primero, re-pinear acá y volver a derivar el
+manifiesto — no editar hashes a mano.
 
 ## Estado de la animación
 
 `proposals/logo-triangulo-espiral/aurea7.html` es la animación aprobada y ya
 refleja el acabado del mark: dibuja la C como banda con bisel y la revela con
 una máscara sobre el path central, conservando el timing del trazado (sync del
-acabado, issue #1). La integración en el sitio es el issue #56 de
-`cv-cluciani`.
+acabado, issue #1). La integración en el sitio se completó en `cv-cluciani`
+#56 (cerrado 2026-10-23).
 
 ## Contacto
 

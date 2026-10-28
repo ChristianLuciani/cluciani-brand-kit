@@ -16,20 +16,32 @@ del issue #1 (acabado de la C).
 - **Gate de paridad** (`tools/logo/verify-assets.mjs`, nuevo + manifiesto
   `tools/logo/assets.sha256`): sin red, verifica que `assets/logo/` coincide
   con el manifiesto (sha256 por archivo + origen declarado: `mirror` /
-  `diverged` / `local` / `retired`). Con `--from-source` re-deriva la verdad de
+  `diverged` / `local` / `retired`, con la razón de cada no-`mirror` escrita en
+  el manifiesto). Con `--from-source` re-deriva la verdad de
   `ChristianLuciani/christianluciani.github.io` › `assets/brand/logo/` y falla
-  ante cualquier drift, incluida una divergencia sin declarar. CI lo corre en
-  cada push; `npm test` cubre la lógica del instrumento y fija la composición.
+  ante cualquier drift. `mirror` se recalcula de la fuente; los otros tres
+  orígenes son declaraciones explícitas: `--from-source --write` **no puede
+  mover sus bytes** sin que la misma invocación los declare con
+  `--diverge`/`--local`/`--retire` y un `--reason`, que queda en el diff. El
+  parser valida además los conteos `(n)` de los encabezados. CI corre el modo
+  offline en cada push.
+- **Números publicados**: un test deriva la composición del manifiesto y la
+  contrasta contra README, manual y este CHANGELOG, así que una cifra no puede
+  quedar actualizada en una sola superficie.
+- **Límite declarado**: CI no consulta la fuente, así que verde significa «el
+  árbol es el declarado», no «la fuente no avanzó». La frescura contra la
+  fuente es manual (`--from-source`, documentado en README y en el step de CI);
+  hoy la fuente en `main` ya sumó `assets/brand/logo/README.md` después del pin.
 - **Composición** (la imprime el gate): **66 archivos** — **52** espejados de
-  la fuente @ `8c2a110`, **4** divergentes (favicons de tile lleno de #4, que
-  la fuente todavía no tiene), **10** propios (`favicon-*-teal*`) y **2**
-  retirados (`favicon-{aurea,base}-16.png` transparentes, #4). Si la
+  la fuente @ `8c2a110`, **4** divergentes (favicons de tile lleno de #4; la
+  fuente todavía tiene la versión previa), **10** propios (`favicon-*-teal*`) y
+  **2** retirados (`favicon-{aurea,base}-16.png` transparentes, #4). Si la
   composición cambia, el test falla hasta actualizar README, manual y este
   CHANGELOG en el mismo PR.
-- **README — corrección de una afirmación vencida**: «Estado de la animación»
-  decía que `aurea7.html` todavía dibujaba la C plana; el sync del acabado
-  (#1) ya la dibuja como banda con máscara. Se corrige el texto, no la
-  animación.
+- **README — corrección de afirmaciones vencidas**: «Estado de la animación»
+  decía que `aurea7.html` todavía dibujaba la C plana (el sync de #1 ya la
+  dibuja como banda con máscara) y apuntaba a #56 como trabajo en curso (está
+  cerrado desde 2026-10-23). Se corrige el texto, no la animación.
 - Release: misma ventana que #1; versión y tag los decide el operador.
 
 ### Sync del acabado de la C (issue #1)

@@ -42,7 +42,8 @@ expande.
   **La animación (`proposals/logo-triangulo-espiral/aurea7.html`) ya refleja
   este acabado** (sync de `cv-cluciani` #55): dibuja la C como banda con
   bisel y la revela con una máscara que traza el path central, conservando el
-  timing del trazado. La integración en el sitio es #56.
+  timing del trazado. La integración en el sitio se completó en #56
+  (cerrado 2026-10-23).
 - **Jerarquía** (operador, 2026-09-25): el ojo va primero al origen — la
   supernova gana +2pt de core y las estrellas grandes de las aristas (la
   punta de la C + las bright) bajan ~22% para no robar protagonismo. Es
@@ -343,6 +344,15 @@ Gate de fidelidad: `npm run logo:verify` (requiere Chrome; `CHROME_PATH` para Li
 Gate de paridad de assets: `node tools/logo/verify-assets.mjs`
 Tests: `npm test`
 
+**Nota sobre los print 300dpi**: el PNG está dimensionado para 300dpi
+(A4 = 2480×3508 px ≙ 210×297 mm; A3 = 3508×4961 ≙ 297×420 mm) pero Chrome
+no embede el metadato pHYs — al importarlo en InDesign/Illustrator setear
+300 dpi manualmente.
+
+QA visual de los exports: Chrome headless (`--headless --screenshot
+--virtual-time-budget=N --window-size=WxH`), el mismo mecanismo que usó la
+sesión de origen (PR #53) — reutilizado aquí para los PNG.
+
 ### 10.1 Paridad con la fuente — el último logo
 
 `assets/logo/` es la copia canónica de `ChristianLuciani/christianluciani.github.io`
@@ -350,12 +360,12 @@ Tests: `npm test`
 `tools/logo/assets.sha256` fija el sha256 de cada archivo y declara su origen;
 el gate de CI compara el árbol local contra el manifiesto **sin red**.
 
-| Origen | Qué significa |
-|---|---|
-| `mirror` | existe en la fuente y es byte-idéntico (sha256) |
-| `diverged` | existe en la fuente y acá es distinto a propósito: el brand kit adelanta un cambio y se verifica que **siga** divergiendo |
-| `local` | propio del brand kit, no existe en la fuente |
-| `retired` | existe en la fuente y acá **no** se publica (declarado con su razón) |
+| Origen | Qué significa | ¿Se re-deriva de la fuente? |
+|---|---|---|
+| `mirror` | existe en la fuente y es byte-idéntico (sha256) | sí, siempre |
+| `diverged` | existe en la fuente y acá es distinto a propósito | no: exige razón |
+| `local` | propio del brand kit, no existe en la fuente | no: exige razón |
+| `retired` | existe en la fuente y acá **no** se publica | no: exige razón |
 
 Composición vigente (la imprime el gate): **66 archivos** — **52** espejados
 de la fuente @ `8c2a110`, **4** divergentes, **10** propios y **2** retirados.
@@ -376,20 +386,38 @@ node tools/logo/verify-assets.mjs --from-source --write   # re-deriva el manifie
 ```
 
 `--from-source` necesita red (`api.github.com`, `raw.githubusercontent.com`;
-`GITHUB_TOKEN` opcional para el rate limit) y **falla** si aparece un archivo
-sin declarar, si un `mirror` difiere o si la fuente ya coincide con un
-`diverged`. Un cambio intencional se declara con `--diverge <path>` /
-`--retire <path>` —nunca a mano— y se justifica en el CHANGELOG y en el PR.
-El ref de la fuente se pinea al **commit** (`8c2a110…`), no a `main`.
-La fuente puede sumar documentación en esa carpeta (p. ej.
-`assets/brand/logo/README.md`, posterior al pin): no es un asset — al re-derivar
-contra un ref que la incluya se declara con `--retire`.
+`GITHUB_TOKEN` opcional para el rate limit) y **falla** si la fuente tiene un
+archivo que acá falta, si un `mirror` difiere, si la fuente ya coincide con un
+`diverged` o si aparece un archivo sin declarar.
 
-**Nota sobre los print 300dpi**: el PNG está dimensionado para 300dpi
-(A4 = 2480×3508 px ≙ 210×297 mm; A3 = 3508×4961 ≙ 297×420 mm) pero Chrome
-no embede el metadato pHYs — al importarlo en InDesign/Illustrator setear
-300 dpi manualmente.
+**Nada se declara a mano.** Los tres orígenes sin verdad externa se declaran en
+el manifiesto con su razón (PR/issue) y el hash **no** se puede mover sin
+volver a declararlos: `--from-source --write` sólo re-ancla un `local` o un
+`diverged` cuando la misma invocación lo declara con `--local`/`--diverge` y un
+motivo, y lo deja escrito en el diff.
 
-QA visual de los exports: Chrome headless (`--headless --screenshot
---virtual-time-budget=N --window-size=WxH`), el mismo mecanismo que usó la
-sesión de origen (PR #53) — reutilizado aquí para los PNG.
+```bash
+node tools/logo/verify-assets.mjs --from-source --write \
+  --diverge "assets/logo/favicon-aurea.svg=<PR/issue y por qué>" \
+  --retire  "assets/logo/favicon-aurea-16.png=<PR/issue y por qué>"
+```
+
+Los conteos `(n)` de los encabezados del manifiesto **no son decorativos**: el
+parser los compara con las entradas reales y falla si no cierran, igual que
+exige razón en cada `diverged`/`local`/`retired`.
+
+**Límite declarado — verde ≠ último logo.** CI corre sólo el modo offline:
+prueba que el árbol es *el declarado*, no que la fuente no haya avanzado. La
+frescura contra la fuente es **manual**:
+`node tools/logo/verify-assets.mjs --from-source --ref main`, al tocar assets o
+al revisar el pin. Estado conocido: la fuente en `main` ya sumó
+`assets/brand/logo/README.md` (documentación en la carpeta de assets, posterior
+al pin) y `--from-source --ref main` falla a propósito hasta re-pinear; ese
+archivo se declara con `--retire` porque no es un asset. El ref se pinea al
+**commit** (`8c2a110…`), no a `main`.
+
+**Regenerar.** `npm run logo:generate` re-renderiza desde `geometry.mjs`; si
+Chrome produce bytes distintos a los de la fuente, el gate lo marca como
+`declarado mirror y difiere de la fuente`. El camino sancionado es regenerar
+**en la fuente** primero, re-pinear acá y re-derivar el manifiesto — no editar
+hashes a mano.

@@ -11,11 +11,15 @@
  * Cada archivo de `assets/logo/` tiene un origen declarado en el manifiesto
  * `tools/logo/assets.sha256`:
  *
- *   mirror    existe en la fuente y es byte-idéntico (sha256)
- *   diverged  existe en la fuente y acá es distinto a propósito (el brand kit
- *             adelanta un cambio); se verifica que siga divergiendo
- *   local     propio del brand kit, no existe en la fuente
- *   retired   existe en la fuente y acá NO se publica
+ *   mirror    existe en la fuente y es byte-idéntico (se re-deriva de la fuente)
+ *   diverged  existe en la fuente y acá difiere a propósito; lleva una razón
+ *   local     propio del brand kit, no existe en la fuente; lleva una razón
+ *   retired   existe en la fuente y acá NO se publica; lleva una razón
+ *
+ * Los tres orígenes que no pueden re-derivarse de la fuente son declaraciones
+ * explícitas: `--from-source --write` NO puede mover sus bytes. Para re-anclar
+ * uno hace falta declararlo otra vez con `--diverge`/`--local`/`--retire` y un
+ * `--reason`, que queda escrito en el manifiesto y en el diff.
  *
  * Uso:
  *   node tools/logo/verify-assets.mjs                 # verify (offline, CI)
@@ -26,7 +30,8 @@
  * `--from-source` necesita red hacia api.github.com y raw.githubusercontent.com
  * (opcional `GITHUB_TOKEN`/`GH_TOKEN` para el rate limit). El modo `verify` —el
  * único que corre en CI— no toca la red: verifica la copia local contra el
- * manifiesto commiteado.
+ * manifiesto commiteado. Límite declarado en README: CI no consulta la fuente,
+ * así que verde significa «el árbol es el declarado», no «la fuente no avanzó».
  */
 import { createHash } from 'node:crypto';
 import { readFile, readdir, writeFile } from 'node:fs/promises';
@@ -49,20 +54,26 @@ const USAGE = `Uso: node tools/logo/verify-assets.mjs [comando]
 Comandos:
   (ninguno)        verify — compara ${ASSETS_DIR}/ con ${MANIFEST}. Sin red.
   --from-source    Deriva la verdad de la fuente (red) y reporta drift.
-                   --ref <sha>     commit o rama de la fuente (default: el del
-                                   manifiesto).
-                   --write         Reescribe el manifiesto si NO hay drift
-                                   (nunca bendice una divergencia).
-                   --retire <path>   Declara un archivo de la fuente como no
-                                     publicado acá (exige --write).
-                   --diverge <path>  Declara un archivo que acá difiere de la
-                                     fuente a propósito (exige --write).
+                   --ref <sha>       commit o rama de la fuente (default: el del
+                                     manifiesto).
+                   --write           Reescribe el manifiesto si NO hay drift.
+                                     Nunca mueve los bytes de un local/diverged
+                                     sin una declaración explícita.
+                   --diverge <path>  Declara (o re-ancla) un archivo que existe
+                                     en la fuente y acá difiere a propósito.
+                   --local <path>    Declara (o re-ancla) un archivo propio del
+                                     brand kit, ausente en la fuente.
+                   --retire <path>   Declara un archivo de la fuente que acá no
+                                     se publica.
+                   --reason <texto>  Motivo (PR/issue) por defecto para las
+                                     declaraciones sin motivo inline. Toda
+                                     declaración exige motivo: queda escrito en
+                                     el manifiesto. Un motivo por archivo:
+                                     --diverge <path>=<motivo>
   --help, -h       Esta ayuda.
 
-Categorías del manifiesto: mirror (idéntico a la fuente) · diverged (existe en
-la fuente y acá es distinto a propósito) · local (sólo existe acá) · retired
-(existe en la fuente y no se publica acá). Justificá cada divergencia/retiro en
-el CHANGELOG y en el PR.`;
+Un cambio de bytes en un local/diverged sin declararlo hace fallar --write, y
+el modo offline lo detecta igual contra el manifiesto commiteado.`;
 
 const die = (msg, code = 1) => {
   console.error(msg);
@@ -76,10 +87,19 @@ const baseName = (path) => path.slice(ASSETS_DIR.length + 1);
 // Manifiesto
 // ---------------------------------------------------------------------------
 
+const SECTION_TITLE = {
+  mirror: 'mirror — existe en la fuente y es byte-idéntico',
+  diverged: 'diverged — existe en la fuente y acá es distinto a propósito',
+  local: 'local — propio del brand kit, no existe en la fuente',
+  retired: 'retired — existe en la fuente y acá NO se publica',
+};
+
 /**
- * Parsea el manifiesto. Formato: comentarios `#` y líneas `<sha256>  <path>`
- * agrupadas por secciones `# --- mirror|diverged|local ---`. Las líneas
- * `# retired: <path>` declaran archivos de la fuente no publicados.
+ * Parsea el manifiesto. Formato: comentarios `#` y líneas
+ * `<sha256>  <path>[  # <razón>]` agrupadas por secciones
+ * `# --- mirror|diverged|local|retired … (n) ---`; los retiros van como
+ * `# retired: <path> — <razón>`. Los conteos `(n)` de cada encabezado son
+ * estructura: se validan contra las entradas reales.
  */
 export function parseManifest(text) {
   const manifest = {
@@ -88,6 +108,7 @@ export function parseManifest(text) {
     entries: [],
     retired: [],
   };
+  const headerCounts = new Map();
   let section = null;
 
   for (const [i, raw] of text.split('\n').entries()) {
@@ -96,53 +117,81 @@ export function parseManifest(text) {
 
     if (line.startsWith('#')) {
       const body = line.replace(/^#\s?/, '');
-      if (body.startsWith('retired:')) {
-        manifest.retired.push(body.slice('retired:'.length).trim());
-        continue;
-      }
-      const sec = body.match(/^---\s*(mirror|diverged|local)\b/);
+
+      const sec = body.match(/^---\s*(mirror|diverged|local|retired)\b(.*)$/);
       if (sec) {
         section = sec[1];
+        const count = sec[2].match(/\((\d+)\)\s*(?:---)?\s*$/);
+        if (count) headerCounts.set(section, Number(count[1]));
         continue;
       }
+
+      if (body.startsWith('retired:')) {
+        const rest = body.slice('retired:'.length).trim();
+        const sepIndex = rest.indexOf(' — ');
+        const path = (sepIndex === -1 ? rest : rest.slice(0, sepIndex)).trim();
+        const reason = sepIndex === -1 ? '' : rest.slice(sepIndex + 3).trim();
+        validatePath(path, i);
+        if (!reason) throw new Error(`manifiesto: línea ${i + 1}: retiro sin razón: ${path}`);
+        if (manifest.retired.some((r) => r.path === path)) {
+          throw new Error(`manifiesto: retiro duplicado: ${path}`);
+        }
+        manifest.retired.push({ path, reason });
+        continue;
+      }
+
       const header = body.match(/^([a-z_]+):\s*(.*)$/);
       if (header) manifest.meta[header[1]] = header[2].trim();
       continue;
     }
 
-    const entry = line.match(/^([0-9a-f]{64})\s{2}(\S.*)$/);
+    const entry = line.match(/^([0-9a-f]{64}) {2}(\S+)(?: {2}# (\S.*))?$/);
     if (!entry) throw new Error(`manifiesto: línea ${i + 1} inválida: ${line}`);
     if (!section) throw new Error(`manifiesto: línea ${i + 1} fuera de sección: ${line}`);
-    const [, hash, path] = entry;
-    if (!path.startsWith(`${ASSETS_DIR}/`)) {
-      throw new Error(`manifiesto: línea ${i + 1} fuera de ${ASSETS_DIR}/: ${path}`);
+    if (section === 'retired') {
+      throw new Error(`manifiesto: línea ${i + 1}: los retiros son líneas «# retired:», no entradas`);
     }
-    if (baseName(path).includes('/')) {
-      throw new Error(`manifiesto: subdirectorios no soportados: ${path}`);
+    const [, hash, path, reason] = entry;
+    validatePath(path, i);
+    if (section !== 'mirror' && !reason) {
+      throw new Error(`manifiesto: línea ${i + 1}: ${section} sin razón: ${path}`);
     }
-    manifest.entries.push({ hash, path, origin: section });
+    if (manifest.entries.some((e) => e.path === path)) {
+      throw new Error(`manifiesto: path duplicado: ${path}`);
+    }
+    manifest.entries.push({ hash, path, origin: section, reason: reason ?? null });
+  }
+
+  for (const entry of manifest.entries) {
+    if (manifest.retired.some((r) => r.path === entry.path)) {
+      throw new Error(`manifiesto: ${entry.path} está retirado y declarado a la vez`);
+    }
+  }
+
+  for (const [name, declared] of headerCounts) {
+    const actual =
+      name === 'retired' ? manifest.retired.length : manifest.entries.filter((e) => e.origin === name).length;
+    if (actual !== declared) {
+      throw new Error(
+        `manifiesto: el encabezado de «${name}» declara ${declared} y hay ${actual} (¿editaste a mano?)`,
+      );
+    }
   }
 
   manifest.source.repo = manifest.meta.source_repo ?? DEFAULTS.repo;
   manifest.source.ref = manifest.meta.source_ref ?? null;
   manifest.source.path = manifest.meta.source_path ?? DEFAULTS.path;
-
-  const seen = new Set();
-  for (const e of manifest.entries) {
-    if (seen.has(e.path)) throw new Error(`manifiesto: path duplicado: ${e.path}`);
-    seen.add(e.path);
-  }
-  for (const path of manifest.retired) {
-    if (seen.has(path)) throw new Error(`manifiesto: ${path} está retirado y declarado a la vez`);
-  }
   return manifest;
 }
 
-const SECTION_TITLE = {
-  mirror: 'mirror — existe en la fuente y es byte-idéntico',
-  diverged: 'diverged — existe en la fuente y acá es distinto a propósito',
-  local: 'local — propio del brand kit, no existe en la fuente',
-};
+function validatePath(path, lineIndex) {
+  if (!path.startsWith(`${ASSETS_DIR}/`)) {
+    throw new Error(`manifiesto: línea ${lineIndex + 1} fuera de ${ASSETS_DIR}/: ${path}`);
+  }
+  if (baseName(path).includes('/')) {
+    throw new Error(`manifiesto: subdirectorios no soportados: ${path}`);
+  }
+}
 
 export function renderManifest({ source, mirror, diverged, local, retired }) {
   const groups = { mirror, diverged, local };
@@ -159,22 +208,23 @@ export function renderManifest({ source, mirror, diverged, local, retired }) {
     `# source_ref: ${source.ref}`,
     `# source_path: ${source.path}`,
     '#',
-    '# Secciones:',
-    `#   ${SECTION_TITLE.mirror} (${mirror.length})`,
-    `#   ${SECTION_TITLE.diverged} (${diverged.length})`,
-    `#   ${SECTION_TITLE.local} (${local.length})`,
-    `#   retired — existe en la fuente y acá NO se publica (${retired.length})`,
+    '# mirror se re-deriva de la fuente. diverged/local/retired son',
+    '# declaraciones explícitas con razón (PR/issue): --from-source --write no',
+    '# puede mover sus bytes; re-anclarlos exige --diverge/--local/--retire con',
+    '# --reason. Los conteos de cada encabezado los valida el parser.',
     '',
   ];
 
   for (const origin of ORIGINS) {
     lines.push(`# --- ${SECTION_TITLE[origin]} (${groups[origin].length}) ---`);
-    for (const e of groups[origin]) lines.push(`${e.hash}  ${e.path}`);
+    for (const e of groups[origin]) {
+      lines.push(e.origin === 'mirror' ? `${e.hash}  ${e.path}` : `${e.hash}  ${e.path}  # ${e.reason}`);
+    }
     lines.push('');
   }
 
-  lines.push(`# --- retired — de la fuente, no se publican acá (${retired.length}) ---`);
-  for (const path of retired) lines.push(`# retired: ${path}`);
+  lines.push(`# --- ${SECTION_TITLE.retired} (${retired.length}) ---`);
+  for (const r of retired) lines.push(`# retired: ${r.path} — ${r.reason}`);
   lines.push('');
   return lines.join('\n');
 }
@@ -224,8 +274,8 @@ export function diffManifest(manifest, localTree) {
   for (const path of localTree.keys()) {
     if (!declared.has(path)) result.extra.push(path);
   }
-  for (const path of manifest.retired) {
-    if (localTree.has(path)) result.resurrected.push(path);
+  for (const r of manifest.retired) {
+    if (localTree.has(r.path)) result.resurrected.push(r.path);
   }
   result.ok =
     !result.missing.length && !result.changed.length && !result.extra.length && !result.resurrected.length;
@@ -328,23 +378,19 @@ async function verify() {
   console.log(`✔ ${ASSETS_DIR} coincide con ${MANIFEST} (${manifest.entries.length} entradas)`);
 }
 
-async function fromSource({ ref, write, retire = [], diverge = [] }) {
+async function fromSource({ ref, write, declarations }) {
   const manifest = await loadManifest({ tolerant: Boolean(ref) });
   const source = { ...manifest.source, ref: ref ?? manifest.source.ref };
   if (!source.ref) die('✖ no hay ref de la fuente: pasá --ref <sha>');
 
-  const declared = new Map(manifest.entries.map((e) => [e.path, e]));
-  const retired = new Set(manifest.retired);
-  for (const path of retire) {
-    if (!path.startsWith(`${ASSETS_DIR}/`)) die(`✖ --retire fuera de ${ASSETS_DIR}/: ${path}`, 2);
-    retired.add(path);
-    declared.delete(path);
-  }
-  for (const path of diverge) {
-    if (!path.startsWith(`${ASSETS_DIR}/`)) die(`✖ --diverge fuera de ${ASSETS_DIR}/: ${path}`, 2);
-    if (!declared.has(path)) declared.set(path, { path, origin: 'diverged', hash: null });
-    else declared.set(path, { ...declared.get(path), origin: 'diverged' });
-    retired.delete(path);
+  const previous = new Map(manifest.entries.map((e) => [e.path, e]));
+  const declaredNow = new Map(declarations.map((d) => [d.path, d]));
+  const retired = new Map(manifest.retired.map((r) => [r.path, r.reason]));
+
+  for (const { path, origin, reason } of declarations) {
+    if (!path.startsWith(`${ASSETS_DIR}/`)) die(`✖ ${origin} fuera de ${ASSETS_DIR}/: ${path}`, 2);
+    if (origin === 'retire') retired.set(path, reason);
+    else retired.delete(path);
   }
 
   console.log(`fuente: ${describeSource(source)} — derivando hashes (red)…`);
@@ -353,10 +399,13 @@ async function fromSource({ ref, write, retire = [], diverge = [] }) {
 
   const problems = [];
   const groups = { mirror: [], diverged: [], local: [] };
+  const reasonFor = (path) => {
+    const declared = declaredNow.get(path);
+    if (declared) return declared.reason;
+    return previous.get(path)?.reason ?? null;
+  };
 
-  // Un retiro que la fuente no tiene (o que ya cumple) es un retiro vencido:
-  // mantiene ruido en el manifiesto y taparía un asset nuevo con ese nombre.
-  for (const path of retired) {
+  for (const [path] of retired) {
     if (!sourceFiles.has(baseName(path))) {
       problems.push(`retirado y la fuente no lo tiene: ${path} (quitá el retiro)`);
     }
@@ -366,12 +415,13 @@ async function fromSource({ ref, write, retire = [], diverge = [] }) {
     const path = `${ASSETS_DIR}/${name}`;
     const sourceHash = sourceFiles.get(name);
     const localHash = tree.get(path);
-    const entry = declared.get(path);
-    const origin = entry?.origin;
+    const prev = previous.get(path);
+    const declared = declaredNow.get(path);
+    const origin = declared?.origin ?? prev?.origin;
 
     if (localHash === undefined) {
       if (!retired.has(path)) {
-        problems.push(`la fuente lo tiene y acá falta: ${path} (declaralo con --retire si es a propósito)`);
+        problems.push(`la fuente lo tiene y acá falta: ${path} (declaralo con --retire --reason)`);
       }
       continue;
     }
@@ -379,29 +429,59 @@ async function fromSource({ ref, write, retire = [], diverge = [] }) {
       problems.push(`retirado y presente a la vez: ${path} (quitá el retiro o el archivo)`);
       continue;
     }
-    if (origin === 'mirror' || (!origin && localHash === sourceHash)) {
-      if (localHash !== sourceHash) problems.push(`declarado mirror y difiere de la fuente: ${path}`);
-      groups.mirror.push({ path, hash: sourceHash });
+    if (origin === 'mirror') {
+      if (localHash !== sourceHash) {
+        problems.push(
+          `declarado mirror y difiere de la fuente: ${path} (sincronizá/regenerá, o declará --diverge --reason)`,
+        );
+      } else {
+        groups.mirror.push({ path, hash: sourceHash, origin: 'mirror', reason: null });
+      }
       continue;
     }
     if (origin === 'diverged') {
       if (localHash === sourceHash) {
         problems.push(`la fuente ya coincide con la copia local: pasá ${path} a mirror con --write`);
+      } else if (!declared && prev.hash !== localHash) {
+        problems.push(`cambió sin declarar: ${path} (--diverge --reason si es a propósito)`);
       } else {
-        groups.diverged.push({ path, hash: localHash });
+        groups.diverged.push({ path, hash: localHash, origin: 'diverged', reason: reasonFor(path) });
       }
       continue;
     }
-    problems.push(`difiere de la fuente sin declarar: ${path} (--diverge si es a propósito)`);
+    if (origin === 'local') {
+      problems.push(`declarado local pero existe en la fuente: ${path} (clasificalo como mirror o diverged)`);
+      continue;
+    }
+    if (localHash === sourceHash) {
+      groups.mirror.push({ path, hash: sourceHash, origin: 'mirror', reason: null });
+      continue;
+    }
+    problems.push(`difiere de la fuente sin declarar: ${path} (--diverge --reason si es a propósito)`);
   }
 
   for (const [path, localHash] of [...tree].sort(([a], [b]) => a.localeCompare(b))) {
     if (sourceFiles.has(baseName(path))) continue;
-    if (declared.get(path)?.origin === 'mirror') {
+    const prev = previous.get(path);
+    const declared = declaredNow.get(path);
+    if (declared?.origin === 'retire') continue; // ya reportado arriba como retiro + presencia
+    if (prev?.origin === 'mirror') {
       problems.push(`declarado mirror y la fuente ya no lo tiene: ${path}`);
       continue;
     }
-    groups.local.push({ path, hash: localHash });
+    if (declared?.origin === 'local' || prev?.origin === 'local') {
+      if (!declared && prev.hash !== localHash) {
+        problems.push(`cambió sin declarar: ${path} (--local --reason si es a propósito)`);
+      } else {
+        groups.local.push({ path, hash: localHash, origin: 'local', reason: reasonFor(path) });
+      }
+      continue;
+    }
+    if (!declared) {
+      problems.push(`archivo propio sin declarar: ${path} (--local --reason)`);
+      continue;
+    }
+    groups.local.push({ path, hash: localHash, origin: 'local', reason: reasonFor(path) });
   }
 
   console.log(
@@ -417,7 +497,9 @@ async function fromSource({ ref, write, retire = [], diverge = [] }) {
     mirror: groups.mirror,
     diverged: groups.diverged,
     local: groups.local,
-    retired: [...retired].sort(),
+    retired: [...retired]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([path, why]) => ({ path, reason: why })),
   });
 
   const current = await readFile(join(ROOT, MANIFEST), 'utf8').catch(() => null);
@@ -442,7 +524,7 @@ async function main(argv) {
     return;
   }
 
-  const values = { '--ref': [], '--retire': [], '--diverge': [] };
+  const values = { '--ref': [], '--retire': [], '--diverge': [], '--local': [], '--reason': [] };
   const flags = new Set();
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
@@ -465,20 +547,38 @@ async function main(argv) {
     flags.add(arg);
   }
 
+  const reason = values['--reason'].join(' ').trim();
+  const parseDeclaration = (value, origin) => {
+    const split = value.indexOf('=');
+    const path = split === -1 ? value : value.slice(0, split);
+    const inline = split === -1 ? null : value.slice(split + 1).trim();
+    return { path, origin, reason: inline || reason };
+  };
+  const declarations = [
+    ...values['--diverge'].map((v) => parseDeclaration(v, 'diverged')),
+    ...values['--local'].map((v) => parseDeclaration(v, 'local')),
+    ...values['--retire'].map((v) => parseDeclaration(v, 'retire')),
+  ];
+
   if (flags.has('--write') && !flags.has('--from-source')) {
     die('✖ --write sólo tiene sentido con --from-source (nunca se escribe sin la fuente)', 2);
   }
-  if ((values['--retire'].length || values['--diverge'].length) && !flags.has('--write')) {
-    die('✖ --retire/--diverge exigen --from-source --write (dejan traza en el manifiesto)', 2);
+  if (declarations.length && !flags.has('--write')) {
+    die('✖ --diverge/--local/--retire exigen --from-source --write', 2);
+  }
+  const withoutReason = declarations.filter((d) => !d.reason);
+  if (withoutReason.length) {
+    die(
+      `✖ una declaración exige motivo (--reason, o <path>=<motivo>): ${withoutReason.map((d) => d.path).join(', ')}`,
+      2,
+    );
+  }
+  if (reason && !declarations.length) {
+    die('✖ --reason sólo acompaña a una declaración (--diverge/--local/--retire)', 2);
   }
 
   if (flags.has('--from-source')) {
-    await fromSource({
-      ref: values['--ref'][0],
-      write: flags.has('--write'),
-      retire: values['--retire'],
-      diverge: values['--diverge'],
-    });
+    await fromSource({ ref: values['--ref'][0], write: flags.has('--write'), declarations });
   } else {
     await verify();
   }
