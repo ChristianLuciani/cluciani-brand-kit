@@ -15,5 +15,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # Paridad de assets contra la fuente del logo (issue #3). Verifica el
+      # árbol local contra el manifiesto commiteado (tools/logo/assets.sha256):
+      # sin red, hermético. LÍMITE DECLARADO: este step NO consulta la fuente,
+      # así que verde significa «el árbol es el declarado», no «el logo es el
+      # último». La frescura contra la fuente es manual, con
+      # `node tools/logo/verify-assets.mjs --from-source --ref main`, al tocar
+      # assets o al revisar el pin (ver README y docs/logo.md §10.1).
+      - run: node tools/logo/verify-assets.mjs
       # El gate de fidelidad (npm run logo:verify) necesita Chrome; su
       # cableado en CI es el issue #59 del repo cv-cluciani.

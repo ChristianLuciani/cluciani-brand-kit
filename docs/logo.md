@@ -1,5 +1,11 @@
-# Manual de marca — Logo Triángulo-Espiral
+# Manual de marca — Espirángulo (logo Triángulo-Espiral)
 
+> **Nombre del mark:** **Espirángulo** (espiral + triángulo), ratificado por el
+> operador el **2026-10-27** (issue #3). Nombra el **símbolo** —el mark del
+> triángulo-espiral—, no el wordmark: «Christian Luciani» en la tipografía del
+> lockup (§5) es el nombre de marca, no el nombre del logo. El nombre no cambia
+> geometría, paleta ni assets; el acabado de la C es alcance del issue #1.
+>
 > **Fuente única de verdad:** la geometría vive paramétrica en
 > `tools/logo/geometry.mjs` (puerto verificado 1:1 contra el DOM aprobado de
 > `proposals/logo-triangulo-espiral/aurea7.html` — gate
@@ -13,7 +19,7 @@
 
 ## 1. El símbolo
 
-Espiral de conocimiento acumulativo: un triángulo que nace en el
+Espirángulo: espiral de conocimiento acumulativo — un triángulo que nace en el
 origen —la supernova— y gira creciendo en generaciones hasta la C final en
 plena intensidad (triángulo abierto = evolución en curso). Con
 nodos-estrella en cada vértice: el símbolo es una constelación que se
@@ -36,7 +42,8 @@ expande.
   **La animación (`proposals/logo-triangulo-espiral/aurea7.html`) ya refleja
   este acabado** (sync de `cv-cluciani` #55): dibuja la C como banda con
   bisel y la revela con una máscara que traza el path central, conservando el
-  timing del trazado. La integración en el sitio es #56.
+  timing del trazado. La integración en el sitio se completó en #56
+  (cerrado 2026-10-23).
 - **Jerarquía** (operador, 2026-09-25): el ojo va primero al origen — la
   supernova gana +2pt de core y las estrellas grandes de las aristas (la
   punta de la C + las bright) bajan ~22% para no robar protagonismo. Es
@@ -334,6 +341,7 @@ Sólo áurea/base: `--only-aurea` / `--only-base`
 Salida alternativa: `LOGO_OUT=<dir>` o `--out <dir>`
 Sandbox externo que bloquea el sandbox de Chrome: `CHROME_NO_SANDBOX=1`
 Gate de fidelidad: `npm run logo:verify` (requiere Chrome; `CHROME_PATH` para Linux/CI)
+Gate de paridad de assets: `node tools/logo/verify-assets.mjs`
 Tests: `npm test`
 
 **Nota sobre los print 300dpi**: el PNG está dimensionado para 300dpi
@@ -344,3 +352,81 @@ no embede el metadato pHYs — al importarlo en InDesign/Illustrator setear
 QA visual de los exports: Chrome headless (`--headless --screenshot
 --virtual-time-budget=N --window-size=WxH`), el mismo mecanismo que usó la
 sesión de origen (PR #53) — reutilizado aquí para los PNG.
+
+### 10.1 Paridad con la fuente — el último logo
+
+`assets/logo/` es la copia canónica de `ChristianLuciani/christianluciani.github.io`
+› `assets/brand/logo/` (la fuente del logo). El manifiesto
+`tools/logo/assets.sha256` fija el sha256 de cada archivo y declara su origen;
+el gate de CI compara el árbol local contra el manifiesto **sin red**.
+
+| Origen | Qué significa | ¿Se re-deriva de la fuente? |
+|---|---|---|
+| `mirror` | existe en la fuente y es byte-idéntico (sha256) | sí, siempre |
+| `diverged` | existe en la fuente y acá es distinto a propósito | no: exige razón |
+| `local` | propio del brand kit, no existe en la fuente | no: exige razón |
+| `retired` | existe en la fuente y acá **no** se publica | no: exige razón |
+| `dropped` | se publicó acá y se dejó de publicar (no viene de la fuente) | no: exige razón |
+
+<!-- composición: 66/52/4/10/3/0 (total/mirror/diverged/local/retired/dropped) -->
+
+Composición vigente (la imprime el gate): **66 archivos** — **52** espejados
+de la fuente, **4** divergentes, **10** propios y **3** retirados.
+
+- **Divergentes** (`favicon-{aurea,base}{,-32}.{svg,png}`): la familia de
+  favicons con tile lleno de #4; la fuente todavía tiene la versión previa.
+  Cuando se sincronice allá, pasan a `mirror` (el gate lo exige: falla si un
+  `diverged` deja de divergir).
+- **Propios** (`favicon-*-teal*`): el tile teal y su variante dorada, que la
+  fuente aún no tiene.
+- **Retirados** (`favicon-{aurea,base}-16.png` transparentes, retirados en #4):
+  a 16 px sólo se publica `-teal`; y `README.md` de la carpeta de assets en la
+  fuente, que es documentación y no un asset.
+- **Dropeados**: hoy ninguno. Es el camino declarado para dejar de publicar un
+  archivo propio sin que el borrado sea mudo.
+
+```bash
+node tools/logo/verify-assets.mjs                 # offline (lo que corre CI)
+node tools/logo/verify-assets.mjs --from-source   # red: drift contra la fuente
+node tools/logo/verify-assets.mjs --from-source --write   # re-deriva el manifiesto
+```
+
+`--from-source` necesita red (`api.github.com`, `raw.githubusercontent.com`;
+`GITHUB_TOKEN` opcional para el rate limit) y **falla** si la fuente tiene un
+archivo que acá falta, si un `mirror` difiere, si la fuente ya coincide con un
+`diverged` o si aparece un archivo sin declarar.
+
+**Nada se declara a mano.** Los cuatro orígenes sin verdad externa se declaran
+en el manifiesto con su razón (PR/issue); `--from-source --write` no puede
+mover sus bytes ni **borrarlos**: sólo re-ancla un `local`/`diverged` cuando la
+misma invocación lo declara con `--local`/`--diverge` y un motivo, y un archivo
+borrado exige `--drop` (propio) o `--retire` (de la fuente). Todo queda escrito
+en el diff del manifiesto.
+
+```bash
+node tools/logo/verify-assets.mjs --from-source --write \
+  --diverge "assets/logo/favicon-aurea.svg=<PR/issue y por qué>" \
+  --retire  "assets/logo/favicon-aurea-16.png=<PR/issue y por qué>" \
+  --drop    "assets/logo/favicon-propio-viejo.png=<PR/issue y por qué>"
+```
+
+Los conteos `(n)` de los encabezados del manifiesto **no son decorativos**: el
+parser los compara con las entradas reales y falla si no cierran, igual que
+exige razón en cada `diverged`/`local`/`retired`.
+
+**Límite declarado — verde ≠ último logo.** CI corre sólo el modo offline:
+prueba que el árbol es *el declarado*, no que la fuente no haya avanzado. La
+frescura contra la fuente es **manual**:
+`node tools/logo/verify-assets.mjs --from-source --ref main`, al tocar assets o
+al revisar el pin; hoy está **verde**. La comparación es de **contenido**: si
+`main` avanza sin tocar los assets, el chequeo sigue verde y avisa que el pin
+quedó atrás (re-pinear es un acto explícito, `--ref main --write`). En cuanto
+la fuente sume, cambie o borre un asset, falla. El `README.md` de la carpeta de
+assets de la fuente está declarado `retired` porque es documentación, no un
+asset. El `source_ref` del manifiesto se pinea a un **commit**, nunca a `main`.
+
+**Regenerar.** `npm run logo:generate` re-renderiza desde `geometry.mjs`; si
+Chrome produce bytes distintos a los de la fuente, el gate lo marca como
+`declarado mirror y difiere de la fuente`. El camino sancionado es regenerar
+**en la fuente** primero, re-pinear acá y re-derivar el manifiesto — no editar
+hashes a mano.
