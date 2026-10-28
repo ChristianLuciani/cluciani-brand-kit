@@ -10,7 +10,7 @@ sus assets generados, el generador paramétrico y el manual de marca.
 ## Contenido
 
 ```
-assets/logo/          # 70 assets generados (SVG, PNG, print, favicon, og)
+assets/logo/          # 68 assets generados (SVG, PNG, print, favicon, og)
 docs/logo.md          # manual de marca (símbolo, paleta, construcción, uso)
 tools/logo/           # geometry.mjs (fuente de verdad), generador, tests, gate
 proposals/            # HTML de la animación aprobada (fuente de diseño)
@@ -57,7 +57,7 @@ https://raw.githubusercontent.com/ChristianLuciani/cluciani-brand-kit/v1.0.1/ass
 | `logo-aurea-print-{a4\|a3}{,-dark,-light}.png` | 300 dpi |
 | `favicon-aurea.svg`, `favicon-aurea-{16,32}.png` | favicon: la C llena el tile (sin fondo) |
 | `favicon-aurea-teal.svg`, `favicon-aurea-teal-{16,32}.png` | favicon con tile teal `#00c9c0` y C en night (máximo contraste) |
-| `favicon-aurea-teal-gold.svg`, `favicon-aurea-teal-gold-{16,32}.png` | tile teal + C con el acabado ámbar→oro→luz del mark |
+| `favicon-aurea-teal-gold.svg`, `favicon-aurea-teal-gold-32.png` | tile teal + C con el acabado ámbar→oro→luz (32/SVG; sin 16, no se aprecia) |
 | `apple-touch-icon-aurea.png`, `og-image-aurea.png` | 180 / 1200×630 |
 
 La versión **áurea** es la canónica; `base` se conserva como referencia
@@ -85,8 +85,8 @@ Requisitos: Node 20+ y Chrome/Chromium. En Linux/CI, apuntá `CHROME_PATH`.
 ```bash
 npm install
 npm test                    # invariantes de geometría
-npm run logo:generate       # regenera los 70 assets (áurea + base)
-npm run logo:favicons       # sólo favicons (16/32, 3 variantes)
+npm run logo:generate       # regenera los 68 assets (áurea + base)
+npm run logo:favicons       # sólo favicons (16/32, 3 variantes; teal-gold sin 16)
 CHROME_PATH=/usr/bin/google-chrome npm run logo:verify   # gate ≡ DOM aprobado
 ```
 

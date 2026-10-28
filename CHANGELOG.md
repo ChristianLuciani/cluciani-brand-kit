@@ -7,7 +7,8 @@
   icono (`FAVICON` en `geometry.mjs`); el viewBox se computa del contorno
   real de la barra. Variantes de tile lleno: **`-teal`** (fondo `#00c9c0` +
   C en night, 9.7:1) y **`-teal-gold`** (fondo teal + C con el acabado
-  ámbar→oro→luz del mark). Regeneración selectiva: `npm run logo:favicons`.
+  ámbar→oro→luz del mark; sólo 32/SVG, a 16 px el oro no se aprecia).
+  Regeneración selectiva: `npm run logo:favicons`.
 - **Tooling**: `--only-favicon`, perfil único de Chrome por captura dentro de
   `TMP` y `CHROME_NO_SANDBOX=1` opt-in para sandboxes externos.
 

@@ -382,17 +382,19 @@ function main() {
 
     /* favicon tile-first: 16/32 legibles por diseño, no por suerte.
        Tres variantes: transparente, tile teal (night) y tile teal con la C
-       en sus colores (acabado del mark). */
+       en sus colores (acabado del mark). Esta última NO se rasteriza a
+       16px: el oro sobre teal no se aprecia a ese tamaño (decisión del
+       operador, 2026-10-27); se publica en 32 y SVG. */
     for (const fv of [
-      { suffix: "", variant: "plain" },
-      { suffix: "-teal", variant: "teal" },
-      { suffix: "-teal-gold", variant: "teal-gold" },
+      { suffix: "", variant: "plain", sizes: [16, 32] },
+      { suffix: "-teal", variant: "teal", sizes: [16, 32] },
+      { suffix: "-teal-gold", variant: "teal-gold", sizes: [32] },
     ]) {
       const base = `favicon-${version}${fv.suffix}`;
       const doc = faviconDoc(g, cfg, { variant: fv.variant });
       writeFileSync(join(OUT, `${base}.svg`), doc, "utf8");
       written.push(`${base}.svg`);
-      for (const s of [16, 32]) {
+      for (const s of fv.sizes) {
         shoot(`${base}-${s}.png`, squarePage(doc, s, "transparent"), { w: s, transparent: true });
       }
     }
