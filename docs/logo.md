@@ -33,9 +33,10 @@ expande.
   en su nacimiento (B), oro de marca en el vértice y luz en la punta, con
   bisel transversal que le da volumen (ver §3.1). Todo el acabado vive en la
   familia del oro: el cuarto color suma calidez, no cambia de metal.
-  **La animación aprobada (#53) todavía dibuja la C plana**: este acabado es
-  el de los assets; espejarlo en la animación es trabajo de #55 y de #56 al
-  integrarla.
+  **La animación (`proposals/logo-triangulo-espiral/aurea7.html`) ya refleja
+  este acabado** (sync de `cv-cluciani` #55): dibuja la C como banda con
+  bisel y la revela con una máscara que traza el path central, conservando el
+  timing del trazado. La integración en el sitio es #56.
 - **Jerarquía** (operador, 2026-09-25): el ojo va primero al origen — la
   supernova gana +2pt de core y las estrellas grandes de las aristas (la
   punta de la C + las bright) bajan ~22% para no robar protagonismo. Es
@@ -110,7 +111,8 @@ Superficies:
   estrellas se conservan.
 
 Todo esto es **tratamiento de render**: `cPathD`, centros, radios y anchos
-siguen siendo la fuente de verdad y el gate de fidelidad no cambia.
+siguen siendo la fuente de verdad; el acabado se declara en `cFinish` y el
+gate de fidelidad lo verifica contra el DOM aprobado (ver §4).
 
 **Ambiente night aprobado** (no documentado antes — agregado por review
 fresco): el HTML usa `--bg-0 #050810` y `--bg-1 #0b1120` (= `--deep` del
@@ -152,10 +154,20 @@ regiones separadas por la bisectriz del vértice.
 **Verificación** (tests automáticos, `npm test`):
 ancla C ≡ fórmula base a 7 generaciones (0.0000 px), ratios internos = φ
 exacto por generación, twist = 3°×φ, determinismo, y fidelidad DOM
-(`node tools/logo/verify-dom-fidelity.mjs`). El gate de fidelidad compara la
-**geometría de referencia** (centros, segmentos, cielo y constelación) contra
-el DOM aprobado; **no** cubre el contorno nuevo de la barra (marco y
-terminales), que se verifica con los tests de `cBand`.
+(`npm run logo:verify`). El gate de fidelidad compara la **geometría de
+referencia** (centros, segmentos, cielo y constelación) contra el DOM
+aprobado. Desde el sync del acabado (`cv-cluciani` #55) verifica además el
+**contorno de la banda** (`cBand`: marco y terminales), que la **máscara de
+revelado** esté aplicada en el render normal, y que el acabado **declarado**
+en `cFinish` (stops del bisel y del barrido, `stdDeviation` del bloom)
+coincida con los `defs` del DOM aprobado; los assets se generan desde esa
+misma geometría.
+
+**Límite declarado**: el chequeo del acabado compara lo **declarado** en los
+`defs`, no que cada capa esté efectivamente pintada — quitar del DOM el
+overlay del barrido, el `clip-path` de la bisectriz o el `filter` del glow
+todavía pasa el gate (medido el 2026-10-27). El contorno y la máscara sí se
+comparan contra el render.
 
 ## 5. Tipografía
 
