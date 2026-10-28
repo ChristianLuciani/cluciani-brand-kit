@@ -120,6 +120,41 @@ sitio) con un gradiente radial `radial-gradient(1100×780 @ 50% 38%,
 Los PNG dark (`*-dark`, og, apple-touch) reproducen ese ambiente — no son
 fondo plano. Los tokens del sitio completos: `cv-cluciani/docs/STYLE_GUIDE.md`.
 
+### 3.2 Favicon: el icono llena el tile
+
+El favicon no es el mark a escala. A 16/32 px la barra de `cWidth` se lee
+como una hebra y el 12% de respiro del mark deja el símbolo flotando en el
+tile. El icono **es** el tile: se genera con `faviconFrame()` desde
+`FAVICON` (`geometry.mjs`).
+
+| Parámetro | Valor | Efecto |
+|---|---|---|
+| `padRatio` | 0.05 | margen por lado = 5% del lado mayor del contorno; el mark ocupa ~91% del cuadrado |
+| `widthScale` | 4 | barra del icono = 4 × `cWidth` (40 en el lienzo 800) |
+| `novaCoreScale` | 4 | el punto de la supernova ×4 (core 6.2 → 24.8): a 16 px el original es subpíxel |
+| `background.color` | `#00c9c0` | tile teal de las variantes `-teal` / `-teal-gold` (acento/links del sitio) |
+| `background.ink` | `#050810` | C de la variante teal: night sobre teal = 9.7:1 |
+
+El viewBox se computa del **contorno real** de la barra (terminales y
+vértice incluidos), no de la línea central: el borde no queda fuera del
+encuadre. Hay tres variantes:
+
+- **sin fondo** (`favicon-{aurea|base}.svg` + `-32.png`): la C en oro
+  plano, para fondos ya resueltos. **No se publica a 16 px**: el oro sin
+  fondo no se aprecia sobre un tab de color arbitrario. Se permite a 16
+  sólo sobre **night/negro, transparente o blanco** y con el soporte
+  controlado, usando el SVG; para el favicon general de 16 usá `-teal`.
+- **`-teal`**: fondo teal + C en night. Es la de máximo contraste (9.7:1)
+  y la única que se publica a 16 px.
+- **`-teal-gold`**: fondo teal + la C **con el acabado del mark**
+  (bisel ámbar→oro→luz) y la supernova coral. El oro `#c9a84c` sobre teal
+  da 1.1:1 de luminancia; a 32 px la forma se sostiene por el bisel y la
+  diferencia de tono, no por contraste de texto (validar sobre el soporte
+  final). **No se publica a 16 px**: a ese tamaño el oro no se aprecia
+  (decisión del operador, 2026-10-27); para 16 usá `-teal`. Es una variante
+  **generada** para el icono, no un recoloreo de la C del mark (que sigue
+  siendo dorada en `logo-*`).
+
 ## 4. Construcción geométrica
 
 Todos los valores viven en `CONFIG` (`tools/logo/geometry.mjs`):
@@ -198,7 +233,7 @@ light, además, se omite `logo-background` y los halos de la constelación
 |---|---|---|
 | **full** (layers) | constelación de vértices en pico + cielo + galaxia | hero, og-image, prints, masters |
 | **settled** | el mark completo (espiral + C + supernova + cielo) SIN las estrellas de vértices — el estado final de la animación | contextos medianos |
-| **favicon** (simplificado) | la C del mark (mismo contorno, terminales y esquinas) **en oro plano**, sin bisel ni bloom, + supernova; recortados al bbox | favicon 16/32, contextos <24px |
+| **favicon** (simplificado) | la C del mark (mismo contorno, terminales y esquinas) **en oro plano**, sin bisel ni bloom, + supernova ×4; el icono llena el tile (~91%) y la barra se engrosa ×4. Variantes **`-teal`** (tile + C night; única a 16) y **`-teal-gold`** (tile + C con el acabado del mark, sólo 32/SVG). La transparente queda 32/SVG | favicon 16/32, contextos <24px |
 
 ## 7. Uso correcto
 
@@ -210,10 +245,16 @@ light, además, se omite `logo-background` y los halos de la constelación
   blanco. Sobre blanco el oro del bisel tiene contraste bajo por diseño
   (marca gráfica, no texto): validar el contraste sobre el soporte final
   cuando el logo conviva con texto u otros elementos de información.
+- **Favicon**: para 16 px usá **`-teal`** (tile opaco, único que se lee a
+  ese tamaño). La transparente queda en 32/SVG para night/negro,
+  transparente o blanco controlado; `-teal-gold` en 32/SVG. El tile ES el
+  marco, no se le suma respiro (§3.2).
 - **Tamaño mínimo**: 24 px de alto para el mark completo. Los favicons 16/32
   usan la variante **simplificada** (sólo la C + supernova) — no el mark
   completo, que en <24px se vuelve ilegible.
-- **Zona de respiro**: ≥ 12% del ancho del símbolo a cada lado.
+- **Zona de respiro**: ≥ 12% del ancho del símbolo a cada lado. El
+  **favicon** es la excepción: el tile es el marco y el icono ocupa ~91%
+  (5% por lado, §3.2).
 - **No reemplazar** la tipografía del lockup por otra familia sin decisión
   de marca.
 - **No alterar** colores, ángulos ni proporciones — regenerar desde
@@ -223,7 +264,9 @@ light, además, se omite `logo-background` y los halos de la constelación
 
 - ❌ Rotar, estirar o reflectar el símbolo.
 - ❌ Recolorear la C a mano o aplanar su bisel (el oro es la firma; el
-  acabado ámbar→oro→luz se genera desde `cFinish`).
+  acabado ámbar→oro→luz se genera desde `cFinish`). Las variantes `-teal` y
+  `-teal-gold` del favicon no son excepciones a mano: se generan desde
+  `FAVICON` y la C dorada sigue siendo la firma en el mark.
 - ❌ Dibujar el símbolo a mano: **siempre regenerar** (`node
   tools/logo/generate-logo.mjs`).
 - ❌ Editar los SVG/PNG generados — son OUTPUT; la fuente es `geometry.mjs`.
@@ -263,14 +306,21 @@ assets/logo/
   logo-{aurea|base}-print-{a4|a3}.png             # 300dpi transparente
   logo-{aurea|base}-print-{a4|a3}-dark.png        # 300dpi night
   logo-{aurea|base}-print-{a4|a3}-light.png       # 300dpi blanco
-  favicon-{aurea|base}-{16|32}.png
+  favicon-{aurea|base}.svg             # icono: la C llena el tile (~91%); 32/SVG
+  favicon-{aurea|base}-32.png
+  favicon-{aurea|base}-teal.svg        # tile teal + C night (única a 16)
+  favicon-{aurea|base}-teal-{16|32}.png
+  favicon-{aurea|base}-teal-gold.svg   # tile teal + C con el acabado del mark (32/SVG)
+  favicon-{aurea|base}-teal-gold-32.png
   apple-touch-icon-{aurea|base}.png   # 180, fondo night
   og-image-{aurea|base}.png           # 1200×630 dark + nombre
 ```
 
 Regenerar todo: `npm run logo:generate`
+Sólo favicons: `npm run logo:favicons` (`--only-favicon`)
 Sólo áurea/base: `--only-aurea` / `--only-base`
 Salida alternativa: `LOGO_OUT=<dir>` o `--out <dir>`
+Sandbox externo que bloquea el sandbox de Chrome: `CHROME_NO_SANDBOX=1`
 Gate de fidelidad: `npm run logo:verify` (requiere Chrome; `CHROME_PATH` para Linux/CI)
 Tests: `npm test`
 

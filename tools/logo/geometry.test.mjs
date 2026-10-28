@@ -8,6 +8,7 @@ import { describe, it, expect } from "vitest";
 import {
   CONFIG_AUREA, CONFIG_BASE, config, buildGeometry, buildSky,
   constellationPoints, segStyle, cPathD, cBand, seeded, starSpec,
+  FAVICON, faviconFrame, NOVA_CORE_BOOST,
 } from "./geometry.mjs";
 
 const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
@@ -228,6 +229,72 @@ describe("cBand() — la C como barra con bisel (centros y ancho, contorno nuevo
     const deep = CONFIG_AUREA.cFinish.perp.at(-1).color;
     expect(deep).toBe("#8f661c");
     expect(CONFIG_AUREA.cFinish.bloom.color).toBe("#dfa637");
+  });
+});
+
+describe("faviconFrame() — el icono llena el tile", () => {
+  const g = buildGeometry(CONFIG_AUREA.geometry);
+  const cfg = CONFIG_AUREA;
+
+  it("la barra del icono es cWidth × widthScale y ocupa ≥90% del tile", () => {
+    const f = faviconFrame(g.segs, cfg);
+    expect(f.width).toBe(cfg.cWidth * FAVICON.widthScale);
+    expect(f.width).toBe(40);
+    expect(f.band.h).toBeCloseTo(f.width / 2, 6);
+    expect(f.occupancy).toBeGreaterThan(0.89);
+    expect(f.occupancy).toBeLessThan(0.95);
+    expect(f.side).toBeCloseTo(f.span + f.pad * 2, 6);
+  });
+
+  it("el viewBox es cuadrado y el contorno real queda dentro", () => {
+    const f = faviconFrame(g.segs, cfg);
+    const { x, y, w, h } = f.viewBox;
+    expect(w).toBeCloseTo(h, 9);
+    expect(w).toBeCloseTo(f.side, 9);
+    const corners = [
+      [f.band.B.x - f.band.h, f.band.B.y - f.band.h],
+      [f.band.B.x + f.band.h, f.band.B.y + f.band.h],
+      [f.band.A.x - f.band.h, f.band.A.y - f.band.h],
+      [f.band.A.x + f.band.h, f.band.A.y + f.band.h],
+      [f.band.miter.Xo.x, f.band.miter.Xo.y],
+      [f.band.miter.Xi.x, f.band.miter.Xi.y],
+    ];
+    for (const [px, py] of corners) {
+      expect(px).toBeGreaterThanOrEqual(x);
+      expect(px).toBeLessThanOrEqual(x + w);
+      expect(py).toBeGreaterThanOrEqual(y);
+      expect(py).toBeLessThanOrEqual(y + h);
+    }
+  });
+
+  it("el core de la supernova se escala para leerse a 16px", () => {
+    const f = faviconFrame(g.segs, cfg);
+    const sp = starSpec(0, constellationPoints(g.segs).length, cfg.constellation);
+    expect(f.coreR).toBeCloseTo((sp.coreR + NOVA_CORE_BOOST) * FAVICON.novaCoreScale, 6);
+    expect(f.coreR).toBeGreaterThan(sp.coreR + NOVA_CORE_BOOST);
+  });
+
+  it("tinta: oro en transparente, night sobre el tile teal", () => {
+    expect(faviconFrame(g.segs, cfg).ink).toBe(cfg.colors.c);
+    expect(faviconFrame(g.segs, cfg).background).toBeNull();
+    const teal = faviconFrame(g.segs, cfg, { background: true });
+    expect(teal.background).toBe("#00c9c0");
+    expect(teal.ink).toBe("#050810");
+    // variante teal-gold: mismo tile, pero la C conserva su tinta dorada
+    const gold = faviconFrame(g.segs, cfg, { background: true, ink: cfg.colors.c });
+    expect(gold.background).toBe("#00c9c0");
+    expect(gold.ink).toBe(cfg.colors.c);
+  });
+
+  it("determinista y sirve para base y áurea", () => {
+    const a = faviconFrame(g.segs, cfg);
+    const b = faviconFrame(g.segs, cfg);
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+    for (const version of ["aurea", "base"]) {
+      const c = config(version);
+      const gv = buildGeometry(c.geometry);
+      expect(faviconFrame(gv.segs, c).occupancy).toBeGreaterThan(0.89);
+    }
   });
 });
 
