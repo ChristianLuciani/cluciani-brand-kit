@@ -329,7 +329,8 @@ light, además, se omite `logo-background` y los halos de la constelación
 assets/logo/
   logo-{aurea|base}-layers.svg        # master por capas (hero)
   logo-{aurea|base}-settled.svg       # estado final (favicons/print)
-  logo-{aurea|base}-lockup.svg        # mark + tipografía (800×940)
+  logo-{aurea|base}-lockup.svg        # mark + tipografía con constelación (800×940)
+  logo-{aurea|base}-lockup-settled.svg # lockup canónico sin constelación (800×940)
   logo-{aurea|base}-*-light.svg       # masters para superficie clara
   logo-{aurea|base}-{512|1024|2048|4096}.png       # transparente
   logo-{aurea|base}-{512|1024|2048|4096}-dark.png  # fondo night

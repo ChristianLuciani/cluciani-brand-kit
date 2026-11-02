@@ -364,7 +364,7 @@ function main() {
   const onlyFavicon = argv.includes("--only-favicon");
   const onlySvg = argv.includes("--only-svg"); // sólo los SVG: no lanza Chrome
   const versions = argv.includes("--only-base") ? ["base"] : argv.includes("--only-aurea") ? ["aurea"] : ["aurea", "base"];
-  const chrome = pickChrome();
+  const chrome = onlySvg ? null : pickChrome(); // --only-svg no necesita Chrome
   mkdirSync(OUT, { recursive: true });
   mkdirSync(TMP, { recursive: true });
 
@@ -389,7 +389,7 @@ function main() {
          queda SVG + 32 para night/negro/transparente/blanco controlados.
        · -teal-gold: el oro sobre teal no se aprecia a 16; queda SVG + 32.
        Para 16 px el favicon robusto es `-teal` (tile opaco). */
-    if (!onlySvg) for (const fv of [
+    for (const fv of [
       { suffix: "", variant: "plain", sizes: [32] },
       { suffix: "-teal", variant: "teal", sizes: [16, 32] },
       { suffix: "-teal-gold", variant: "teal-gold", sizes: [32] },
@@ -398,6 +398,7 @@ function main() {
       const doc = faviconDoc(g, cfg, { variant: fv.variant });
       writeFileSync(join(OUT, `${base}.svg`), doc, "utf8");
       written.push(`${base}.svg`);
+      if (onlySvg) continue; // SVG sí, raster no
       for (const s of fv.sizes) {
         shoot(`${base}-${s}.png`, squarePage(doc, s, "transparent"), { w: s, transparent: true });
       }

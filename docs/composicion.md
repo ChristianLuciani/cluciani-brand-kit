@@ -88,11 +88,6 @@ cumplan. Nada de esto cambia la decisión.
   salir de `settled` y el set con constelación publicarse como variante
   (sufijo propio). Es un cambio de nombres para consumidores: **no se hace sin
   decisión del operador**, y por eso queda declarado y no ejecutado.
-- **`loader-reduced`** — la causa está en `aurea7.html:501`: la constelación y
-  el cielo están dentro de `if (!reduced)`. El arreglo es mover la construcción
-  fuera del guard y dejar dentro sólo las animaciones. Medición del centro de la
-  supernova (400, 414) con Chrome headless: reducido `(9, 29, 43)` vs vivo
-  `(195, 142, 131)` (§7).
 - **`mark-42`** — sin cambio: el sitio ya usa el mini y así queda ratificado. El
   salto al minimizar es la transición declarada.
 
