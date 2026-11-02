@@ -230,6 +230,12 @@ técnica.
 > `tools/logo/composition.test.mjs`). Ese documento es la matriz; esta sección
 > describe las capas. Cambiar la composición de un asset sin actualizar la
 > matriz pone CI en rojo a propósito.
+>
+> **Matriz ratificada (2026-11-02, issue #6):** el master es el **settled** y la
+> constelación de vértices deja de publicarse — vive sólo en la animación. El
+> mark de ≤ 42 px es el **mini** (C + supernova). La tabla «Variantes de
+> estrellas» de más abajo describe el estado **previo** a esa decisión; manda la
+> matriz.
 
 `logo-{versión}-layers.svg` — 800×800, en este orden z:
 
