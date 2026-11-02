@@ -1,6 +1,20 @@
 # Changelog
 
-## Unreleased
+## v1.1.0 — 2026-11-02
+
+Release que lleva a un tag lo que `v1.0.1` no alcanzaba: la **política de
+favicons 16/32** y los **favicons con tile teal**, que hasta ahora sólo vivían
+en `main`. Respecto de `v1.0.1`, los únicos archivos de `assets/` que cambian
+son los 16 de la familia de favicons (diez teal nuevos, cuatro de tile lleno
+re-renderizados y los dos `-16` transparentes retirados); los 50 restantes son
+byte-idénticos y `tools/logo/assets.sha256` lo fija. Este release **no regenera
+ningún asset**: `npm test` y `node tools/logo/verify-assets.mjs` verifican la
+paridad.
+
+La sección recoge además lo que estaba bajo `## Unreleased`: el nombre del mark
+**Espirángulo** y el gate de paridad de assets (issue #3), y el sync del acabado
+de la C en la animación (issue #1). Los consumidores deben pinnear `v1.1.0` (o
+posterior) para alcanzar los favicons teal.
 
 ### Espirángulo — nombre del mark y paridad de assets (issue #3)
 
@@ -51,7 +65,8 @@ del issue #1 (acabado de la C).
   decía que `aurea7.html` todavía dibujaba la C plana (el sync de #1 ya la
   dibuja como banda con máscara) y apuntaba a #56 como trabajo en curso (está
   cerrado desde 2026-10-23). Se corrige el texto, no la animación.
-- Release: misma ventana que #1; versión y tag los decide el operador.
+- Release: **v1.1.0** (este corte); el tag y la publicación los ejecuta el
+  operador.
 
 ### Sync del acabado de la C (issue #1)
 
@@ -74,8 +89,9 @@ tenía el acabado (idénticos a v1.0.1); cambian animación, gate y manual.
   declarado: compara lo declarado en `defs`, no la pintura). §6 y §7 son
   byte-idénticos a la fuente y no cambian; §10 sólo diverge en paths y
   comandos propios del repo del sitio.
-- Release **v1.0.2** propuesto: tag, fecha de release y bump de `package.json`
-  los decide el operador (este sync no los toca).
+- Release: este sync propuso **v1.0.2**; el operador ratificó **v1.1.0**
+  (2026-11-02, minor por favicons teal + política 16/32), que es este corte.
+  Tag, fecha de release y bump de `package.json` siguen siendo del operador.
 
 - **Favicon**: el icono llena el tile (~91%, antes ~75% de alto y ~56% de
   ancho), la barra se engrosa ×4 y el punto de la supernova ×4 sólo en el
