@@ -63,6 +63,20 @@ const estadoCell = (cell, id) => {
   return norm;
 };
 
+/** Filas de la tabla de §3 (id → estado publicado en el manual). */
+function estadoTable(manual) {
+  const section = manual.match(/## 3\.[\s\S]*?(?=\n## 4\.)/);
+  if (!section) throw new Error('docs/composicion.md: falta la sección §3');
+  const rows = new Map();
+  for (const line of section[0].split('\n')) {
+    if (!line.startsWith('| `')) continue;
+    const cells = line.split('|').map((c) => c.trim());
+    if (cells.length !== 7) throw new Error(`fila de §3 con ${cells.length - 2} columnas: ${line}`);
+    rows.set(cells[1].replaceAll('`', ''), estadoCell(cells[5].replaceAll('*', ''), cells[1]));
+  }
+  return rows;
+}
+
 /** Filas de la tabla de §2 (id → composición publicada en el manual). */
 function manualTable(manual) {
   const section = manual.match(/## 2\.[\s\S]*?(?=\n## 3\.)/);
@@ -97,6 +111,8 @@ describe('matriz de composición', () => {
   it('deriva la composición de cada artefacto y coincide con el SVG', async () => {
     const { matrix } = await load();
     for (const [id, row] of Object.entries(matrix.artefactos)) {
+      expect(typeof row.objetivo, `${id}: falta objetivo`).toBe('string');
+      expect(row.objetivo.trim().length, `${id}: objetivo vacío`).toBeGreaterThan(0);
       const svg = await readFile(join(ROOT, row.path), 'utf8');
       expect(derive(svg), `${id} (${row.path}): la composición declarada no coincide con el SVG`).toEqual(
         row.composicion,
@@ -134,12 +150,18 @@ describe('matriz de composición', () => {
     expect(sinFila, 'estos SVG no están ni en la matriz ni declarados como v10').toEqual([]);
   });
 
-  it('los tres estados no derivables están declarados y validados', async () => {
+  it('la tabla de §3 coincide con el JSON y la prosa vive en el manual', async () => {
     const { matrix, manual } = await load();
-    expect(Object.keys(matrix.estados).sort()).toEqual(['loader-final', 'loader-reduced', 'mark-42']);
+    const table = estadoTable(manual);
+    expect([...table.keys()].sort(), 'la tabla de §3 y el JSON listan estados distintos').toEqual(
+      Object.keys(matrix.estados).sort(),
+    );
     for (const [id, row] of Object.entries(matrix.estados)) {
-      expect(manual, `docs/composicion.md no menciona el estado «${id}»`).toContain(`\`${id}\``);
-      for (const field of ['fuente', 'hoy', 'objetivo']) {
+      // El JSON declara el ESTADO; la prosa (`hoy`/`objetivo`) tiene un solo
+      // hogar: el manual. Duplicarla en el JSON abría una segunda fuente que
+      // podía divergir sin que el test la mirara (review #11, pase 2).
+      expect(table.get(id), `§3: el estado publicado de «${id}» no coincide con el JSON`).toBe(row.estado);
+      for (const field of ['fuente', 'derivacion']) {
         expect(typeof row[field], `${id}: «${field}» debe ser texto no vacío`).toBe('string');
         expect(row[field].trim().length, `${id}: «${field}» vacío`).toBeGreaterThan(0);
       }

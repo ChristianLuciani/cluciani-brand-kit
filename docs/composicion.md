@@ -120,10 +120,12 @@ npm test                                                          # suite comple
 
 El test deriva la composición de cada SVG (no la cree del JSON), compara
 **valor por valor** contra la tabla de §2, exige que ningún SVG áurea quede sin
-fila (sólo los `-base` pueden quedar fuera), valida los tres `estados` y el
-vocabulario cerrado (`coincide` · `deriva` · `excepcion-declarada`). Cambiar la
-composición de un asset sin actualizar la matriz y este documento pone CI en
-rojo, a propósito.
+fila (sólo los `-base` pueden quedar fuera), compara la tabla de §3 contra el
+JSON y valida el vocabulario cerrado (`coincide` · `deriva` ·
+`excepcion-declarada`). La prosa `hoy`/`objetivo` de §3 vive **sólo** en este
+documento: el JSON declara el estado, no la duplica, para que no exista una
+segunda fuente que derive en silencio. Cambiar la composición de un asset sin
+actualizar la matriz y este documento pone CI en rojo, a propósito.
 
 ## 7. Medición local (no corre en CI)
 

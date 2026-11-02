@@ -148,24 +148,18 @@
     "loader-final": {
       "fuente": "proposals/logo-triangulo-espiral/aurea7.html",
       "derivacion": "DOM a t=9 s",
-      "hoy": "espiral + C + supernova + cielo; 22 grupos de estrella en el DOM, 21 disueltos al ser tocados",
-      "objetivo": "idéntico al settled: vértices disueltos, supernova y cielo conservados",
       "estado": "coincide",
       "ratificado": false
     },
     "loader-reduced": {
       "fuente": "proposals/logo-triangulo-espiral/aurea7.html",
       "derivacion": "DOM con prefers-reduced-motion",
-      "hoy": "espiral + C; sin supernova y sin cielo (0 star, 0 ambient)",
-      "objetivo": "el settled estático: espiral + C + supernova + cielo, sin animación",
       "estado": "deriva",
       "ratificado": false
     },
     "mark-42": {
       "fuente": "sitio (cv-cluciani), .brand-mini",
       "derivacion": "composición del mini = favicon (issue #6); comparación por render a 42 px",
-      "hoy": "C + supernova: sin espiral, sin cielo, sin vértices; el C ocupa ~91 % de la caja",
-      "objetivo": "reducción del settled (espiral + C + supernova + cielo), no un mark distinto: 42 px > el mínimo declarado de 24 px",
       "estado": "deriva",
       "ratificado": false
     }
