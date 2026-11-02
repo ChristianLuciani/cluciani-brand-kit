@@ -1,3 +1,4 @@
 node_modules/
+.agos/sprints/
 tools/logo/.chrome-tmp/
 .DS_Store

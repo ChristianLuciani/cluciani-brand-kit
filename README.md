@@ -34,22 +34,22 @@ tag, nunca `main`: los assets de una versión no cambian.
 jsDelivr sirve el repo público con caché inmutable por tag:
 
 ```
-https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.0.1/assets/logo/logo-aurea-1024-dark.png
-https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.0.1/assets/logo/logo-aurea-1024-light.png
+https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.1.0/assets/logo/logo-aurea-1024-dark.png
+https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.1.0/assets/logo/logo-aurea-1024-light.png
 ```
 
 Ejemplo para el README de perfil (HTML, controla el tamaño en GitHub):
 
 ```html
 <p align="center">
-  <img width="320" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.0.1/assets/logo/logo-aurea-1024-dark.png" alt="Christian Luciani">
+  <img width="320" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.1.0/assets/logo/logo-aurea-1024-dark.png" alt="Christian Luciani">
 </p>
 ```
 
 ### Raw de GitHub
 
 ```
-https://raw.githubusercontent.com/ChristianLuciani/cluciani-brand-kit/v1.0.1/assets/logo/logo-aurea-1024-dark.png
+https://raw.githubusercontent.com/ChristianLuciani/cluciani-brand-kit/v1.1.0/assets/logo/logo-aurea-1024-dark.png
 ```
 
 ### Nomenclatura
@@ -72,18 +72,17 @@ La versión **áurea** es la canónica; `base` se conserva como referencia
 comparativa. Sobre blanco usá siempre `-light`: la variante night deja un halo
 verdoso.
 
-Favicon con tile teal (opciones de color, §3.2 del manual). Los favicons teal
-todavía no están en `v1.0.1`: reemplazá `<tag>` por el tag que publique esta
-versión.
+Favicon con tile teal (opciones de color, §3.2 del manual). Se publican desde
+`v1.1.0` (en `v1.0.1` todavía no existían): pinnear `v1.1.0` o posterior.
 
 ```html
 <!-- máximo contraste: C en night -->
-<link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@<tag>/assets/logo/favicon-aurea-teal.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@<tag>/assets/logo/favicon-aurea-teal-32.png">
+<link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.1.0/assets/logo/favicon-aurea-teal.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.1.0/assets/logo/favicon-aurea-teal-32.png">
 
 <!-- la C con sus colores (acabado ámbar→oro→luz) -->
-<link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@<tag>/assets/logo/favicon-aurea-teal-gold.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@<tag>/assets/logo/favicon-aurea-teal-gold-32.png">
+<link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.1.0/assets/logo/favicon-aurea-teal-gold.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.1.0/assets/logo/favicon-aurea-teal-gold-32.png">
 ```
 
 ## Regenerar
