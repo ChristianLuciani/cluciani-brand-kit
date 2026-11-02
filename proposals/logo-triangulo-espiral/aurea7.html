@@ -496,9 +496,10 @@ function render() {
     return h;
   });
 
-  // constelación: estrellas en cada punto del espiral (centro + vértices);
-  // preexisten titilando y se desvanecen cuando la línea las toca
-  if (!reduced) {
+  // constelación y cielo se construyen SIEMPRE: en `reduced` no hay vértices
+  // ni disolución (el estado final es estático), pero la supernova y el cielo
+  // se conservan — pedir menos movimiento no es pedir otro mark.
+  {
     const C = CONFIG.constellation;
     if (C.ambient > 0) { // atmósfera de fondo, nunca se disuelve
       const rnd = seeded(20260901);
@@ -546,6 +547,7 @@ function render() {
     const constellation = el("g", { class: "constellation" });
     const pts = [segs[0].a, ...segs.map(s => s.b)];
     pts.forEach((p, j) => {
+      if (reduced && j > 0) return; // en reduced no se dibujan los 21 vértices
       const sp = starSpec(j, pts.length, C); // tamaño/color/intensidad variados
       const g = el("g", { class: "star" });
       const glow = el("circle", { class: "glow", cx: p.x, cy: p.y, r: sp.glowR });
@@ -568,9 +570,10 @@ function render() {
     svg.appendChild(constellation);
 
     // al construirse el vértice, la línea coincide con la estrella: choca y desvanece
-    // (la del centro permanece: es el origen del espiral)
+    // (la del centro permanece: es el origen del espiral). En reduced no hay
+    // animación: la disolución no corre.
     const touch = j => segDelay(j - 1) + segDur(j - 1);
-    pts.forEach((_, j) => {
+    if (!reduced) pts.forEach((_, j) => {
       if (j === 0) return; // supernova central: no desaparece
       const punta = j === pts.length - 1;
       constellation.children[j].animate(

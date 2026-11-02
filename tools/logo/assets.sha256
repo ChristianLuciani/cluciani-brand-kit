@@ -76,7 +76,7 @@ a8573a5a87c04bc1ed3b9a11e041f19948f34a13e4411abc36191ce211086ad3  assets/logo/og
 8df644ea5b8a84461be378c552b95ebb1399771cd89c020d2f145cf882304b19  assets/logo/favicon-base-32.png  # PR #4 (favicon tile lleno): el brand kit adelanta la familia de favicons; la fuente todavía tiene la versión previa
 d13c421c5bfc720139e02a17eda1eb323ceb53a3127dc986faa595f4f4a82a22  assets/logo/favicon-base.svg  # PR #4 (favicon tile lleno): el brand kit adelanta la familia de favicons; la fuente todavía tiene la versión previa
 
-# --- local — propio del brand kit, no existe en la fuente (10) ---
+# --- local — propio del brand kit, no existe en la fuente (14) ---
 e71aa6d4f359211a24539681a5b0cb8f6e5fa91b872680cb9505cdc1319654e1  assets/logo/favicon-aurea-teal-16.png  # PR #4: variante propia del brand kit (tile teal); no existe en la fuente
 5f979f7ecb176290e178cda3ac4f6e6a8192749942482afca63ce894459de05a  assets/logo/favicon-aurea-teal-32.png  # PR #4: variante propia del brand kit (tile teal); no existe en la fuente
 2b4c7ce4956fd659f2b5c05ee5afc0b18971a72b4abe3893c75ee8934a75180e  assets/logo/favicon-aurea-teal-gold-32.png  # PR #4: variante propia del brand kit (tile teal); no existe en la fuente
@@ -87,6 +87,10 @@ d17bc0935eca3ba4836b86566c84d565691d9a9b12dc7a06d51542f9d8d827cd  assets/logo/fa
 f316da21d8593da9d3a1e989a0313b4775601af0355e258657a6932da42f7857  assets/logo/favicon-base-teal-gold-32.png  # PR #4: variante propia del brand kit (tile teal); no existe en la fuente
 d2604538559b41b9ae67b1e1fdac968e9c5cc9c86b389722b854a20a2964c66e  assets/logo/favicon-base-teal-gold.svg  # PR #4: variante propia del brand kit (tile teal); no existe en la fuente
 f18fd7bce75d3d1dd07401d9d411646918d45415074f4486222e1092937f54f5  assets/logo/favicon-base-teal.svg  # PR #4: variante propia del brand kit (tile teal); no existe en la fuente
+6a88b31e97f4d7a2ddabaaa13318286e581dc2ab19b03c8b67c3c7b9e10cac94  assets/logo/logo-aurea-lockup-settled-light.svg  # lockup canónico settled light (#6, 2026-11-02)
+85c5c9fdeda55d42812867c9efa90a5774693bc8465fb873ef8d6ac59994c961  assets/logo/logo-aurea-lockup-settled.svg  # lockup canónico settled (#6, 2026-11-02)
+2ecd8bbef1cbf780be3e8eda10bc4bec684661bc852f640692ad2161cf5f4696  assets/logo/logo-base-lockup-settled-light.svg  # lockup v10 settled light, paridad de generador (#6)
+176040903a076c260b1e52eb8e957f4e8ce677488cb69f79b90d2d9fda07c81d  assets/logo/logo-base-lockup-settled.svg  # lockup v10 settled, paridad de generador (#6)
 
 # --- retired — existe en la fuente y acá NO se publica (3) ---
 # retired: assets/logo/favicon-aurea-16.png — PR #4: a 16 px el oro sin fondo no se aprecia; a 16 sólo se publica -teal

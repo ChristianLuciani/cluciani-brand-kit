@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Lockups settled**: nuevos `logo-{aurea,base}-lockup-settled{,-light}.svg` —
+  el lockup canónico sin constelación. El lockup existente queda como variante
+  permitida (#6).
+- **`prefers-reduced-motion`**: la animación conserva la supernova y el cielo;
+  los 21 vértices no se dibujan. El guard ya no envuelve cielo ni supernova (#6).
+
 ## v1.1.0 — 2026-11-02
 
 Release que lleva a un tag lo que `v1.0.1` no alcanzaba: la **política de
@@ -52,11 +60,11 @@ del issue #1 (acabado de la C).
   `main` que avanza sin tocar assets no la rompe, y un asset nuevo/cambiado sí.
   El `README.md` de la carpeta de assets de la fuente va `retired` (es
   documentación, no un asset) y el `source_ref` se pinea a un commit.
-<!-- composición: 66/52/4/10/3/0 (total/mirror/diverged/local/retired/dropped) -->
+<!-- composición: 70/52/4/14/3/0 (total/mirror/diverged/local/retired/dropped) -->
 
-- **Composición** (la imprime el gate): **66 archivos** — **52** espejados de
+- **Composición** (la imprime el gate): **70 archivos** — **52** espejados de
   la fuente, **4** divergentes (favicons de tile lleno de #4; la fuente todavía
-  tiene la versión previa), **10** propios (`favicon-*-teal*`) y **3**
+  tiene la versión previa), **14** propios (`favicon-*-teal*` y `*-lockup-settled*`) y **3**
   retirados (`favicon-{aurea,base}-16.png` transparentes, #4; más el `README.md`
   de la carpeta de assets de la fuente). Ningún archivo `dropped`.
   Si la composición cambia, el test falla hasta actualizar README, manual y

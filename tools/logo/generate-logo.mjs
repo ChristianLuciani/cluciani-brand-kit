@@ -13,7 +13,7 @@
  *   · og-image 1200×630 (dark + nombre)
  *
  * Uso: node tools/logo/generate-logo.mjs [--only-aurea|--only-base]
- *      [--only-favicon] [--out assets/logo] (o LOGO_OUT env)
+ *      [--only-favicon] [--only-svg] [--out assets/logo] (o LOGO_OUT env)
  */
 import { execFileSync } from "node:child_process";
 import { accessSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -362,6 +362,7 @@ ${cBlock}
 
 function main() {
   const onlyFavicon = argv.includes("--only-favicon");
+  const onlySvg = argv.includes("--only-svg"); // sólo los SVG: no lanza Chrome
   const versions = argv.includes("--only-base") ? ["base"] : argv.includes("--only-aurea") ? ["aurea"] : ["aurea", "base"];
   const chrome = pickChrome();
   mkdirSync(OUT, { recursive: true });
@@ -388,7 +389,7 @@ function main() {
          queda SVG + 32 para night/negro/transparente/blanco controlados.
        · -teal-gold: el oro sobre teal no se aprecia a 16; queda SVG + 32.
        Para 16 px el favicon robusto es `-teal` (tile opaco). */
-    for (const fv of [
+    if (!onlySvg) for (const fv of [
       { suffix: "", variant: "plain", sizes: [32] },
       { suffix: "-teal", variant: "teal", sizes: [16, 32] },
       { suffix: "-teal-gold", variant: "teal-gold", sizes: [32] },
@@ -410,9 +411,11 @@ function main() {
     const layersSvg = svgDoc(g, cfg, sky, { settled: false });
     const settledSvg = svgDoc(g, cfg, sky, { settled: true });
     const lockupSvg = svgDoc(g, cfg, sky, { settled: false, typography: true });
+    const lockupSettledSvg = svgDoc(g, cfg, sky, { settled: true, typography: true });
     const layersLightSvg = svgDoc(g, cfg, sky, { settled: false, surface: "light" });
     const settledLightSvg = svgDoc(g, cfg, sky, { settled: true, surface: "light" });
     const lockupLightSvg = svgDoc(g, cfg, sky, { settled: false, typography: true, surface: "light" });
+    const lockupSettledLightSvg = svgDoc(g, cfg, sky, { settled: true, typography: true, surface: "light" });
     for (const [name, doc] of [
       [`logo-${version}-layers.svg`, layersSvg],
       [`logo-${version}-settled.svg`, settledSvg],
@@ -420,9 +423,16 @@ function main() {
       [`logo-${version}-layers-light.svg`, layersLightSvg],
       [`logo-${version}-settled-light.svg`, settledLightSvg],
       [`logo-${version}-lockup-light.svg`, lockupLightSvg],
+      [`logo-${version}-lockup-settled.svg`, lockupSettledSvg],
+      [`logo-${version}-lockup-settled-light.svg`, lockupSettledLightSvg],
     ]) {
       writeFileSync(join(OUT, name), doc, "utf8");
       written.push(name);
+    }
+
+    if (onlySvg) {
+      console.log(`✅ ${version}: ${written.length} SVG → ${OUT} (sin raster)`)
+      continue;
     }
 
     /* master PNG 512..4096 (full: transparente + dark + light) */
