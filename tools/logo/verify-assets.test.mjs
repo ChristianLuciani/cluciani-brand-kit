@@ -10,6 +10,15 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const DIGEST_A = 'a'.repeat(64);
 const DIGEST_B = 'b'.repeat(64);
 
+// Una cifra de resto («los 52 restantes») es una resta contra un tag anterior:
+// el manifiesto no la puede re-derivar y CI clona sin historia (checkout depth
+// 1), así que git tampoco. Cifra publicada sin derivación = cifra que puede
+// mentir con el gate en verde — pasó en el PR #9 (decía 50 donde eran 52).
+// Por eso no se liga a un número «parecido» (atarla a `mirror` daría falso
+// verde el día que un release toque un espejado): se prohíbe la forma.
+const CIFRA_DE_RESTO = /\b\d+\*{0,2}\s+restantes?\b/gi;
+const cifrasDeResto = (text) => [...text.matchAll(CIFRA_DE_RESTO)].map((m) => m[0].replace(/\*/g, ''));
+
 const manifestText = ({ mirror = [], diverged = [], local = [], retired = [], dropped = [] }) =>
   [
     '# source_repo: owner/src',
@@ -299,7 +308,7 @@ describe('manifiesto commiteado contra assets/logo', () => {
   });
 
   // Un número publicado en varias superficies tiene que moverse en todas a la
-  // vez. Tres guardas por superficie (README, manual, CHANGELOG):
+  // vez. Cuatro guardas por superficie (README, manual, CHANGELOG):
   //   1. línea canónica `<!-- composición: T/M/D/L/R/D -->` con la composición
   //      derivada del manifiesto;
   //   2. TODAS las frases `**N archivos**` —no sólo la primera— con los cuatro
@@ -307,6 +316,9 @@ describe('manifiesto commiteado contra assets/logo', () => {
   //   3. TODO total publicado (`N archivos` / `N assets`, en negrita o no)
   //      igual al total. Si un doc necesita citar otro número de archivos
   //      (p. ej. los de la fuente), que no use la palabra «archivos/assets».
+  //   4. NINGUNA cifra de resto (`N restantes`): el escape de la regla 3 es
+  //      justamente donde se esconden los números que nadie re-deriva. La
+  //      composición se publica con el marcador; el resto, sin número.
   it('los números publicados son los derivados del manifiesto', async () => {
     const { manifest, tree, result } = await load();
     const derived = {
@@ -355,6 +367,36 @@ describe('manifiesto commiteado contra assets/logo', () => {
           derived.total,
         );
       }
+
+      expect(
+        cifrasDeResto(text),
+        `${path}: cifra de resto sin derivación. El manifiesto no puede recalcularla y CI clona sin historia, ` +
+          `así que publicarla deja un número que puede mentir con el gate en verde. Publicala con ` +
+          `«<!-- composición: T/M/D/L/R/D -->» o escribí el resto sin número.`,
+      ).toEqual([]);
     }
+  });
+
+  it('ninguna superficie publica cifras de resto (defecto sembrado: PR #9)', async () => {
+    for (const path of ['README.md', 'docs/logo.md', 'CHANGELOG.md']) {
+      const text = await readFile(join(ROOT, path), 'utf8');
+      expect(cifrasDeResto(text), `${path}: «N restantes» volvió a aparecer`).toEqual([]);
+    }
+  });
+});
+
+describe('cifras de resto (el instrumento muerde)', () => {
+  it('«N restantes», con o sin negrita, se detecta', () => {
+    expect(cifrasDeResto('los **50** restantes son byte-idénticos')).toEqual(['50 restantes']);
+    expect(cifrasDeResto('y los 52 restantes de assets/')).toEqual(['52 restantes']);
+    expect(cifrasDeResto('1 restante')).toEqual(['1 restante']);
+    // el markdown envuelve: la cifra y la palabra pueden caer en líneas distintas
+    expect(cifrasDeResto('los **50**\nrestantes son')).toEqual(['50 restantes']);
+  });
+
+  it('el resto sin número y el marcador canónico pasan', () => {
+    expect(cifrasDeResto('el resto es byte-idéntico a `v1.0.1`')).toEqual([]);
+    expect(cifrasDeResto('<!-- composición: 66/52/4/10/3/0 (total/mirror/…) -->')).toEqual([]);
+    expect(cifrasDeResto('los **66** archivos, **52** espejados')).toEqual([]);
   });
 });

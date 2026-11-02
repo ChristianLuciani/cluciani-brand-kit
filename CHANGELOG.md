@@ -6,8 +6,8 @@ Release que lleva a un tag lo que `v1.0.1` no alcanzaba: la **política de
 favicons 16/32** y los **favicons con tile teal**, que hasta ahora sólo vivían
 en `main`. Respecto de `v1.0.1`, los únicos archivos de `assets/` que cambian
 son los 16 de la familia de favicons (diez teal nuevos, cuatro de tile lleno
-re-renderizados y los dos `-16` transparentes retirados); los **52** restantes
-son byte-idénticos a `v1.0.1` y `tools/logo/assets.sha256` lo fija. Este release
+re-renderizados y los dos `-16` transparentes retirados); el resto es
+byte-idéntico a `v1.0.1` y `tools/logo/assets.sha256` lo fija. Este release
 **no regenera ningún asset**: `npm test` y `node tools/logo/verify-assets.mjs`
 verifican la paridad.
 
