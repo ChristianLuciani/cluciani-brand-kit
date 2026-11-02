@@ -6,10 +6,10 @@ Release que lleva a un tag lo que `v1.0.1` no alcanzaba: la **política de
 favicons 16/32** y los **favicons con tile teal**, que hasta ahora sólo vivían
 en `main`. Respecto de `v1.0.1`, los únicos archivos de `assets/` que cambian
 son los 16 de la familia de favicons (diez teal nuevos, cuatro de tile lleno
-re-renderizados y los dos `-16` transparentes retirados); los 50 restantes son
-byte-idénticos y `tools/logo/assets.sha256` lo fija. Este release **no regenera
-ningún asset**: `npm test` y `node tools/logo/verify-assets.mjs` verifican la
-paridad.
+re-renderizados y los dos `-16` transparentes retirados); los **52** restantes
+son byte-idénticos a `v1.0.1` y `tools/logo/assets.sha256` lo fija. Este release
+**no regenera ningún asset**: `npm test` y `node tools/logo/verify-assets.mjs`
+verifican la paridad.
 
 La sección recoge además lo que estaba bajo `## Unreleased`: el nombre del mark
 **Espirángulo** y el gate de paridad de assets (issue #3), y el sync del acabado
@@ -91,7 +91,7 @@ tenía el acabado (idénticos a v1.0.1); cambian animación, gate y manual.
   comandos propios del repo del sitio.
 - Release: este sync propuso **v1.0.2**; el operador ratificó **v1.1.0**
   (2026-11-02, minor por favicons teal + política 16/32), que es este corte.
-  Tag, fecha de release y bump de `package.json` siguen siendo del operador.
+  El tag y la publicación siguen siendo del operador.
 
 - **Favicon**: el icono llena el tile (~91%, antes ~75% de alto y ~56% de
   ancho), la barra se engrosa ×4 y el punto de la supernova ×4 sólo en el
