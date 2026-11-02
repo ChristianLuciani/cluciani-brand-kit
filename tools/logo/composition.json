@@ -109,7 +109,7 @@
         "lineas": 0,
         "paths": 1
       },
-      "objetivo": "excepción declarada por tamaño: C + supernova ×4, sólo por debajo de 24 px; no es el mark reducido",
+      "objetivo": "excepción declarada: icono simplificado de 16/32 px y SVG; no se usa a 42 px",
       "estado": "excepcion-declarada",
       "ratificado": false
     },
@@ -124,7 +124,7 @@
         "lineas": 0,
         "paths": 1
       },
-      "objetivo": "excepción declarada por tamaño: única variante publicada a 16 px",
+      "objetivo": "excepción declarada: icono simplificado, única variante publicada a 16 px",
       "estado": "excepcion-declarada",
       "ratificado": false
     },
@@ -139,7 +139,7 @@
         "lineas": 0,
         "paths": 6
       },
-      "objetivo": "excepción declarada por tamaño: C con el acabado del mark, sólo 32 px y SVG",
+      "objetivo": "excepción declarada: icono con el acabado del mark, sólo 32 px y SVG",
       "estado": "excepcion-declarada",
       "ratificado": false
     }

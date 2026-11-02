@@ -5,10 +5,14 @@
  * `docs/composicion.md`. Este test NO decide: verifica que lo publicado y lo
  * generado no deriven en silencio.
  *
- *  1. cada artefacto derivable declara su composición y coincide con el SVG;
- *  2. ningún SVG áurea queda fuera de la matriz (cobertura);
- *  3. cada artefacto de la matriz aparece en la tabla del manual (doc ↔ dato);
- *  4. todo objetivo está declarado y su estado usa el vocabulario cerrado.
+ *  1. cada artefacto declara su composición y coincide valor por valor con el SVG;
+ *  2. la tabla de §2 del manual coincide valor por valor con el JSON (no sólo
+ *     los ids: cambiar un «21» por un «99» en la tabla pone rojo);
+ *  3. ningún SVG áurea queda fuera de la matriz — sólo los `-base` (v10) pueden
+ *     excluirse, y por nombre;
+ *  4. los tres `estados` no derivables están declarados y validados;
+ *  5. ratificación sin ambigüedad: `propuesta` ⇒ todo `false`;
+ *     `ratificada` ⇒ todo `true`.
  *
  * Si cambia la composición de un asset, este test falla a propósito: hay que
  * actualizar la matriz y el manual en el mismo PR (#7 es el antecedente para
@@ -16,11 +20,13 @@
  */
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-const ROOT = new URL('../..', import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const MATRIX = join(ROOT, 'tools/logo/composition.json');
 const MANUAL = join(ROOT, 'docs/composicion.md');
+const ESTADOS_VOCAB = ['coincide', 'deriva', 'excepcion-declarada'];
 
 /** Deriva la composición de un SVG generado: hechos del archivo, no del issue. */
 function derive(svg) {
@@ -32,10 +38,52 @@ function derive(svg) {
     supernova,
     cielo: /id="logo-background"/.test(svg),
     // star 0 ES la supernova; los vértices son los grupos restantes.
-    vertices: Math.max(0, stars.size - 1),
+    vertices: [...stars].filter((n) => n !== 0).length,
     lineas: (svg.match(/<line\b/g) || []).length,
     paths: (svg.match(/<path\b/g) || []).length,
   };
+}
+
+const yn = (cell, id) => {
+  if (cell === 'sí') return true;
+  if (cell === 'no') return false;
+  throw new Error(`fila ${id}: columna booleana inválida «${cell}» (esperado sí|no)`);
+};
+
+/** «excepción declarada» (prosa) → `excepcion-declarada` (vocabulario del JSON). */
+const estadoCell = (cell, id) => {
+  const norm = cell
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, '-');
+  if (!ESTADOS_VOCAB.includes(norm)) {
+    throw new Error(`fila ${id}: estado publicado «${cell}» fuera del vocabulario ${ESTADOS_VOCAB.join('|')}`);
+  }
+  return norm;
+};
+
+/** Filas de la tabla de §2 (id → composición publicada en el manual). */
+function manualTable(manual) {
+  const section = manual.match(/## 2\.[\s\S]*?(?=\n## 3\.)/);
+  if (!section) throw new Error('docs/composicion.md: falta la sección §2');
+  const rows = new Map();
+  for (const line of section[0].split('\n')) {
+    if (!line.startsWith('| `')) continue;
+    const cells = line.split('|').map((c) => c.trim());
+    if (cells.length !== 10) throw new Error(`fila de §2 con ${cells.length - 2} columnas: ${line}`);
+    const id = cells[1].replaceAll('`', '');
+    rows.set(id, {
+      path: cells[2].replaceAll('`', ''),
+      espiral: yn(cells[3], id),
+      c: yn(cells[4], id),
+      supernova: yn(cells[5], id),
+      cielo: yn(cells[6], id),
+      vertices: Number(cells[7]),
+      estado: estadoCell(cells[8], id),
+    });
+  }
+  return rows;
 }
 
 async function load() {
@@ -50,41 +98,65 @@ describe('matriz de composición', () => {
     const { matrix } = await load();
     for (const [id, row] of Object.entries(matrix.artefactos)) {
       const svg = await readFile(join(ROOT, row.path), 'utf8');
-      const derived = derive(svg);
-      expect(derived, `${id} (${row.path}): la composición declarada no coincide con el SVG`).toEqual(
+      expect(derive(svg), `${id} (${row.path}): la composición declarada no coincide con el SVG`).toEqual(
         row.composicion,
       );
     }
   });
 
-  it('ningún SVG áurea queda fuera de la matriz', async () => {
+  it('la tabla de §2 coincide valor por valor con el JSON', async () => {
+    const { matrix, manual } = await load();
+    const table = manualTable(manual);
+    expect([...table.keys()].sort(), 'la tabla de §2 y el JSON listan artefactos distintos').toEqual(
+      Object.keys(matrix.artefactos).sort(),
+    );
+    for (const [id, row] of Object.entries(matrix.artefactos)) {
+      const published = table.get(id);
+      expect(published.path, `${id}: path distinto entre manual y JSON`).toBe(row.path);
+      expect(published.estado, `${id}: estado distinto entre manual y JSON`).toBe(row.estado);
+      for (const axis of ['espiral', 'c', 'supernova', 'cielo', 'vertices']) {
+        expect(published[axis], `${id}: «${axis}» publicado en §2 no coincide con el JSON`).toBe(
+          row.composicion[axis],
+        );
+      }
+    }
+  });
+
+  it('sólo los SVG -base (v10) pueden quedar fuera de la matriz', async () => {
     const { matrix, files } = await load();
     const declared = new Set(Object.values(matrix.artefactos).map((r) => r.path.split('/').pop()));
-    const fuera = new Set(matrix.fueraDeMatriz);
-    const sinFila = files.filter((f) => !declared.has(f) && !fuera.has(f));
-    expect(sinFila, 'estos SVG no están ni en la matriz ni declarados fuera de alcance').toEqual([]);
-    for (const f of fuera) {
+    for (const f of matrix.fueraDeMatriz) {
+      expect(f, `fueraDeMatriz sólo admite la familia v10 (…-base…): ${f}`).toMatch(/-base/);
       expect(files, `fueraDeMatriz lista un archivo inexistente: ${f}`).toContain(f);
     }
+    const fuera = new Set(matrix.fueraDeMatriz);
+    const sinFila = files.filter((f) => !declared.has(f) && !fuera.has(f));
+    expect(sinFila, 'estos SVG no están ni en la matriz ni declarados como v10').toEqual([]);
   });
 
-  it('cada artefacto de la matriz aparece en la tabla del manual', async () => {
+  it('los tres estados no derivables están declarados y validados', async () => {
     const { matrix, manual } = await load();
-    for (const [id, row] of Object.entries(matrix.artefactos)) {
-      expect(manual, `docs/composicion.md no menciona el id «${id}»`).toContain(`\`${id}\``);
-      expect(manual, `docs/composicion.md no menciona el path ${row.path}`).toContain(row.path);
+    expect(Object.keys(matrix.estados).sort()).toEqual(['loader-final', 'loader-reduced', 'mark-42']);
+    for (const [id, row] of Object.entries(matrix.estados)) {
+      expect(manual, `docs/composicion.md no menciona el estado «${id}»`).toContain(`\`${id}\``);
+      for (const field of ['fuente', 'hoy', 'objetivo']) {
+        expect(typeof row[field], `${id}: «${field}» debe ser texto no vacío`).toBe('string');
+        expect(row[field].trim().length, `${id}: «${field}» vacío`).toBeGreaterThan(0);
+      }
+      expect(ESTADOS_VOCAB, `${id}: estado fuera de vocabulario`).toContain(row.estado);
+      expect(typeof row.ratificado, `${id}: falta ratificado`).toBe('boolean');
     }
   });
 
-  it('todo objetivo está declarado y el estado usa el vocabulario cerrado', async () => {
+  it('la ratificación no tiene término medio', async () => {
     const { matrix } = await load();
-    expect(matrix.estado).toBe('propuesta');
-    for (const [id, row] of Object.entries(matrix.artefactos)) {
-      expect(row.objetivo, `${id}: falta el objetivo`).toBeTruthy();
-      expect(['coincide', 'deriva', 'excepcion-declarada'], `${id}: estado fuera de vocabulario`).toContain(
-        row.estado,
-      );
-      expect(typeof row.ratificado, `${id}: falta ratificado`).toBe('boolean');
+    expect(['propuesta', 'ratificada'], 'estado de la matriz fuera de vocabulario').toContain(matrix.estado);
+    const esperado = matrix.estado === 'ratificada';
+    for (const [id, row] of Object.entries({ ...matrix.artefactos, ...matrix.estados })) {
+      expect(row.ratificado, `${id}: estado "${matrix.estado}" exige ratificado=${esperado}`).toBe(esperado);
+      if (Object.hasOwn(row, 'estado')) {
+        expect(ESTADOS_VOCAB, `${id}: estado fuera de vocabulario`).toContain(row.estado);
+      }
     }
   });
 });

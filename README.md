@@ -19,6 +19,7 @@ geometría ni el acabado de la C — eso es alcance del issue #1.
 ```
 assets/logo/               # 66 assets generados (SVG, PNG, print, favicon, og)
 docs/logo.md               # manual de marca (símbolo, paleta, construcción, uso)
+docs/composicion.md        # matriz de composición por superficie y estado (#6)
 tools/logo/                # geometry.mjs (fuente de verdad), generador, tests, gate
 tools/logo/assets.sha256   # manifiesto de paridad de assets/logo (sha256)
 proposals/                 # HTML de la animación aprobada (fuente de diseño)
