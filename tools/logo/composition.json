@@ -1,0 +1,181 @@
+{
+  "estado": "ratificada",
+  "alcance": {
+    "cubre": "la composición declarada de los SVG áurea publicados y de los tres estados no derivables (loader final, loader reduced, mark de 42 px)",
+    "no_cubre": "los SVG v10 (base) — referencia comparativa, fuera de la matriz; y el render del sitio, que se mide en cv-cluciani",
+    "as_of": "2026-11-02",
+    "sha": "622d958"
+  },
+  "regla": "Un solo Espirángulo: misma geometría, mismo cFinish, misma supernova. Las diferencias entre superficies son de tamaño y de estado, no de identidad.",
+  "artefactos": {
+    "master-layers": {
+      "path": "assets/logo/logo-aurea-layers.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": true,
+        "vertices": 21,
+        "lineas": 19,
+        "paths": 7
+      },
+      "objetivo": "variante permitida: constelación completa para los contextos que la pidan (print, og, hero); no es el default",
+      "estado": "excepcion-declarada",
+      "ratificado": true
+    },
+    "master-settled": {
+      "path": "assets/logo/logo-aurea-settled.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": true,
+        "vertices": 0,
+        "lineas": 19,
+        "paths": 7
+      },
+      "objetivo": "sin cambio: es la composición canónica",
+      "estado": "coincide",
+      "ratificado": true
+    },
+    "light-layers": {
+      "path": "assets/logo/logo-aurea-layers-light.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 21,
+        "lineas": 19,
+        "paths": 6
+      },
+      "objetivo": "variante permitida light: constelación sin cielo ni halos; no es el default",
+      "estado": "excepcion-declarada",
+      "ratificado": true
+    },
+    "light-settled": {
+      "path": "assets/logo/logo-aurea-settled-light.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 0,
+        "lineas": 19,
+        "paths": 6
+      },
+      "objetivo": "sin cambio: light settled es la canónica de superficie clara",
+      "estado": "coincide",
+      "ratificado": true
+    },
+    "lockup-night": {
+      "path": "assets/logo/logo-aurea-lockup.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": true,
+        "vertices": 21,
+        "lineas": 19,
+        "paths": 7
+      },
+      "objetivo": "falta el lockup settled (canónico): hoy sólo existe el lockup con constelación, que pasa a ser la variante permitida",
+      "estado": "deriva",
+      "ratificado": true
+    },
+    "lockup-light": {
+      "path": "assets/logo/logo-aurea-lockup-light.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 21,
+        "lineas": 19,
+        "paths": 6
+      },
+      "objetivo": "falta el lockup light settled (canónico): hoy sólo existe con constelación",
+      "estado": "deriva",
+      "ratificado": true
+    },
+    "favicon-transparent": {
+      "path": "assets/logo/favicon-aurea.svg",
+      "composicion": {
+        "espiral": false,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 0,
+        "lineas": 0,
+        "paths": 1
+      },
+      "objetivo": "excepción declarada: icono simplificado de 16/32 px y SVG; no se usa a 42 px",
+      "estado": "excepcion-declarada",
+      "ratificado": true
+    },
+    "favicon-teal": {
+      "path": "assets/logo/favicon-aurea-teal.svg",
+      "composicion": {
+        "espiral": false,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 0,
+        "lineas": 0,
+        "paths": 1
+      },
+      "objetivo": "excepción declarada: icono simplificado, única variante publicada a 16 px",
+      "estado": "excepcion-declarada",
+      "ratificado": true
+    },
+    "favicon-teal-gold": {
+      "path": "assets/logo/favicon-aurea-teal-gold.svg",
+      "composicion": {
+        "espiral": false,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 0,
+        "lineas": 0,
+        "paths": 6
+      },
+      "objetivo": "excepción declarada: icono con el acabado del mark, sólo 32 px y SVG",
+      "estado": "excepcion-declarada",
+      "ratificado": true
+    }
+  },
+  "estados": {
+    "loader-final": {
+      "fuente": "proposals/logo-triangulo-espiral/aurea7.html",
+      "derivacion": "DOM a t=9 s",
+      "estado": "coincide",
+      "ratificado": true
+    },
+    "loader-reduced": {
+      "fuente": "proposals/logo-triangulo-espiral/aurea7.html",
+      "derivacion": "DOM con prefers-reduced-motion",
+      "estado": "deriva",
+      "ratificado": true
+    },
+    "mark-42": {
+      "fuente": "sitio (cv-cluciani), .brand-mini",
+      "derivacion": "composición del mini = favicon (issue #6); comparación por render a 42 px",
+      "estado": "coincide",
+      "ratificado": true
+    }
+  },
+  "fueraDeMatriz": [
+    "favicon-base-teal-gold.svg",
+    "favicon-base-teal.svg",
+    "favicon-base.svg",
+    "logo-base-layers-light.svg",
+    "logo-base-layers.svg",
+    "logo-base-lockup-light.svg",
+    "logo-base-lockup.svg",
+    "logo-base-settled-light.svg",
+    "logo-base-settled.svg"
+  ],
+  "ratificado_por": "Christian Luciani",
+  "ratificado_at": "2026-11-02",
+  "traza": "https://github.com/ChristianLuciani/cluciani-brand-kit/issues/6#issuecomment-6589283153"
+}
