@@ -67,7 +67,7 @@ composición light es la misma del par night, menos el cielo.
 |---|---|---|---|---|
 | `loader-final` | `proposals/logo-triangulo-espiral/aurea7.html` | espiral + C + supernova + cielo; 22 grupos de estrella en el DOM, 21 disueltos al ser tocados | idéntico al `master-settled` | coincide |
 | `loader-reduced` | mismo archivo, `prefers-reduced-motion` | espiral + C; **sin supernova y sin cielo** (0 `star`, 0 `ambient` en el DOM) | el settled estático: espiral + C + supernova + cielo, sin animación | **deriva** |
-| `mark-42` | sitio (`cv-cluciani`), `.brand-mini` | C + supernova: sin espiral, sin cielo; el C ocupa ~91 % de la caja | **el mini, tal como está**: el salto settled → mini es declarado y aceptado | coincide |
+| `mark-42` | sitio (`cv-cluciani`), `.brand-mini` | C + supernova: sin espiral, sin cielo; el C ocupa ~91 % de la caja. Hoy el sitio lo dibuja a **36 px**; 42 era el tamaño cuando se abrió #6 | **el mini, tal como está**: el salto settled → mini es declarado y aceptado | coincide |
 
 El `mark-42` no se mide en este repo: `cv-cluciani` no está disponible en esta
 máquina. Se usa `favicon-aurea.svg` como artefacto canónico del mini (mismos
@@ -157,7 +157,28 @@ flags, y por eso se declara el procedimiento en vez de publicar el número solo.
 - No borra `logo-aurea-layers.svg`: el retiro se declara, el borrado físico lo
   aprueba el operador.
 
-## 9. Fuentes
+## 9. Historia de la deriva (dónde se produjo)
+
+Tres piezas legítimas, cada una con su fecha, y ninguna regla que dijera cuál
+manda en cada superficie. No hay un commit que "rompa" el mark.
+
+| fecha | pieza | dónde | qué dejó |
+|---|---|---|---|
+| 2026-09-09 | animación v16 (`ad38853`, sitio) | `aurea7.html` | `reduced` renderiza sólo espiral + C: el guard `if (!reduced)` ya deja afuera constelación y cielo. **Origen del estado reduced**, desde el primer día. |
+| 2026-09-25 | logo oficial (`055f5c5`, PR #54, sitio) | `assets/brand/logo/` | nacen `layers` (21 vértices) y `settled` (0) como variantes del mismo mark, **sin regla de qué superficie usa cuál**. |
+| 2026-09-28 | favicon (`d16cc4c`, sitio) | `favicon-aurea.svg` | el icono simplificado: C + supernova. Es un **icono**, no una reducción del mark. |
+| 2026-10-23 | logo animado del sitio (`b0a50c2`, #56) | `index.html` + `logoAnim.js` | al minimizar, el mismo `#brand-logo` cambia `.brand-full` por `.brand-mini` (la composición del favicon) a **42 px**. **Acá el salto se vuelve visible**: un icono pasa a ocupar el lugar del mark. Hoy ese tamaño es 36 px. |
+| 2026-10-22 | brand kit v1.0.0 (`6ccd725`) | este repo | importa los assets como espejo: hereda las tres composiciones y no hereda ninguna matriz. |
+| 2026-10-27 | sync y guardas (#1, #4, #7) | este repo | se sincroniza el acabado de la C, entran los favicons teal y un gate que fija **conteos** de archivos — no composición. |
+| 2026-10-28 | issue #6 | tracker | se nombra la deriva; queda frenada como decisión, no como tarea. |
+| 2026-11-02 | decisión por pares | este PR | matriz ratificada; `layers`/`lockups`/`layers-light`/`reduced` quedan en deuda declarada. |
+
+Lectura: la deriva tiene **dos orígenes distintos**. El estado `reduced` nació
+incompleto en el diseño de la animación (2026-09-09). El salto settled → mini
+nació cuando el sitio reutilizó el **icono** como mark persistente (2026-10-23).
+El resto —`layers` vs `settled`— es una convivencia sin regla desde 2026-09-25.
+
+## 10. Fuentes
 
 - Issue #6 y su traza de decisión (2026-11-02).
 - PR #88 de `cv-cluciani` (`e9000f1`), composición del `.brand-mini`.
