@@ -17,7 +17,8 @@ const DIGEST_B = 'b'.repeat(64);
 // Por eso no se liga a un número «parecido» (atarla a `mirror` daría falso
 // verde el día que un release toque un espejado): se prohíbe la forma.
 const CIFRA_DE_RESTO = /\b\d+\*{0,2}\s+restantes?\b/gi;
-const cifrasDeResto = (text) => [...text.matchAll(CIFRA_DE_RESTO)].map((m) => m[0].replace(/\*/g, ''));
+const cifrasDeResto = (text) =>
+  [...text.matchAll(CIFRA_DE_RESTO)].map((m) => m[0].replace(/\*/g, '').replace(/\s+/g, ' ').trim());
 
 const manifestText = ({ mirror = [], diverged = [], local = [], retired = [], dropped = [] }) =>
   [
