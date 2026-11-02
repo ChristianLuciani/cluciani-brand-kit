@@ -21,15 +21,18 @@
 misma supernova. Lo que cambia entre superficies es el **tamaño** y el
 **estado**, nunca la identidad del mark.
 
-La composición canónica es el **settled**: espiral + C + supernova + cielo,
-sin constelación de vértices.
+La composición **canónica y por defecto** es el **settled**: espiral + C +
+supernova + cielo, sin constelación de vértices. El **full** (con los 21
+vértices) no se retira: queda como **variante permitida**, para los contextos
+que pidan la constelación (print grande, og-image, hero).
 
-- **> 42 px** (master, lockups, hero, og-image, print): settled.
+- **Por defecto, cualquier superficie**: settled.
+- **Variante permitida**: full (`layers`), cuando el contexto la justifique.
+  No es el default y no reemplaza al settled.
 - **≤ 42 px** (mark persistente, favicon 16/32): **mini** — C + supernova.
   La transición settled → mini al minimizar es un **cambio declarado y
   aceptado**: no es una reducción del mismo mark, y no se "arregla".
-- La **constelación de vértices** deja de publicarse en assets: vive sólo
-  dentro de la animación, en su apertura, y se disuelve al ser tocada.
+- La **constelación de vértices** sólo aparece en el full y en la animación.
 
 La deriva **no** es el acabado de la C: animación y assets comparten `cFinish`;
 la diferencia visible es el halo, que en la animación respira entre 0.5 y 0.75.
@@ -39,9 +42,9 @@ El eje es la composición.
 
 | id | artefacto | espiral | C | supernova | cielo | vértices | estado |
 |---|---|---|---|---|---|---|---|
-| `master-layers` | `assets/logo/logo-aurea-layers.svg` | sí | sí | sí | sí | 21 | deriva |
+| `master-layers` | `assets/logo/logo-aurea-layers.svg` | sí | sí | sí | sí | 21 | excepción declarada |
 | `master-settled` | `assets/logo/logo-aurea-settled.svg` | sí | sí | sí | sí | 0 | coincide |
-| `light-layers` | `assets/logo/logo-aurea-layers-light.svg` | sí | sí | sí | no | 21 | deriva |
+| `light-layers` | `assets/logo/logo-aurea-layers-light.svg` | sí | sí | sí | no | 21 | excepción declarada |
 | `light-settled` | `assets/logo/logo-aurea-settled-light.svg` | sí | sí | sí | no | 0 | coincide |
 | `lockup-night` | `assets/logo/logo-aurea-lockup.svg` | sí | sí | sí | sí | 21 | deriva |
 | `lockup-light` | `assets/logo/logo-aurea-lockup-light.svg` | sí | sí | sí | no | 21 | deriva |
@@ -78,12 +81,14 @@ conteos que `.brand-mini` según el issue #6) y se declara la premisa.
 Las cinco decisiones están tomadas; lo que sigue es hacer que los assets las
 cumplan. Nada de esto cambia la decisión.
 
-- **`master-layers`, `lockup-night` y `lockup-light`** — hoy llevan 21 vértices;
-  el master ratificado es el settled. Hay que regenerarlos sin constelación y
-  **retirar `logo-aurea-layers.svg` como master** (retiro declarado; el borrado
-  físico lo aprueba el operador aparte).
-- **`light-layers`** — hoy lleva 21 vértices; la variante ratificada es
-  `light-settled`.
+- **`lockup-night` y `lockup-light`** — hoy sólo existe el lockup **con**
+  constelación. Falta el lockup **settled** (el canónico): hay que generarlo y
+  dejar el actual como variante permitida.
+- **Exports** — los PNG, print y og-image se generan hoy desde `layers`
+  (con estrellitas). Si el default es settled, el set por defecto tiene que
+  salir de `settled` y el set con constelación publicarse como variante
+  (sufijo propio). Es un cambio de nombres para consumidores: no se hace sin
+  decisión del operador.
 - **`loader-reduced`** — la causa está en `aurea7.html:501`: la constelación y
   el cielo están dentro de `if (!reduced)`. El arreglo es mover la construcción
   fuera del guard y dejar dentro sólo las animaciones. Medición del centro de la
@@ -102,11 +107,11 @@ Los cinco pares, con la opción elegida por el operador:
 4. Light: **light settled**, sin cielo ni vértices.
 5. `prefers-reduced-motion`: **settled estático**, conserva supernova y cielo.
 
-La consecuencia de 2 + 3 + 4 es que la constelación deja de publicarse: era la
-pieza que distinguía al master, y el operador eligió que viva sólo en la
-animación. La consecuencia de 1 + 2 es que el mark persistente es otro mark que
-el estado final: se acepta como transición declarada en vez de forzar una
-reducción.
+La consecuencia de 3 + 4 es que el **default** deja de llevar la constelación,
+pero la constelación no desaparece: se conserva como **variante permitida** para
+los contextos que la pidan. La consecuencia de 1 + 2 es que el mark persistente
+es otro mark que el estado final: se acepta como transición declarada en vez de
+forzar una reducción.
 
 ## 6. Ratificación y guarda
 
@@ -171,7 +176,7 @@ manda en cada superficie. No hay un commit que "rompa" el mark.
 | 2026-10-22 | brand kit v1.0.0 (`6ccd725`) | este repo | importa los assets como espejo: hereda las tres composiciones y no hereda ninguna matriz. |
 | 2026-10-27 | sync y guardas (#1, #4, #7) | este repo | se sincroniza el acabado de la C, entran los favicons teal y un gate que fija **conteos** de archivos — no composición. |
 | 2026-10-28 | issue #6 | tracker | se nombra la deriva; queda frenada como decisión, no como tarea. |
-| 2026-11-02 | decisión por pares | este PR | matriz ratificada; `layers`/`lockups`/`layers-light`/`reduced` quedan en deuda declarada. |
+| 2026-11-02 | decisión por pares | este PR | matriz ratificada; el default es settled, `layers` queda como variante permitida y los lockups settled quedan como deuda. |
 
 Lectura: la deriva tiene **dos orígenes distintos**. El estado `reduced` nació
 incompleto en el diseño de la animación (2026-09-09). El salto settled → mini

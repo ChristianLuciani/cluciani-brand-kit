@@ -19,8 +19,8 @@
         "lineas": 19,
         "paths": 7
       },
-      "objetivo": "settled: sin constelación; la constelación vive sólo en la animación",
-      "estado": "deriva",
+      "objetivo": "variante permitida: constelación completa para los contextos que la pidan (print, og, hero); no es el default",
+      "estado": "excepcion-declarada",
       "ratificado": true
     },
     "master-settled": {
@@ -49,8 +49,8 @@
         "lineas": 19,
         "paths": 6
       },
-      "objetivo": "light settled: sin cielo y sin vértices",
-      "estado": "deriva",
+      "objetivo": "variante permitida light: constelación sin cielo ni halos; no es el default",
+      "estado": "excepcion-declarada",
       "ratificado": true
     },
     "light-settled": {
@@ -79,7 +79,7 @@
         "lineas": 19,
         "paths": 7
       },
-      "objetivo": "settled: el lockup hereda el master sin constelación",
+      "objetivo": "falta el lockup settled (canónico): hoy sólo existe el lockup con constelación, que pasa a ser la variante permitida",
       "estado": "deriva",
       "ratificado": true
     },
@@ -94,7 +94,7 @@
         "lineas": 19,
         "paths": 6
       },
-      "objetivo": "light settled: sin cielo y sin vértices",
+      "objetivo": "falta el lockup light settled (canónico): hoy sólo existe con constelación",
       "estado": "deriva",
       "ratificado": true
     },
