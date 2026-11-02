@@ -225,6 +225,12 @@ técnica.
 
 ## 6. Capas del SVG
 
+> **Composición declarada por superficie y estado:** `docs/composicion.md`
+> (dato en `tools/logo/composition.json`, guarda en
+> `tools/logo/composition.test.mjs`). Ese documento es la matriz; esta sección
+> describe las capas. Cambiar la composición de un asset sin actualizar la
+> matriz pone CI en rojo a propósito.
+
 `logo-{versión}-layers.svg` — 800×800, en este orden z:
 
 1. **`logo-background`** — cielo: 30 estrellas ambient + 46 en brazos de

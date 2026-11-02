@@ -1,0 +1,184 @@
+{
+  "estado": "propuesta",
+  "alcance": {
+    "cubre": "la composición declarada de los SVG áurea publicados y de los tres estados no derivables (loader final, loader reduced, mark de 42 px)",
+    "no_cubre": "los SVG v10 (base) — referencia comparativa, fuera de la matriz; y el render del sitio, que se mide en cv-cluciani",
+    "as_of": "2026-11-02",
+    "sha": "622d958"
+  },
+  "regla": "Un solo Espirángulo: misma geometría, mismo cFinish, misma supernova. Las diferencias entre superficies son de tamaño y de estado, no de identidad.",
+  "artefactos": {
+    "master-layers": {
+      "path": "assets/logo/logo-aurea-layers.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": true,
+        "vertices": 21,
+        "lineas": 19,
+        "paths": 7
+      },
+      "objetivo": "sin cambio: constelación completa en pico + cielo + galaxia (master de hero, og-image y print)",
+      "estado": "coincide",
+      "ratificado": false
+    },
+    "master-settled": {
+      "path": "assets/logo/logo-aurea-settled.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": true,
+        "vertices": 0,
+        "lineas": 19,
+        "paths": 7
+      },
+      "objetivo": "sin cambio: el estado final de la animación (espiral + C + supernova + cielo, sin vértices)",
+      "estado": "coincide",
+      "ratificado": false
+    },
+    "light-layers": {
+      "path": "assets/logo/logo-aurea-layers-light.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 21,
+        "lineas": 19,
+        "paths": 6
+      },
+      "objetivo": "sin cambio: misma constelación que el master, sin cielo ni halos (el fondo lo da la superficie clara)",
+      "estado": "coincide",
+      "ratificado": false
+    },
+    "light-settled": {
+      "path": "assets/logo/logo-aurea-settled-light.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 0,
+        "lineas": 19,
+        "paths": 6
+      },
+      "objetivo": "sin cambio: reducción light del settled",
+      "estado": "coincide",
+      "ratificado": false
+    },
+    "lockup-night": {
+      "path": "assets/logo/logo-aurea-lockup.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": true,
+        "vertices": 21,
+        "lineas": 19,
+        "paths": 7
+      },
+      "objetivo": "sin cambio: el lockup hereda la composición del master",
+      "estado": "coincide",
+      "ratificado": false
+    },
+    "lockup-light": {
+      "path": "assets/logo/logo-aurea-lockup-light.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 21,
+        "lineas": 19,
+        "paths": 6
+      },
+      "objetivo": "sin cambio: el lockup light hereda la composición light",
+      "estado": "coincide",
+      "ratificado": false
+    },
+    "favicon-transparent": {
+      "path": "assets/logo/favicon-aurea.svg",
+      "composicion": {
+        "espiral": false,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 0,
+        "lineas": 0,
+        "paths": 1
+      },
+      "objetivo": "excepción declarada por tamaño: C + supernova ×4, sólo por debajo de 24 px; no es el mark reducido",
+      "estado": "excepcion-declarada",
+      "ratificado": false
+    },
+    "favicon-teal": {
+      "path": "assets/logo/favicon-aurea-teal.svg",
+      "composicion": {
+        "espiral": false,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 0,
+        "lineas": 0,
+        "paths": 1
+      },
+      "objetivo": "excepción declarada por tamaño: única variante publicada a 16 px",
+      "estado": "excepcion-declarada",
+      "ratificado": false
+    },
+    "favicon-teal-gold": {
+      "path": "assets/logo/favicon-aurea-teal-gold.svg",
+      "composicion": {
+        "espiral": false,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 0,
+        "lineas": 0,
+        "paths": 6
+      },
+      "objetivo": "excepción declarada por tamaño: C con el acabado del mark, sólo 32 px y SVG",
+      "estado": "excepcion-declarada",
+      "ratificado": false
+    }
+  },
+  "estados": {
+    "loader-final": {
+      "fuente": "proposals/logo-triangulo-espiral/aurea7.html",
+      "derivacion": "DOM a t=9 s",
+      "hoy": "espiral + C + supernova + cielo; 22 grupos de estrella en el DOM, 21 disueltos al ser tocados",
+      "objetivo": "idéntico al settled: vértices disueltos, supernova y cielo conservados",
+      "estado": "coincide",
+      "ratificado": false
+    },
+    "loader-reduced": {
+      "fuente": "proposals/logo-triangulo-espiral/aurea7.html",
+      "derivacion": "DOM con prefers-reduced-motion",
+      "hoy": "espiral + C; sin supernova y sin cielo (0 star, 0 ambient)",
+      "objetivo": "el settled estático: espiral + C + supernova + cielo, sin animación",
+      "estado": "deriva",
+      "ratificado": false
+    },
+    "mark-42": {
+      "fuente": "sitio (cv-cluciani), .brand-mini",
+      "derivacion": "composición del mini = favicon (issue #6); comparación por render a 42 px",
+      "hoy": "C + supernova: sin espiral, sin cielo, sin vértices; el C ocupa ~91 % de la caja",
+      "objetivo": "reducción del settled (espiral + C + supernova + cielo), no un mark distinto: 42 px > el mínimo declarado de 24 px",
+      "estado": "deriva",
+      "ratificado": false
+    }
+  },
+  "fueraDeMatriz": [
+    "favicon-base-teal-gold.svg",
+    "favicon-base-teal.svg",
+    "favicon-base.svg",
+    "logo-base-layers-light.svg",
+    "logo-base-layers.svg",
+    "logo-base-lockup-light.svg",
+    "logo-base-lockup.svg",
+    "logo-base-settled-light.svg",
+    "logo-base-settled.svg"
+  ]
+}
