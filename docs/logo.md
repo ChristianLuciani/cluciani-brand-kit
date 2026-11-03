@@ -332,7 +332,14 @@ assets/logo/
   logo-{aurea|base}-lockup.svg        # mark + tipografía con constelación (800×940)
   logo-{aurea|base}-lockup-settled.svg # lockup canónico sin constelación (800×940)
   logo-{aurea|base}-*-light.svg       # masters para superficie clara
-  logo-{aurea|base}-{512|1024|2048|4096}.png       # transparente
+  logo-{aurea|base}-{512|1024|2048|4096}.png       # transparente (set full)
+  logo-aurea-settled-{512|1024|2048|4096}.png      # canónico settled, transparente (aditivo, #6)
+  logo-aurea-settled-{512|1024|2048|4096}-dark.png # canónico settled, fondo night
+  logo-aurea-settled-{512|1024|2048|4096}-light.png# canónico settled, fondo blanco
+  logo-aurea-settled-print-{a4|a3}.png             # 300dpi settled transparente
+  logo-aurea-settled-print-{a4|a3}-dark.png        # 300dpi settled night
+  logo-aurea-settled-print-{a4|a3}-light.png       # 300dpi settled blanco
+  og-image-aurea-settled.png           # 1200×630 dark + nombre (mark settled)
   logo-{aurea|base}-{512|1024|2048|4096}-dark.png  # fondo night
   logo-{aurea|base}-{512|1024|2048|4096}-light.png # fondo blanco
   logo-{aurea|base}-print-{a4|a3}.png             # 300dpi transparente
@@ -381,16 +388,16 @@ el gate de CI compara el árbol local contra el manifiesto **sin red**.
 | `retired` | existe en la fuente y acá **no** se publica | no: exige razón |
 | `dropped` | se publicó acá y se dejó de publicar (no viene de la fuente) | no: exige razón |
 
-<!-- composición: 70/52/4/14/3/0 (total/mirror/diverged/local/retired/dropped) -->
+<!-- composición: 89/52/4/33/3/0 (total/mirror/diverged/local/retired/dropped) -->
 
-Composición vigente (la imprime el gate): **70 archivos** — **52** espejados
-de la fuente, **4** divergentes, **14** propios y **3** retirados.
+Composición vigente (la imprime el gate): **89 archivos** — **52** espejados
+de la fuente, **4** divergentes, **33** propios y **3** retirados.
 
 - **Divergentes** (`favicon-{aurea,base}{,-32}.{svg,png}`): la familia de
   favicons con tile lleno de #4; la fuente todavía tiene la versión previa.
   Cuando se sincronice allá, pasan a `mirror` (el gate lo exige: falla si un
   `diverged` deja de divergir).
-- **Propios** (`favicon-*-teal*` y `*-lockup-settled*`): el tile teal con su variante dorada y los lockups canónicos sin constelación (#6), que la
+- **Propios** (`favicon-*-teal*`, `*-lockup-settled*` y `*-settled-*`): el tile teal con su variante dorada, los lockups canónicos sin constelación y los exports settled (#6), que la
   fuente aún no tiene.
 - **Retirados** (`favicon-{aurea,base}-16.png` transparentes, retirados en #4):
   a 16 px sólo se publica `-teal`; y `README.md` de la carpeta de assets en la

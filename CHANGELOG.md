@@ -5,15 +5,18 @@
 - **Lockups settled**: nuevos `logo-{aurea,base}-lockup-settled{,-light}.svg` —
   el lockup canónico sin constelación. El lockup existente queda como variante
   permitida (#6).
+- **Exports settled**: set aditivo `logo-aurea-settled-*` (512–4096, print A4/A3
+  y og-image) con nombres propios. Los PNG actuales conservan su nombre y su
+  contenido (set full, con constelación): nada se renombra (#6).
 - **`prefers-reduced-motion`**: la animación conserva la supernova y el cielo,
   y queda **estática** (sin titileo, fade ni respiración). Los 21 vértices no
   se dibujan. El guard ya no envuelve cielo ni supernova (#6).
 
-<!-- composición: 70/52/4/14/3/0 (total/mirror/diverged/local/retired/dropped) -->
+<!-- composición: 89/52/4/33/3/0 (total/mirror/diverged/local/retired/dropped) -->
 
-- **Composición** (la imprime el gate): **70 archivos** — **52** espejados de
+- **Composición** (la imprime el gate): **89 archivos** — **52** espejados de
   la fuente, **4** divergentes (favicons de tile lleno de #4; la fuente todavía
-  tiene la versión previa), **14** propios (`favicon-*-teal*` y `*-lockup-settled*`) y **3**
+  tiene la versión previa), **33** propios (`favicon-*-teal*`, `*-lockup-settled*` y `*-settled-*`) y **3**
   retirados (`favicon-{aurea,base}-16.png` transparentes, #4; más el `README.md`
   de la carpeta de assets de la fuente). Ningún archivo `dropped`.
   Si la composición cambia, el test falla hasta actualizar README, manual y
