@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## v1.2.0 — 2026-11-03
+
+Release de composición: el **settled** pasa a ser el default documentado, con
+lockups canónicos y un set de exports propio, y `prefers-reduced-motion` deja
+de perder el mark. **Nada se renombra**: los nombres existentes conservan su
+contenido; lo nuevo se publica con nombre propio.
+
 
 - **Lockups settled**: nuevos `logo-{aurea,base}-lockup-settled{,-light}.svg` —
   el lockup canónico sin constelación. El lockup existente queda como variante
