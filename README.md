@@ -17,7 +17,7 @@ geometría ni el acabado de la C — eso es alcance del issue #1.
 ## Contenido
 
 ```
-assets/logo/               # 70 assets generados (SVG, PNG, print, favicon, og)
+assets/logo/               # 89 assets generados (SVG, PNG, print, favicon, og)
 docs/logo.md               # manual de marca (símbolo, paleta, construcción, uso)
 docs/composicion.md        # matriz de composición por superficie y estado (#6)
 tools/logo/                # geometry.mjs (fuente de verdad), generador, tests, gate
@@ -93,7 +93,7 @@ Requisitos: Node 20+ y Chrome/Chromium. En Linux/CI, apuntá `CHROME_PATH`.
 ```bash
 npm install
 npm test                    # invariantes de geometría
-npm run logo:generate       # regenera los 70 assets (áurea + base)
+npm run logo:generate       # regenera los 89 assets (áurea + base)
 npm run logo:favicons       # sólo favicons (16 sólo -teal; 32 las 3)
 CHROME_PATH=/usr/bin/google-chrome npm run logo:verify   # gate ≡ DOM aprobado
 ```
@@ -116,13 +116,13 @@ node tools/logo/verify-assets.mjs                 # offline: assets/logo/ ≡ ma
 node tools/logo/verify-assets.mjs --from-source   # red: drift contra la fuente
 ```
 
-<!-- composición: 70/52/4/14/3/0 (total/mirror/diverged/local/retired/dropped) -->
+<!-- composición: 89/52/4/33/3/0 (total/mirror/diverged/local/retired/dropped) -->
 
-Composición vigente (la imprime el propio comando): **70 archivos** —
+Composición vigente (la imprime el propio comando): **89 archivos** —
 **52** byte-idénticos a la fuente, **4** divergentes a propósito
 (`favicon-{aurea,base}{,-32}.{svg,png}`: la familia de favicons con tile lleno
 que este repo adelantó en #4; la fuente todavía tiene la versión previa),
-**14** propios de este repo (los `favicon-*-teal*` y los cuatro `*-lockup-settled*`, que la fuente aún no tiene)
+**33** propios de este repo (los `favicon-*-teal*`, los cuatro `*-lockup-settled*` y los 19 exports `*-settled-*` — PNG, print y og —, que la fuente aún no tiene)
 y **3** retirados (`favicon-{aurea,base}-16.png` transparentes, retirados en
 #4 — a 16 px sólo se publica `-teal` — y el `README.md` de la carpeta de assets
 en la fuente, que es documentación, no un asset).

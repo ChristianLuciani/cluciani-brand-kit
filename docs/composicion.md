@@ -83,11 +83,11 @@ conteos que `.brand-mini` según el issue #6) y se declara la premisa.
 Las cinco decisiones están tomadas; lo que sigue es hacer que los assets las
 cumplan. Nada de esto cambia la decisión.
 
-- **Exports** — los PNG, print y og-image se generan hoy desde `layers`
-  (con estrellitas). Si el default es settled, el set por defecto tiene que
-  salir de `settled` y el set con constelación publicarse como variante
-  (sufijo propio). Es un cambio de nombres para consumidores: **no se hace sin
-  decisión del operador**, y por eso queda declarado y no ejecutado.
+- **Exports** — resuelto de forma **aditiva**: el set canónico se publica con
+  nombres propios (`logo-aurea-settled-{512,1024,2048,4096}{,-dark,-light}.png`,
+  `logo-aurea-settled-print-{a4,a3}{,-dark,-light}.png` y
+  `og-image-aurea-settled.png`). Los PNG existentes conservan nombre y
+  contenido: son el set **full**, con constelación. Nada se renombra.
 - **`mark-42`** — sin cambio: el sitio ya usa el mini y así queda ratificado. El
   salto al minimizar es la transición declarada.
 

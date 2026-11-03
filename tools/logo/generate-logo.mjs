@@ -443,6 +443,23 @@ function main() {
       shoot(`logo-${version}-${s}-light.png`, squarePage(layersLightSvg, s, "light"), { w: s, transparent: false });
     }
 
+    /* set settled (canónico): nombres propios, sin tocar los existentes.
+       El default de la matriz es settled; el set con constelación queda como
+       variante permitida bajo los nombres actuales (decisión #6). */
+    if (version === "aurea") {
+      for (const s of [512, 1024, 2048, 4096]) {
+        shoot(`logo-${version}-settled-${s}.png`, squarePage(settledSvg, s, "transparent"), { w: s, transparent: true });
+        shoot(`logo-${version}-settled-${s}-dark.png`, squarePage(settledSvg, s, "night"), { w: s, transparent: false });
+        shoot(`logo-${version}-settled-${s}-light.png`, squarePage(settledLightSvg, s, "light"), { w: s, transparent: false });
+      }
+      for (const [label, { w, h }] of [["print-a4", { w: 2480, h: 3508 }], ["print-a3", { w: 3508, h: 4961 }]]) {
+        shoot(`logo-${version}-settled-${label}.png`, printPage(settledSvg, w, h, "transparent"), { w, h, transparent: true });
+        shoot(`logo-${version}-settled-${label}-dark.png`, printPage(settledSvg, w, h, "night"), { w, h, transparent: false });
+        shoot(`logo-${version}-settled-${label}-light.png`, printPage(settledLightSvg, w, h, "light"), { w, h, transparent: false });
+      }
+      shoot(`og-image-${version}-settled.png`, ogPage(settledSvg), { w: 1200, h: 630, transparent: false });
+    }
+
     /* print 300dpi A4/A3 (transparente + dark + light) */
     for (const [label, { w, h }] of [["print-a4", { w: 2480, h: 3508 }], ["print-a3", { w: 3508, h: 4961 }]]) {
       shoot(`logo-${version}-${label}.png`, printPage(layersSvg, w, h, "transparent"), { w, h, transparent: true });
