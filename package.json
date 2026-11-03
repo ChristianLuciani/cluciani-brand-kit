@@ -12,7 +12,7 @@
     "logo:verify": "node tools/logo/verify-dom-fidelity.mjs"
   },
   "devDependencies": {
-    "vitest": "4.1.0"
+    "vitest": "5.0.5"
   },
   "engines": {
     "node": ">=20"
