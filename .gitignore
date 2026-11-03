@@ -1,4 +1,9 @@
 node_modules/
-.agos/sprints/
+# Estado local de sesiones/outbox de AGOS: no se versiona.
+.agos/
 tools/logo/.chrome-tmp/
 .DS_Store
+# Secretos: nunca versionar .env (el gate de CI lo verifica).
+.env
+.env.*
+!.env.example
