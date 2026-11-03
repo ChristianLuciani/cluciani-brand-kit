@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 # Estado local de sesiones/outbox de AGOS: no se versiona.
 .agos/
 tools/logo/.chrome-tmp/
