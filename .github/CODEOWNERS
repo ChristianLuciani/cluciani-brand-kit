@@ -1,0 +1,4 @@
+# Owner de todo el repo: routing de review y trazabilidad.
+# La aprobación de owner NO se exige en el ruleset de main: el repo tiene un
+# solo mantenedor y GitHub no permite auto-aprobar el PR propio.
+* @ChristianLuciani
