@@ -79,8 +79,8 @@
         "lineas": 19,
         "paths": 7
       },
-      "objetivo": "falta el lockup settled (canónico): hoy sólo existe el lockup con constelación, que pasa a ser la variante permitida",
-      "estado": "deriva",
+      "objetivo": "variante permitida: lockup con constelación, para los contextos que la pidan",
+      "estado": "excepcion-declarada",
       "ratificado": true
     },
     "lockup-light": {
@@ -94,8 +94,8 @@
         "lineas": 19,
         "paths": 6
       },
-      "objetivo": "falta el lockup light settled (canónico): hoy sólo existe con constelación",
-      "estado": "deriva",
+      "objetivo": "variante permitida: lockup light con constelación",
+      "estado": "excepcion-declarada",
       "ratificado": true
     },
     "favicon-transparent": {
@@ -142,6 +142,36 @@
       "objetivo": "excepción declarada: icono con el acabado del mark, sólo 32 px y SVG",
       "estado": "excepcion-declarada",
       "ratificado": true
+    },
+    "lockup-settled": {
+      "path": "assets/logo/logo-aurea-lockup-settled.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": true,
+        "vertices": 0,
+        "lineas": 19,
+        "paths": 7
+      },
+      "objetivo": "lockup canónico: settled, sin constelación",
+      "estado": "coincide",
+      "ratificado": true
+    },
+    "lockup-settled-light": {
+      "path": "assets/logo/logo-aurea-lockup-settled-light.svg",
+      "composicion": {
+        "espiral": true,
+        "c": true,
+        "supernova": true,
+        "cielo": false,
+        "vertices": 0,
+        "lineas": 19,
+        "paths": 6
+      },
+      "objetivo": "lockup canónico light: settled, sin cielo",
+      "estado": "coincide",
+      "ratificado": true
     }
   },
   "estados": {
@@ -154,7 +184,7 @@
     "loader-reduced": {
       "fuente": "proposals/logo-triangulo-espiral/aurea7.html",
       "derivacion": "DOM con prefers-reduced-motion",
-      "estado": "deriva",
+      "estado": "coincide",
       "ratificado": true
     },
     "mark-42": {
@@ -173,7 +203,9 @@
     "logo-base-lockup-light.svg",
     "logo-base-lockup.svg",
     "logo-base-settled-light.svg",
-    "logo-base-settled.svg"
+    "logo-base-settled.svg",
+    "logo-base-lockup-settled.svg",
+    "logo-base-lockup-settled-light.svg"
   ],
   "ratificado_por": "Christian Luciani",
   "ratificado_at": "2026-11-02",

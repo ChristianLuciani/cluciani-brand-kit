@@ -3,9 +3,10 @@
  *
  * Carga los HTMLs aprobados (PR #53) en Chrome headless y compara la
  * geometría RENDERIZADA contra geometry.mjs, en dos modos:
- *   · reduced (--force-prefers-reduced-motion): estado final limpio —
- *     segmentos del espiral (coordenadas + stroke/width/opacity exactos)
- *     y el path de la C (áurea). Sin hot-lines ni constelación.
+ *   · reduced (--force-prefers-reduced-motion): estado final estático —
+ *     segmentos del espiral (coordenadas + stroke/width/opacity exactos),
+ *     el path de la C (áurea) y la composición: 1 supernova + cielo, sin
+ *     vértices (decisión #6, 2026-11-02). Sin hot-lines.
  *   · normal (virtual-time): cielo (ambient + galaxia) y constelación
  *     de vértices — posición/radio/fill exactos.
  *
@@ -110,6 +111,20 @@ function verify(version, htmlPath) {
   }
   if (styleOk === expected.size)
     console.log(`✅ ${version}: stroke/width/opacity de cada tramo coinciden (rampa ${lerpColor(cfg.colors.spiralFrom, cfg.colors.spiralTo, 0)} → ${lerpColor(cfg.colors.spiralFrom, cfg.colors.spiralTo, 1)})`);
+
+  // Composición reducida: el mark conserva supernova y cielo y no dibuja
+  // los 21 vértices (decisión #6, 2026-11-02). El modo normal sigue completo.
+  const starsR = (dumpR.match(/class="star"/g) || []).length;
+  const ambientR = (dumpR.match(/class="ambient"/g) || []).length;
+  const skyR = (dumpR.match(/class="sky"/g) || []).length;
+  if (starsR !== 1)
+    fail(`${version}: reduced — ${starsR} grupos de estrella, esperado 1 (sólo la supernova)`);
+  else if (ambientR !== sky.length)
+    fail(`${version}: reduced — ${ambientR} ambient, esperado ${sky.length} (cielo intacto)`);
+  else if (skyR !== 1)
+    fail(`${version}: reduced — falta el grupo del cielo`);
+  else
+    console.log(`✅ ${version}: reduced — 1 supernova + ${sky.length} ambient, sin vértices`);
 
   if (version === "aurea") {
     // La C es una barra (dos regiones de gradiente) revelada por una máscara

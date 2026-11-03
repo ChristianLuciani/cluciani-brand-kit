@@ -13,7 +13,7 @@
  *   · og-image 1200×630 (dark + nombre)
  *
  * Uso: node tools/logo/generate-logo.mjs [--only-aurea|--only-base]
- *      [--only-favicon] [--out assets/logo] (o LOGO_OUT env)
+ *      [--only-favicon] [--only-svg] [--out assets/logo] (o LOGO_OUT env)
  */
 import { execFileSync } from "node:child_process";
 import { accessSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -362,8 +362,9 @@ ${cBlock}
 
 function main() {
   const onlyFavicon = argv.includes("--only-favicon");
+  const onlySvg = argv.includes("--only-svg"); // sólo los SVG: no lanza Chrome
   const versions = argv.includes("--only-base") ? ["base"] : argv.includes("--only-aurea") ? ["aurea"] : ["aurea", "base"];
-  const chrome = pickChrome();
+  const chrome = onlySvg ? null : pickChrome(); // --only-svg no necesita Chrome
   mkdirSync(OUT, { recursive: true });
   mkdirSync(TMP, { recursive: true });
 
@@ -397,6 +398,7 @@ function main() {
       const doc = faviconDoc(g, cfg, { variant: fv.variant });
       writeFileSync(join(OUT, `${base}.svg`), doc, "utf8");
       written.push(`${base}.svg`);
+      if (onlySvg) continue; // SVG sí, raster no
       for (const s of fv.sizes) {
         shoot(`${base}-${s}.png`, squarePage(doc, s, "transparent"), { w: s, transparent: true });
       }
@@ -410,9 +412,11 @@ function main() {
     const layersSvg = svgDoc(g, cfg, sky, { settled: false });
     const settledSvg = svgDoc(g, cfg, sky, { settled: true });
     const lockupSvg = svgDoc(g, cfg, sky, { settled: false, typography: true });
+    const lockupSettledSvg = svgDoc(g, cfg, sky, { settled: true, typography: true });
     const layersLightSvg = svgDoc(g, cfg, sky, { settled: false, surface: "light" });
     const settledLightSvg = svgDoc(g, cfg, sky, { settled: true, surface: "light" });
     const lockupLightSvg = svgDoc(g, cfg, sky, { settled: false, typography: true, surface: "light" });
+    const lockupSettledLightSvg = svgDoc(g, cfg, sky, { settled: true, typography: true, surface: "light" });
     for (const [name, doc] of [
       [`logo-${version}-layers.svg`, layersSvg],
       [`logo-${version}-settled.svg`, settledSvg],
@@ -420,9 +424,16 @@ function main() {
       [`logo-${version}-layers-light.svg`, layersLightSvg],
       [`logo-${version}-settled-light.svg`, settledLightSvg],
       [`logo-${version}-lockup-light.svg`, lockupLightSvg],
+      [`logo-${version}-lockup-settled.svg`, lockupSettledSvg],
+      [`logo-${version}-lockup-settled-light.svg`, lockupSettledLightSvg],
     ]) {
       writeFileSync(join(OUT, name), doc, "utf8");
       written.push(name);
+    }
+
+    if (onlySvg) {
+      console.log(`✅ ${version}: ${written.length} SVG → ${OUT} (sin raster)`)
+      continue;
     }
 
     /* master PNG 512..4096 (full: transparente + dark + light) */

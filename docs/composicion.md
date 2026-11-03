@@ -46,8 +46,10 @@ El eje es la composición.
 | `master-settled` | `assets/logo/logo-aurea-settled.svg` | sí | sí | sí | sí | 0 | coincide |
 | `light-layers` | `assets/logo/logo-aurea-layers-light.svg` | sí | sí | sí | no | 21 | excepción declarada |
 | `light-settled` | `assets/logo/logo-aurea-settled-light.svg` | sí | sí | sí | no | 0 | coincide |
-| `lockup-night` | `assets/logo/logo-aurea-lockup.svg` | sí | sí | sí | sí | 21 | deriva |
-| `lockup-light` | `assets/logo/logo-aurea-lockup-light.svg` | sí | sí | sí | no | 21 | deriva |
+| `lockup-night` | `assets/logo/logo-aurea-lockup.svg` | sí | sí | sí | sí | 21 | excepción declarada |
+| `lockup-settled` | `assets/logo/logo-aurea-lockup-settled.svg` | sí | sí | sí | sí | 0 | coincide |
+| `lockup-light` | `assets/logo/logo-aurea-lockup-light.svg` | sí | sí | sí | no | 21 | excepción declarada |
+| `lockup-settled-light` | `assets/logo/logo-aurea-lockup-settled-light.svg` | sí | sí | sí | no | 0 | coincide |
 | `favicon-transparent` | `assets/logo/favicon-aurea.svg` | no | sí | sí | no | 0 | excepción declarada |
 | `favicon-teal` | `assets/logo/favicon-aurea-teal.svg` | no | sí | sí | no | 0 | excepción declarada |
 | `favicon-teal-gold` | `assets/logo/favicon-aurea-teal-gold.svg` | no | sí | sí | no | 0 | excepción declarada |
@@ -69,7 +71,7 @@ composición light es la misma del par night, menos el cielo.
 | id | fuente | hoy | objetivo | estado |
 |---|---|---|---|---|
 | `loader-final` | `proposals/logo-triangulo-espiral/aurea7.html` | espiral + C + supernova + cielo; 22 grupos de estrella en el DOM, 21 disueltos al ser tocados | idéntico al `master-settled` | coincide |
-| `loader-reduced` | mismo archivo, `prefers-reduced-motion` | espiral + C; **sin supernova y sin cielo** (0 `star`, 0 `ambient` en el DOM) | el settled estático: espiral + C + supernova + cielo, sin animación | **deriva** |
+| `loader-reduced` | mismo archivo, `prefers-reduced-motion` | espiral + C + supernova + cielo, sin vértices ni animación (1 `star`, 76 `ambient` en el DOM) | el settled estático: espiral + C + supernova + cielo, sin animación | coincide |
 | `mark-42` | sitio (`cv-cluciani`), `.brand-mini` | C + supernova: sin espiral, sin cielo; el C ocupa ~91 % de la caja. Hoy el sitio lo dibuja a **36 px**; 42 era el tamaño cuando se abrió #6 | **el mini, tal como está**: el salto settled → mini es declarado y aceptado | coincide |
 
 El `mark-42` no se mide en este repo: `cv-cluciani` no está disponible en esta
@@ -81,19 +83,11 @@ conteos que `.brand-mini` según el issue #6) y se declara la premisa.
 Las cinco decisiones están tomadas; lo que sigue es hacer que los assets las
 cumplan. Nada de esto cambia la decisión.
 
-- **`lockup-night` y `lockup-light`** — hoy sólo existe el lockup **con**
-  constelación. Falta el lockup **settled** (el canónico): hay que generarlo y
-  dejar el actual como variante permitida.
 - **Exports** — los PNG, print y og-image se generan hoy desde `layers`
   (con estrellitas). Si el default es settled, el set por defecto tiene que
   salir de `settled` y el set con constelación publicarse como variante
-  (sufijo propio). Es un cambio de nombres para consumidores: no se hace sin
-  decisión del operador.
-- **`loader-reduced`** — la causa está en `aurea7.html:501`: la constelación y
-  el cielo están dentro de `if (!reduced)`. El arreglo es mover la construcción
-  fuera del guard y dejar dentro sólo las animaciones. Medición del centro de la
-  supernova (400, 414) con Chrome headless: reducido `(9, 29, 43)` vs vivo
-  `(195, 142, 131)` (§7).
+  (sufijo propio). Es un cambio de nombres para consumidores: **no se hace sin
+  decisión del operador**, y por eso queda declarado y no ejecutado.
 - **`mark-42`** — sin cambio: el sitio ya usa el mini y así queda ratificado. El
   salto al minimizar es la transición declarada.
 
@@ -176,7 +170,7 @@ manda en cada superficie. No hay un commit que "rompa" el mark.
 | 2026-10-22 | brand kit v1.0.0 (`6ccd725`) | este repo | importa los assets como espejo: hereda las tres composiciones y no hereda ninguna matriz. |
 | 2026-10-27 | sync y guardas (#1, #4, #7) | este repo | se sincroniza el acabado de la C, entran los favicons teal y un gate que fija **conteos** de archivos — no composición. |
 | 2026-10-28 | issue #6 | tracker | se nombra la deriva; queda frenada como decisión, no como tarea. |
-| 2026-11-02 | decisión por pares | este PR | matriz ratificada; el default es settled, `layers` queda como variante permitida y los lockups settled quedan como deuda. |
+| 2026-11-02 | decisión por pares | este PR | matriz ratificada; el default es settled, `layers` queda como variante permitida. Los lockups settled y el fix de reduced se implementan en el mismo período (PR de implementación). |
 
 Lectura: la deriva tiene **dos orígenes distintos**. El estado `reduced` nació
 incompleto en el diseño de la animación (2026-09-09). El salto settled → mini

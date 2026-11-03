@@ -329,7 +329,8 @@ light, además, se omite `logo-background` y los halos de la constelación
 assets/logo/
   logo-{aurea|base}-layers.svg        # master por capas (hero)
   logo-{aurea|base}-settled.svg       # estado final (favicons/print)
-  logo-{aurea|base}-lockup.svg        # mark + tipografía (800×940)
+  logo-{aurea|base}-lockup.svg        # mark + tipografía con constelación (800×940)
+  logo-{aurea|base}-lockup-settled.svg # lockup canónico sin constelación (800×940)
   logo-{aurea|base}-*-light.svg       # masters para superficie clara
   logo-{aurea|base}-{512|1024|2048|4096}.png       # transparente
   logo-{aurea|base}-{512|1024|2048|4096}-dark.png  # fondo night
@@ -380,16 +381,16 @@ el gate de CI compara el árbol local contra el manifiesto **sin red**.
 | `retired` | existe en la fuente y acá **no** se publica | no: exige razón |
 | `dropped` | se publicó acá y se dejó de publicar (no viene de la fuente) | no: exige razón |
 
-<!-- composición: 66/52/4/10/3/0 (total/mirror/diverged/local/retired/dropped) -->
+<!-- composición: 70/52/4/14/3/0 (total/mirror/diverged/local/retired/dropped) -->
 
-Composición vigente (la imprime el gate): **66 archivos** — **52** espejados
-de la fuente, **4** divergentes, **10** propios y **3** retirados.
+Composición vigente (la imprime el gate): **70 archivos** — **52** espejados
+de la fuente, **4** divergentes, **14** propios y **3** retirados.
 
 - **Divergentes** (`favicon-{aurea,base}{,-32}.{svg,png}`): la familia de
   favicons con tile lleno de #4; la fuente todavía tiene la versión previa.
   Cuando se sincronice allá, pasan a `mirror` (el gate lo exige: falla si un
   `diverged` deja de divergir).
-- **Propios** (`favicon-*-teal*`): el tile teal y su variante dorada, que la
+- **Propios** (`favicon-*-teal*` y `*-lockup-settled*`): el tile teal con su variante dorada y los lockups canónicos sin constelación (#6), que la
   fuente aún no tiene.
 - **Retirados** (`favicon-{aurea,base}-16.png` transparentes, retirados en #4):
   a 16 px sólo se publica `-teal`; y `README.md` de la carpeta de assets en la
