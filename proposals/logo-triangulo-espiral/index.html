@@ -99,6 +99,7 @@
     /* estado final estático: sin titileo, sin fade y sin respiración */
     .sky,.constellation{opacity:1; animation:none}
     .ambient,.star .core,.star .glow,.c-glow,.settle-on .c-glow{animation:none}
+    .ambient{opacity:var(--lo,.2)} /* el cielo reducido no es más brillante que el settled */
     .star .core{opacity:1}
   }
 </style>

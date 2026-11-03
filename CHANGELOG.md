@@ -5,8 +5,19 @@
 - **Lockups settled**: nuevos `logo-{aurea,base}-lockup-settled{,-light}.svg` —
   el lockup canónico sin constelación. El lockup existente queda como variante
   permitida (#6).
-- **`prefers-reduced-motion`**: la animación conserva la supernova y el cielo;
-  los 21 vértices no se dibujan. El guard ya no envuelve cielo ni supernova (#6).
+- **`prefers-reduced-motion`**: la animación conserva la supernova y el cielo,
+  y queda **estática** (sin titileo, fade ni respiración). Los 21 vértices no
+  se dibujan. El guard ya no envuelve cielo ni supernova (#6).
+
+<!-- composición: 70/52/4/14/3/0 (total/mirror/diverged/local/retired/dropped) -->
+
+- **Composición** (la imprime el gate): **70 archivos** — **52** espejados de
+  la fuente, **4** divergentes (favicons de tile lleno de #4; la fuente todavía
+  tiene la versión previa), **14** propios (`favicon-*-teal*` y `*-lockup-settled*`) y **3**
+  retirados (`favicon-{aurea,base}-16.png` transparentes, #4; más el `README.md`
+  de la carpeta de assets de la fuente). Ningún archivo `dropped`.
+  Si la composición cambia, el test falla hasta actualizar README, manual y
+  este CHANGELOG en el mismo PR.
 
 ## v1.1.0 — 2026-11-02
 
@@ -60,15 +71,8 @@ del issue #1 (acabado de la C).
   `main` que avanza sin tocar assets no la rompe, y un asset nuevo/cambiado sí.
   El `README.md` de la carpeta de assets de la fuente va `retired` (es
   documentación, no un asset) y el `source_ref` se pinea a un commit.
-<!-- composición: 70/52/4/14/3/0 (total/mirror/diverged/local/retired/dropped) -->
-
-- **Composición** (la imprime el gate): **70 archivos** — **52** espejados de
-  la fuente, **4** divergentes (favicons de tile lleno de #4; la fuente todavía
-  tiene la versión previa), **14** propios (`favicon-*-teal*` y `*-lockup-settled*`) y **3**
-  retirados (`favicon-{aurea,base}-16.png` transparentes, #4; más el `README.md`
-  de la carpeta de assets de la fuente). Ningún archivo `dropped`.
-  Si la composición cambia, el test falla hasta actualizar README, manual y
-  este CHANGELOG en el mismo PR.
+  La composición del manifiesto se publica en **Unreleased**: este corte
+  histórico no lleva cifra.
 - **README — corrección de afirmaciones vencidas**: «Estado de la animación»
   decía que `aurea7.html` todavía dibujaba la C plana (el sync de #1 ya la
   dibuja como banda con máscara) y apuntaba a #56 como trabajo en curso (está
