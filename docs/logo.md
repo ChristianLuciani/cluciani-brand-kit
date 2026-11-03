@@ -333,7 +333,13 @@ assets/logo/
   logo-{aurea|base}-lockup-settled.svg # lockup canónico sin constelación (800×940)
   logo-{aurea|base}-*-light.svg       # masters para superficie clara
   logo-{aurea|base}-{512|1024|2048|4096}.png       # transparente (set full)
-  logo-aurea-settled-{512|1024|2048|4096}.png      # canónico settled (aditivo, #6)
+  logo-aurea-settled-{512|1024|2048|4096}.png      # canónico settled, transparente (aditivo, #6)
+  logo-aurea-settled-{512|1024|2048|4096}-dark.png # canónico settled, fondo night
+  logo-aurea-settled-{512|1024|2048|4096}-light.png# canónico settled, fondo blanco
+  logo-aurea-settled-print-{a4|a3}.png             # 300dpi settled transparente
+  logo-aurea-settled-print-{a4|a3}-dark.png        # 300dpi settled night
+  logo-aurea-settled-print-{a4|a3}-light.png       # 300dpi settled blanco
+  og-image-aurea-settled.png           # 1200×630 dark + nombre (mark settled)
   logo-{aurea|base}-{512|1024|2048|4096}-dark.png  # fondo night
   logo-{aurea|base}-{512|1024|2048|4096}-light.png # fondo blanco
   logo-{aurea|base}-print-{a4|a3}.png             # 300dpi transparente
