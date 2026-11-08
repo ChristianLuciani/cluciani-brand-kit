@@ -10,7 +10,7 @@ import worker, {
   renderIcon,
 } from '../src/worker.mjs';
 import { DEFAULT_COLOR, PATH, TITLE, VIEWBOX } from '../src/icon.generated.mjs';
-import { buildIcon, renderModule } from '../../tools/badge/generate-badge.mjs';
+import { STATIC_VARIANTS, buildIcon, renderModule, renderStaticFiles } from '../../tools/badge/generate-badge.mjs';
 
 const BASE = 'https://cdn.test';
 
@@ -195,5 +195,24 @@ describe('el icono no deriva del mini canónico', () => {
 
   test('C + supernova: dos subpaths cerrados en un único path', () => {
     expect(PATH.match(/Z/g)).toHaveLength(2);
+  });
+});
+
+describe('assets estáticos para jsDelivr', () => {
+  test('cada variante publicada es byte-idéntica al render del Worker', () => {
+    const files = renderStaticFiles();
+    expect(files.size).toBe(STATIC_VARIANTS.length);
+    for (const [relative, expected] of files) {
+      const onDisk = readFileSync(new URL(`../../${relative}`, import.meta.url), 'utf8');
+      expect(onDisk, relative).toBe(expected);
+    }
+  });
+
+  test('el default es oro y el adaptive cambia a blanco en dark mode', () => {
+    const files = renderStaticFiles();
+    expect(files.get('assets/badge/espirangulo.svg')).toContain('fill="#c9a84c"');
+    const adaptive = files.get('assets/badge/espirangulo-adaptive.svg');
+    expect(adaptive).toContain('path{fill:#c9a84c}');
+    expect(adaptive).toContain('@media (prefers-color-scheme:dark){path{fill:#ffffff}}');
   });
 });

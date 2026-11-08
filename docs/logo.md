@@ -355,9 +355,9 @@ assets/logo/
   og-image-{aurea|base}.png           # 1200×630 dark + nombre
 ```
 
-Badge CDN: el icono monocromo para badges (mini C + supernova) se genera desde
-`favicon-aurea.svg`; contrato y límites en [`docs/badge.md`](badge.md). No
-reemplaza el mark ni sus assets.
+Badge: el icono monocromo para badges (mini C + supernova) se genera desde
+`favicon-aurea.svg` y se publica en `assets/badge/` para jsDelivr; contrato y
+límites en [`docs/badge.md`](badge.md). No reemplaza el mark ni sus assets.
 
 Regenerar todo: `npm run logo:generate`
 Sólo favicons: `npm run logo:favicons` (`--only-favicon`)

@@ -18,6 +18,7 @@ geometría ni el acabado de la C — eso es alcance del issue #1.
 
 ```
 assets/logo/               # 89 assets generados (SVG, PNG, print, favicon, og)
+assets/badge/              # 7 SVG estáticos del badge para jsDelivr
 docs/logo.md               # manual de marca (símbolo, paleta, construcción, uso)
 docs/composicion.md        # matriz de composición por superficie y estado (#6)
 tools/logo/                # geometry.mjs (fuente de verdad), generador, tests, gate
@@ -96,23 +97,25 @@ Favicon con tile teal (opciones de color, §3.2 del manual). Se publican desde
 <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.2.0/assets/logo/favicon-aurea-teal-gold-32.png">
 ```
 
-### Badge CDN (Espirángulo)
+### Badge (Espirángulo)
 
-`cdn/` implementa un endpoint colorable con el contrato de
-`cdn.simpleicons.org` — no está en Simple Icons (su alcance excluye marcas que
-representan a una persona) y no necesita estarlo:
+El badge es el **mini** (C + supernova) monocromo, generado desde
+`assets/logo/favicon-aurea.svg`; el mark completo sigue viviendo en
+`assets/logo/`. Se publica por **jsDelivr**, como el resto del repo, sin cuenta
+ni deploy:
 
-```text
-https://<worker>/espirangulo[/<color>[/<darkColor>]][?size=N][&viewbox=auto]
+```html
+<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo.svg" alt="Espirángulo — Christian Luciani">
 ```
 
-El icono es el **mini** (C + supernova) monocromo, generado desde
-`assets/logo/favicon-aurea.svg`; el mark completo sigue viviendo en
-`assets/logo/`. Contrato, límites y deploy: [docs/badge.md](docs/badge.md).
+`assets/badge/` trae siete variantes de color (oro default, teal, ámbar, oro
+profundo, night, blanco y `-adaptive` con dark mode). `@main` sirve apenas se
+mergea; para URLs inmutables, pineá el tag posterior al release.
 
-La URL pública queda pendiente del deploy del operador (`cd cdn && npx
-wrangler@4.158.0 deploy`); hasta entonces, `npm run badge:preview` sirve el
-mismo Worker en `http://127.0.0.1:8788/preview`.
+Si hace falta **color arbitrario por URL**, `cdn/` trae un Worker opcional con
+el contrato de `cdn.simpleicons.org` (`/espirangulo/<color>/<dark>?size=`), pero
+requiere deploy en Cloudflare. Detalle, variantes y límites:
+[docs/badge.md](docs/badge.md).
 
 ## Regenerar
 

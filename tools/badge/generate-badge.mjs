@@ -7,20 +7,39 @@
 // a 16–32 px y sin sentido en un icono de un solo color) y se combinan en un
 // único <path>.
 //
+// Escribe dos salidas con la misma fuente y el mismo render:
+//   cdn/src/icon.generated.mjs          (Worker)
+//   assets/badge/espirangulo*.svg       (estáticos para jsDelivr)
+//
 // Uso:
-//   node tools/badge/generate-badge.mjs           # escribe cdn/src/icon.generated.mjs
-//   node tools/badge/generate-badge.mjs --check   # falla si el archivo está stale
+//   node tools/badge/generate-badge.mjs           # regenera todo
+//   node tools/badge/generate-badge.mjs --check   # falla si algo quedó stale
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { renderSvg } from '../../cdn/src/icon.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const SOURCE = resolve(ROOT, 'assets/logo/favicon-aurea.svg');
 const OUT = resolve(ROOT, 'cdn/src/icon.generated.mjs');
+const STATIC_DIR = resolve(ROOT, 'assets/badge');
 
 const TITLE = 'Espirángulo — Christian Luciani';
 const DEFAULT_COLOR = '#c9a84c';
+
+// Set estático mínimo para consumir por jsDelivr sin deploy. El color es el
+// archivo: para un color arbitrario está el Worker (docs/badge.md §5).
+export const STATIC_VARIANTS = [
+  { file: 'espirangulo.svg', color: DEFAULT_COLOR },
+  { file: 'espirangulo-teal.svg', color: '#00c9c0' },
+  { file: 'espirangulo-amber.svg', color: '#d99a2b' },
+  { file: 'espirangulo-deep.svg', color: '#8a5a1c' },
+  { file: 'espirangulo-night.svg', color: '#050810' },
+  { file: 'espirangulo-white.svg', color: '#ffffff' },
+  { file: 'espirangulo-adaptive.svg', color: DEFAULT_COLOR, darkColor: '#ffffff' },
+];
 
 /** Extrae la C y el núcleo de la supernova y los une en un solo path. */
 export function buildIcon(sourceSvg = readFileSync(SOURCE, 'utf8')) {
@@ -71,25 +90,56 @@ export const DEFAULT_COLOR = ${JSON.stringify(icon.defaultColor)};
 `;
 }
 
+/** Renderiza los SVG estáticos (misma plantilla que el Worker). */
+export function renderStaticFiles(icon = buildIcon()) {
+  const files = new Map();
+  for (const variant of STATIC_VARIANTS) {
+    files.set(
+      `assets/badge/${variant.file}`,
+      `${renderSvg({
+        path: icon.path,
+        viewBox: icon.viewBox,
+        title: icon.title,
+        color: variant.color,
+        darkColor: variant.darkColor ?? null,
+      })}\n`,
+    );
+  }
+  return files;
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const check = process.argv.includes('--check');
-  const rendered = renderModule();
+  const icon = buildIcon();
+  const outputs = new Map([
+    ['cdn/src/icon.generated.mjs', renderModule(icon)],
+    ...renderStaticFiles(icon),
+  ]);
 
   if (check) {
-    let current = '';
-    try {
-      current = readFileSync(OUT, 'utf8');
-    } catch {
-      // cae al error de abajo con el mensaje correcto
+    const stale = [];
+    for (const [relative, expected] of outputs) {
+      let current = '';
+      try {
+        current = readFileSync(resolve(ROOT, relative), 'utf8');
+      } catch {
+        // missing → stale
+      }
+      if (current !== expected) stale.push(relative);
     }
-    if (current !== rendered) {
-      console.error('badge: icon.generated.mjs está desactualizado. Corré `npm run badge:generate`.');
+    if (stale.length > 0) {
+      console.error(`badge: salidas desactualizadas (${stale.length}):`);
+      for (const file of stale) console.error(`  - ${file}`);
+      console.error('Corré `npm run badge:generate`.');
       process.exitCode = 1;
     } else {
-      console.log('badge: icon.generated.mjs ≡ assets/logo/favicon-aurea.svg');
+      console.log(`badge: ${outputs.size} salidas ≡ assets/logo/favicon-aurea.svg`);
     }
   } else {
-    writeFileSync(OUT, rendered);
-    console.log(`badge: escrito ${OUT}`);
+    mkdirSync(STATIC_DIR, { recursive: true });
+    for (const [relative, content] of outputs) {
+      writeFileSync(resolve(ROOT, relative), content);
+    }
+    console.log(`badge: ${outputs.size} salidas escritas (Worker + assets/badge/)`);
   }
 }

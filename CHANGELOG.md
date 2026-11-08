@@ -2,21 +2,23 @@
 
 ## Unreleased
 
-### Badge CDN (Espirángulo)
+### Badge (Espirángulo)
 
-- **`cdn/`** — Worker Cloudflare sin dependencias ni estado: sirve el mini
-  monocromo con el contrato de `cdn.simpleicons.org`
-  (`/espirangulo[/:color[/:dark]]?size=&viewbox=auto`), Cache API, CORS, CSP y
-  cache headers. Simple Icons no puede alojarlo (excluye marcas de personas):
-  el CDN es propio.
+- **`assets/badge/`** — siete SVG estáticos del mini monocromo (oro default,
+  teal, ámbar, oro profundo, night, blanco y `-adaptive` con dark mode) para
+  consumir por jsDelivr, la CDN que el repo ya usa. Sin cuenta ni deploy; `@main`
+  sirve al mergear y el tag posterior fija la URL.
 - **`tools/badge/generate-badge.mjs`** — deriva el icono (un solo `<path>`) de
-  `assets/logo/favicon-aurea.svg`; `npm run badge:check` y el test fallan si el
-  generado queda stale. No se edita a mano.
-- **Tests** — 25 casos: color/fallback, dark mode, tamaño, rutas, métodos,
-  headers, Cache API y no-deriva desde el favicon.
-- **Deploy pendiente** — la URL pública la crea el operador
-  (`cd cdn && npx wrangler@4.158.0 deploy`); hasta entonces, `npm run
-  badge:preview`. No hay deploy en CI (requiere credenciales de cuenta).
+  `assets/logo/favicon-aurea.svg` y escribe los estáticos y el módulo del
+  Worker con la misma función de render; `npm run badge:check` y el test fallan
+  si algo queda stale. No se edita a mano.
+- **`cdn/`** — Worker Cloudflare **opcional** para color arbitrario por URL
+  (`/espirangulo[/:color[/:dark]]?size=&viewbox=auto`), Cache API, CORS, CSP y
+  cache headers. Simple Icons no puede alojar la marca (excluye personas).
+- **Tests** — 27 casos: color/fallback, dark mode, tamaño, rutas, métodos,
+  headers, Cache API, no-deriva y paridad byte a byte de los estáticos.
+- **Deploy opcional** — sólo si se usa el Worker; requiere cuenta Cloudflare
+  (`cd cdn && npx wrangler@4.158.0 deploy`). No hay deploy en CI.
 
 ## v1.2.0 — 2026-11-03
 

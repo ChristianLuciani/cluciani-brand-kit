@@ -11,6 +11,7 @@
 
 import { CSS_COLORS } from './colors.mjs';
 import { DEFAULT_COLOR, PATH, TITLE, VIEWBOX } from './icon.generated.mjs';
+import { renderSvg } from './icon.mjs';
 
 export const SLUG = 'espirangulo';
 export const REPO_URL = 'https://github.com/ChristianLuciani/cluciani-brand-kit';
@@ -43,25 +44,15 @@ export function renderIcon({ color, darkColor, size } = {}) {
   const dark = darkColor === undefined || darkColor === null
     ? null
     : normalizeColor(darkColor);
-  const px = parseSize(size);
 
-  const attrs = [
-    'xmlns="http://www.w3.org/2000/svg"',
-    `viewBox="${VIEWBOX}"`,
-    'role="img"',
-  ];
-  if (px !== null) attrs.push(`width="${px}"`, `height="${px}"`);
-
-  const title = `<title>${TITLE}</title>`;
-  const path = `<path d="${PATH}"/>`;
-  const darkMode = dark !== null && dark !== light;
-
-  if (darkMode) {
-    // El fill vive en el <style> para poder cambiarlo con prefers-color-scheme.
-    return `<svg ${attrs.join(' ')}>${title}<style>path{fill:${light}}@media (prefers-color-scheme:dark){path{fill:${dark}}}</style>${path}</svg>`;
-  }
-
-  return `<svg fill="${light}" ${attrs.join(' ')}>${title}${path}</svg>`;
+  return renderSvg({
+    path: PATH,
+    viewBox: VIEWBOX,
+    title: TITLE,
+    color: light,
+    darkColor: dark,
+    size: parseSize(size),
+  });
 }
 
 const svgHeaders = {

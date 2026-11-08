@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Espirángulo — render del badge</title>
+  <style>
+    :root {
+      --night: #050810;
+      --deep: #0b1120;
+      --gold: #c9a84c;
+      --teal: #00c9c0;
+      --amber: #d99a2b;
+      --coral: #ff8a70;
+      --ink: #e8e6df;
+      --ink-dim: #9aa3b2;
+      --paper: #f5f2ea;
+      --line: #ffffff14;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1100px 700px at 50% 0%, var(--deep), var(--night) 64%);
+      color: var(--ink);
+      font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 48px 36px 56px; }
+    header { display: flex; align-items: center; gap: 18px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+    header img { width: 56px; height: 56px; }
+    h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: .015em; }
+    h1 span { color: var(--gold); }
+    .sub { margin: 5px 0 0; color: var(--ink-dim); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+    h2 { margin: 38px 0 14px; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { border: 1px solid var(--line); border-radius: 14px; padding: 22px; background: #ffffff05; }
+    .card.light { background: var(--paper); color: #17191f; border-color: #00000014; }
+    .row { display: flex; align-items: flex-end; gap: 26px; flex-wrap: wrap; min-height: 104px; }
+    .sample { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .sample small { color: var(--ink-dim); font: 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; }
+    .light .sample small { color: #6b7280; }
+    .caption { margin: 0 0 18px; color: var(--ink-dim); font-size: 12px; }
+    .light .caption { color: #6b7280; }
+
+    .variants { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .variant { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #ffffff05; }
+    .variant .chip { height: 74px; display: grid; place-items: center; }
+    .variant .meta { padding: 8px 11px; border-top: 1px solid var(--line); }
+    .variant code { display: block; font: 10px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); }
+    .variant span { display: block; font-size: 10px; color: var(--ink-dim); margin-top: 2px; }
+    .variant .chip.on-paper { background: var(--paper); }
+
+    .readme { border-radius: 12px; overflow: hidden; border: 1px solid #00000014; background: #ffffff; color: #1f2328; }
+    .readme .bar { display: flex; gap: 6px; padding: 10px 14px; background: #f6f8fa; border-bottom: 1px solid #d0d7de; }
+    .readme .dot { width: 9px; height: 9px; border-radius: 50%; background: #d0d7de; }
+    .readme .body { padding: 22px 24px; }
+    .readme h3 { margin: 0 0 4px; font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+    .readme h3 img { width: 22px; height: 22px; }
+    .readme p { margin: 0; color: #57606a; font-size: 13px; }
+    .readme .links { margin-top: 14px; display: flex; gap: 16px; font-size: 12px; color: #0969da; }
+
+    .note { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 12px; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--teal); }
+    .note code { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="../assets/badge/espirangulo.svg" alt="Espirángulo">
+      <div>
+        <h1>Espirángulo <span>·</span> badge</h1>
+        <p class="sub">mini monocromo · assets/badge/ · jsDelivr</p>
+      </div>
+    </header>
+
+    <h2>1 · Tamaños reales</h2>
+    <div class="grid">
+      <div class="card">
+        <p class="caption">Sobre night (fondo de marca).</p>
+        <div class="row">
+          <div class="sample"><img src="../assets/badge/espirangulo.svg" width="16" height="16" alt=""><small>16</small></div>
+          <div class="sample"><img src="../assets/badge/espirangulo.svg" width="24" height="24" alt=""><small>24</small></div>
+          <div class="sample"><img src="../assets/badge/espirangulo.svg" width="32" height="32" alt=""><small>32</small></div>
+          <div class="sample"><img src="../assets/badge/espirangulo.svg" width="48" height="48" alt=""><small>48</small></div>
+          <div class="sample"><img src="../assets/badge/espirangulo.svg" width="96" height="96" alt=""><small>96</small></div>
+        </div>
+      </div>
+      <div class="card light">
+        <p class="caption">Sobre papel / superficie clara.</p>
+        <div class="row">
+          <div class="sample"><img src="../assets/badge/espirangulo-deep.svg" width="16" height="16" alt=""><small>16</small></div>
+          <div class="sample"><img src="../assets/badge/espirangulo-deep.svg" width="24" height="24" alt=""><small>24</small></div>
+          <div class="sample"><img src="../assets/badge/espirangulo-deep.svg" width="32" height="32" alt=""><small>32</small></div>
+          <div class="sample"><img src="../assets/badge/espirangulo-deep.svg" width="48" height="48" alt=""><small>48</small></div>
+          <div class="sample"><img src="../assets/badge/espirangulo-deep.svg" width="96" height="96" alt=""><small>96</small></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>2 · Variantes</h2>
+    <div class="variants">
+      <div class="variant"><div class="chip"><img src="../assets/badge/espirangulo.svg" width="40" height="40" alt=""></div><div class="meta"><code>espirangulo.svg</code><span>#c9a84c · default</span></div></div>
+      <div class="variant"><div class="chip"><img src="../assets/badge/espirangulo-teal.svg" width="40" height="40" alt=""></div><div class="meta"><code>espirangulo-teal.svg</code><span>#00c9c0</span></div></div>
+      <div class="variant"><div class="chip"><img src="../assets/badge/espirangulo-amber.svg" width="40" height="40" alt=""></div><div class="meta"><code>espirangulo-amber.svg</code><span>#d99a2b</span></div></div>
+      <div class="variant"><div class="chip"><img src="../assets/badge/espirangulo-white.svg" width="40" height="40" alt=""></div><div class="meta"><code>espirangulo-white.svg</code><span>#ffffff</span></div></div>
+      <div class="variant"><div class="chip on-paper"><img src="../assets/badge/espirangulo-deep.svg" width="40" height="40" alt=""></div><div class="meta"><code>espirangulo-deep.svg</code><span>#8a5a1c · claro</span></div></div>
+      <div class="variant"><div class="chip on-paper"><img src="../assets/badge/espirangulo-night.svg" width="40" height="40" alt=""></div><div class="meta"><code>espirangulo-night.svg</code><span>#050810 · claro</span></div></div>
+      <div class="variant"><div class="chip"><img src="../assets/badge/espirangulo-adaptive.svg" width="40" height="40" alt=""></div><div class="meta"><code>espirangulo-adaptive.svg</code><span>oro → blanco en dark</span></div></div>
+      <div class="variant"><div class="chip" style="background:#0b1120"><img src="../assets/badge/espirangulo.svg" width="24" height="24" alt=""><span style="margin-top:6px;color:#9aa3b2">en un README</span></div><div class="meta"><code>height="24"</code><span>tamaño típico</span></div></div>
+    </div>
+
+    <h2>3 · Cómo se ve en un README</h2>
+    <div class="readme">
+      <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="body">
+        <h3><img src="../assets/badge/espirangulo.svg" alt="">Christian Luciani</h3>
+        <p>Espirángulo · espiral de conocimiento, triángulo y C. Brand kit canónico.</p>
+        <div class="links"><span>github.com/ChristianLuciani</span><span>brand kit</span></div>
+      </div>
+    </div>
+
+    <p class="note">
+      Render ilustrativo de <code>assets/badge/</code> (7 SVG, 16–96 px). El badge es el mini
+      (C + supernova) monocromo derivado de <code>favicon-aurea.svg</code>; no reemplaza el mark
+      completo de <code>assets/logo/</code>. URLs por jsDelivr en <code>docs/badge.md</code>.
+    </p>
+  </div>
+</body>
+</html>

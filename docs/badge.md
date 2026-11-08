@@ -1,13 +1,14 @@
 # Badge CDN — Espirángulo
 
-> **Estado: implementado, sin deploy.** El Worker, el contrato y los tests viven
-> en este repo; la URL pública la crea el operador en Cloudflare (§5). Hasta
-> entonces el mismo código se sirve en local con `npm run badge:preview`.
+> **Estado: estático listo para jsDelivr; Worker opcional sin deploy.** Los SVG
+> de `assets/badge/` se publican con el repo y se consumen por jsDelivr sin
+> cuenta ni infraestructura. El Worker de `cdn/` queda como opción para color
+> arbitrario por URL; su deploy lo decide el operador (§5).
 
-**Cubre:** el endpoint HTTP del icono (rutas, color, dark mode, tamaño, headers)
-y su derivación desde el mini canónico.
+**Cubre:** los SVG estáticos del badge, su derivación desde el mini canónico y
+el contrato opcional del Worker.
 **No cubre:** el mark completo, el lockup, los PNG/SVG de `assets/logo/` ni la
-decisión de dominio público.
+decisión de un dominio propio.
 `as_of: 2026-11-08`
 
 ## 1. Por qué no Simple Icons
@@ -18,10 +19,61 @@ representan a una persona](https://github.com/simple-icons/simple-icons/blob/dev
 («Any brands representing individuals rather than an organization, company, or
 product»). No es un trámite pendiente: es un criterio de alcance.
 
-La alternativa es un CDN propio con el mismo contrato. Eso es lo que implementa
-`cdn/`.
+La alternativa para uso propio es publicar los SVG con el repo y servirlos por
+jsDelivr, que ya es la CDN del brand kit. No hace falta Cloudflare.
 
-## 2. Contrato
+## 2. Camino A — jsDelivr (estático, recomendado)
+
+Los archivos viven en `assets/badge/` y se sirven con el resto del repo:
+
+```text
+https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo.svg
+```
+
+`@main` funciona apenas se mergea. Para que la URL sea inmutable, pineá el tag
+posterior al release (por ejemplo `@v1.3.0`); el repo publica por tags y `main`
+puede cambiar.
+
+| Archivo | Color | Uso |
+|---|---|---|
+| `espirangulo.svg` | `#c9a84c` (oro de marca) | default |
+| `espirangulo-teal.svg` | `#00c9c0` | acento teal del sitio |
+| `espirangulo-amber.svg` | `#d99a2b` | ámbar de la C |
+| `espirangulo-deep.svg` | `#8a5a1c` | oro profundo, superficies claras |
+| `espirangulo-night.svg` | `#050810` | night sobre fondo claro |
+| `espirangulo-white.svg` | `#ffffff` | blanco sobre fondo oscuro |
+| `espirangulo-adaptive.svg` | oro → blanco | `prefers-color-scheme: dark` |
+
+Ejemplos:
+
+```html
+<!-- default -->
+<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo.svg" alt="Espirángulo — Christian Luciani">
+
+<!-- teal -->
+<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo-teal.svg" alt="Espirángulo">
+
+<!-- dark mode: oro en claro, blanco en oscuro -->
+<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo-adaptive.svg" alt="Espirángulo — Christian Luciani">
+```
+
+En Markdown:
+
+```md
+![Espirángulo](https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo.svg)
+```
+
+Render de tamaños y variantes: [`badge-render.png`](badge-render.png) (el HTML
+que lo produce es [`badge-render.html`](badge-render.html), con los SVG
+relativos; abrirlo directo o servirlo con `python3 -m http.server`).
+
+**Límite del camino estático:** el color es el archivo. jsDelivr no puede
+recolorear por URL; si querés un color que no está en la tabla, sumá una
+variante al generador o usá el Worker (§3).
+
+## 3. Camino B — Worker (dinámico, opcional)
+
+`cdn/` implementa el contrato de `cdn.simpleicons.org` para color arbitrario:
 
 ```text
 GET /espirangulo
@@ -32,22 +84,25 @@ GET /espirangulo/:color/:darkModeColor
 
 | Segmento / query | Comportamiento |
 |---|---|
-| `:color` | Hex de 3, 4, 6 u 8 dígitos, o keyword CSS (`hotpink`, `white`, …). Inválido o `_` → **oro de marca `#c9a84c`** (mismo fallback que simple-icons). |
+| `:color` | Hex de 3, 4, 6 u 8 dígitos, o keyword CSS (`hotpink`, `white`, …). Inválido o `_` → **oro de marca `#c9a84c`**. |
 | `:darkModeColor` | Si está presente y **difiere** del claro, el fill viaja en `<style>` y respeta `prefers-color-scheme: dark`. Si es igual, no se emite `<style>`. |
 | `size` | Entero en px; se trunca y se clampa a **3–16383**. Agrega `width`/`height`. |
-| `viewbox=auto` | Aceptado. **No-op**: el icono ya es cuadrado y está recortado al contorno. |
+| `viewbox=auto` | Aceptado. **No-op**: el icono ya es cuadrado y recortado al contorno. |
 
 Respuesta: `image/svg+xml`, un único `<path>`, `role="img"` + `<title>`, CORS
 `*`, `Cache-Control: public, max-age=86400, s-maxage=31536000,
 stale-while-revalidate=604800`, CSP `default-src 'none'; style-src
 'unsafe-inline'` y `X-Content-Type-Options: nosniff`. Los `GET 200` se guardan
-además en la **Cache API** del Worker: el edge no cachea respuestas de Worker
-sólo por el header.
+en la **Cache API** del Worker.
 
-Otros caminos: `/` redirige al repo, `/favicon.ico` responde `204`, slug o
-segmentos desconocidos `404`, métodos distintos de `GET`/`HEAD` `405`.
+Sin deploy, el mismo Worker se sirve en local:
 
-## 3. El icono: mini, monocromo, derivado
+```bash
+npm run badge:preview     # http://127.0.0.1:8788/preview
+curl -s http://127.0.0.1:8788/espirangulo/00c9c0
+```
+
+## 4. El icono: mini, monocromo, derivado
 
 El badge **no es el mark**: es el **mini** (C + supernova) que el manual ya usa
 para favicon y para el mark persistente de ≤ 42 px (`docs/composicion.md` §1 y
@@ -55,53 +110,23 @@ para favicon y para el mark persistente de ≤ 42 px (`docs/composicion.md` §1 
 
 - **Fuente:** `assets/logo/favicon-aurea.svg`.
 - **Generación:** `tools/badge/generate-badge.mjs` extrae el path de la C y el
-  núcleo de la supernova, los combina en **un solo path** y escribe
-  `cdn/src/icon.generated.mjs`. El test falla si el archivo no coincide byte a
-  byte con lo que produce el generador: nunca se edita a mano.
+  núcleo de la supernova, los combina en **un solo path** y escribe tanto
+  `cdn/src/icon.generated.mjs` como los SVG de `assets/badge/`. Ambos salen de
+  la misma función de render (`cdn/src/icon.mjs`): archivo y endpoint no pueden
+  divergir.
 - **Qué se omite:** los dos halos de la supernova (gradientes con alpha,
   invisibles a 16–32 px y sin sentido en un icono de un solo color) y el fondo.
 - **Qué se conserva:** el contorno de la C (marco redondeado y terminales) y el
   núcleo de la supernova, ambos rellenos con el color pedido.
 - **Color:** monocromo por contrato. El acabado ámbar→oro→luz y el coral de la
-  supernova siguen siendo la firma del **mark** en `assets/logo/`; este endpoint
-  no los reemplaza.
+  supernova siguen siendo la firma del **mark** en `assets/logo/`; este badge no
+  los reemplaza.
 
 Esto es una **derivación declarada** para badges/iconos, no una regla nueva del
 mark. Si el favicon canónico cambia, `npm run badge:generate` propaga el cambio
 y `npm test` falla hasta hacerlo.
 
-## 4. Uso
-
-Con la URL del deploy (`WORKER`, §5):
-
-```html
-<!-- README/sitio: tamaño controlado por atributo -->
-<img height="24" src="https://WORKER/espirangulo" alt="Espirángulo — Christian Luciani">
-
-<!-- teal de marca -->
-<img height="24" src="https://WORKER/espirangulo/00c9c0" alt="Espirángulo">
-
-<!-- dark mode: oro en claro, blanco en oscuro -->
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://WORKER/espirangulo/c9a84c/ffffff">
-  <img height="24" src="https://WORKER/espirangulo/c9a84c" alt="Espirángulo — Christian Luciani">
-</picture>
-```
-
-Markdown también sirve, pero el color queda fijo por URL:
-
-```md
-![Espirángulo](https://WORKER/espirangulo/00c9c0)
-```
-
-Local, sin deploy:
-
-```bash
-npm run badge:preview     # http://127.0.0.1:8788/preview
-curl -s http://127.0.0.1:8788/espirangulo/00c9c0
-```
-
-## 5. Deploy (operador)
+## 5. Deploy del Worker (opcional, operador)
 
 Requiere una cuenta de Cloudflare y autenticación de Wrangler
 (`wrangler login`, o `CLOUDFLARE_API_TOKEN` en el entorno). **No hay deploy en
@@ -113,7 +138,7 @@ npx wrangler@4.158.0 deploy
 ```
 
 Wrangler imprime la URL `https://cluciani-brand-cdn.<subdominio>.workers.dev`.
-Ese es el `WORKER` que reemplaza los ejemplos de §4 y el placeholder del README.
+Ese es el host del §3.
 
 Dominio propio (opcional): descomentar `routes` en `cdn/wrangler.toml`, fijar el
 patrón y volver a desplegar. Es una decisión de marca/infraestructura, no
@@ -126,31 +151,31 @@ icono, no datos de usuario.
 ## 6. Verificación
 
 ```bash
-npm test                                   # contrato + no-deriva desde el favicon
-npm run badge:check                        # icon.generated.mjs ≡ favicon-aurea.svg
+npm test                                   # contrato + estáticos + no-deriva
+npm run badge:check                        # 8 salidas ≡ favicon-aurea.svg
 npm run badge:generate                     # regenerar tras tocar el favicon
 ```
 
 Los tests cubren: default, hex 3/4/6/8, keywords, fallback de inválidos, `_`,
 dark mode (con y sin style), `size`/clamp, `viewbox=auto`, slug
 case-insensitive, trailing slash, 404/405/HEAD, redirect de root, favicon 204,
-headers de CDN, CSP, un solo path y sincronía del generado.
+headers de CDN, CSP, un solo path, Cache API y sincronía byte a byte de los
+siete SVG estáticos con el render del Worker.
 
 ## 7. Límites declarados
 
-- **Un solo slug:** `espirangulo`. No hay alias (`cluciani`, `christianluciani`)
-  ni otros marks en este endpoint.
-- **Un solo icono:** el mini. No se sirven `settled`, `layers`, lockups ni las
-  variantes `-teal-gold`; esos viven en `assets/logo/` y tienen su propio
-  contrato de composición.
-- **Sin purga automática:** el Cache API guarda cada URL según `s-maxage` (un
-  año). Un deploy nuevo **no** invalida entradas ya cacheadas: un cambio de
-  icono/contrato tarda hasta una purga manual (dashboard/API) o un cambio de URL.
-  El versionado de los assets sigue siendo por tag; el endpoint se versiona
-  desplegando.
-- **`viewbox=auto` es no-op** porque el icono es cuadrado; se acepta por
-  compatibilidad con el contrato de simple-icons.
-- **Sin analytics ni logs de requests** más allá de la observabilidad de
-  Cloudflare (§`wrangler.toml`).
+- **Un solo slug y un solo icono:** `espirangulo`, mini. No se sirven `settled`,
+  `layers`, lockups ni `-teal-gold`; esos viven en `assets/logo/` y tienen su
+  propio contrato de composición.
+- **Estático:** color fijo por archivo; sin `?size=` (el tamaño lo controla el
+  HTML) y sin `viewbox=auto` (el SVG ya es cuadrado).
+- **Sin purga automática en el Worker:** el Cache API guarda cada URL según
+  `s-maxage` (un año). Un deploy nuevo **no** invalida entradas ya cacheadas: un
+  cambio se ve al expirar, con purga manual o con un cambio de URL. El
+  versionado de los assets es por tag.
+- **`@main` es mutable:** jsDelivr lo cachea y no es una versión; para
+  reproducibilidad, pineá el tag.
+- **Sin analytics ni logs de requests** más allá de la observabilidad del
+  Worker.
 - **Derechos:** el repo es `UNLICENSED`. Servir el icono no concede licencia de
   uso de la marca; ver `LICENSE` y `TRADEMARK.md`.
