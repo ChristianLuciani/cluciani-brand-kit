@@ -9,7 +9,10 @@
     "test": "vitest run",
     "logo:generate": "node tools/logo/generate-logo.mjs",
     "logo:favicons": "node tools/logo/generate-logo.mjs --only-favicon",
-    "logo:verify": "node tools/logo/verify-dom-fidelity.mjs"
+    "logo:verify": "node tools/logo/verify-dom-fidelity.mjs",
+    "badge:generate": "node tools/badge/generate-badge.mjs",
+    "badge:check": "node tools/badge/generate-badge.mjs --check",
+    "badge:preview": "node cdn/preview-server.mjs"
   },
   "devDependencies": {
     "vitest": "5.0.5"

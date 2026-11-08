@@ -22,6 +22,8 @@ docs/logo.md               # manual de marca (símbolo, paleta, construcción, u
 docs/composicion.md        # matriz de composición por superficie y estado (#6)
 tools/logo/                # geometry.mjs (fuente de verdad), generador, tests, gate
 tools/logo/assets.sha256   # manifiesto de paridad de assets/logo (sha256)
+tools/badge/               # generador del icono del CDN desde favicon-aurea.svg
+cdn/                       # Worker del badge CDN + preview local (docs/badge.md)
 proposals/                 # HTML de la animación aprobada (fuente de diseño)
 ```
 
@@ -94,6 +96,24 @@ Favicon con tile teal (opciones de color, §3.2 del manual). Se publican desde
 <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.2.0/assets/logo/favicon-aurea-teal-gold-32.png">
 ```
 
+### Badge CDN (Espirángulo)
+
+`cdn/` implementa un endpoint colorable con el contrato de
+`cdn.simpleicons.org` — no está en Simple Icons (su alcance excluye marcas que
+representan a una persona) y no necesita estarlo:
+
+```text
+https://<worker>/espirangulo[/<color>[/<darkColor>]][?size=N][&viewbox=auto]
+```
+
+El icono es el **mini** (C + supernova) monocromo, generado desde
+`assets/logo/favicon-aurea.svg`; el mark completo sigue viviendo en
+`assets/logo/`. Contrato, límites y deploy: [docs/badge.md](docs/badge.md).
+
+La URL pública queda pendiente del deploy del operador (`cd cdn && npx
+wrangler@4.158.0 deploy`); hasta entonces, `npm run badge:preview` sirve el
+mismo Worker en `http://127.0.0.1:8788/preview`.
+
 ## Regenerar
 
 Requisitos: Node 20+ y Chrome/Chromium. En Linux/CI, apuntá `CHROME_PATH`.
@@ -103,6 +123,8 @@ npm install
 npm test                    # invariantes de geometría
 npm run logo:generate       # regenera los 89 assets (áurea + base)
 npm run logo:favicons       # sólo favicons (16 sólo -teal; 32 las 3)
+npm run badge:generate      # regenera el icono del CDN desde el favicon
+npm run badge:check         # verifica que el icono del CDN no derive
 CHROME_PATH=/usr/bin/google-chrome npm run logo:verify   # gate ≡ DOM aprobado
 ```
 

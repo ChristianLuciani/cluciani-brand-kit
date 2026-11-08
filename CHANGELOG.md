@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### Badge CDN (Espirángulo)
+
+- **`cdn/`** — Worker Cloudflare sin dependencias ni estado: sirve el mini
+  monocromo con el contrato de `cdn.simpleicons.org`
+  (`/espirangulo[/:color[/:dark]]?size=&viewbox=auto`), Cache API, CORS, CSP y
+  cache headers. Simple Icons no puede alojarlo (excluye marcas de personas):
+  el CDN es propio.
+- **`tools/badge/generate-badge.mjs`** — deriva el icono (un solo `<path>`) de
+  `assets/logo/favicon-aurea.svg`; `npm run badge:check` y el test fallan si el
+  generado queda stale. No se edita a mano.
+- **Tests** — 25 casos: color/fallback, dark mode, tamaño, rutas, métodos,
+  headers, Cache API y no-deriva desde el favicon.
+- **Deploy pendiente** — la URL pública la crea el operador
+  (`cd cdn && npx wrangler@4.158.0 deploy`); hasta entonces, `npm run
+  badge:preview`. No hay deploy en CI (requiere credenciales de cuenta).
+
 ## v1.2.0 — 2026-11-03
 
 Release de composición: el **settled** pasa a ser el default documentado, con

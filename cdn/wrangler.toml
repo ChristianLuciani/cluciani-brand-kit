@@ -1,0 +1,14 @@
+# Cloudflare Worker del badge CDN (contrato tipo cdn.simpleicons.org).
+# Deploy: ver docs/badge.md. El dominio workers.dev se asigna al desplegar;
+# para un dominio propio, descomentar `routes` y ajustar el patrón.
+name = "cluciani-brand-cdn"
+main = "src/worker.mjs"
+compatibility_date = "2026-11-08"
+workers_dev = true
+
+[observability]
+enabled = true
+
+# routes = [
+#   { pattern = "cdn.example.com", custom_domain = true },
+# ]
