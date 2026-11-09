@@ -15,7 +15,7 @@
     "badge:preview": "node cdn/preview-server.mjs"
   },
   "devDependencies": {
-    "vitest": "5.0.5"
+    "vitest": "5.1.0"
   },
   "engines": {
     "node": ">=20"
