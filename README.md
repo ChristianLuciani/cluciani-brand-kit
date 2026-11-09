@@ -18,10 +18,13 @@ geometría ni el acabado de la C — eso es alcance del issue #1.
 
 ```
 assets/logo/               # 89 assets generados (SVG, PNG, print, favicon, og)
+assets/badge/              # 7 SVG estáticos del badge para jsDelivr
 docs/logo.md               # manual de marca (símbolo, paleta, construcción, uso)
 docs/composicion.md        # matriz de composición por superficie y estado (#6)
 tools/logo/                # geometry.mjs (fuente de verdad), generador, tests, gate
 tools/logo/assets.sha256   # manifiesto de paridad de assets/logo (sha256)
+tools/badge/               # generador del icono del CDN desde favicon-aurea.svg
+cdn/                       # Worker del badge CDN + preview local (docs/badge.md)
 proposals/                 # HTML de la animación aprobada (fuente de diseño)
 ```
 
@@ -94,6 +97,26 @@ Favicon con tile teal (opciones de color, §3.2 del manual). Se publican desde
 <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.2.0/assets/logo/favicon-aurea-teal-gold-32.png">
 ```
 
+### Badge (Espirángulo)
+
+El badge es el **mini** (C + supernova) monocromo, generado desde
+`assets/logo/favicon-aurea.svg`; el mark completo sigue viviendo en
+`assets/logo/`. Se publica por **jsDelivr**, como el resto del repo, sin cuenta
+ni deploy:
+
+```html
+<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo.svg" alt="Espirángulo — Christian Luciani">
+```
+
+`assets/badge/` trae siete variantes de color (oro default, teal, ámbar, oro
+profundo, night, blanco y `-adaptive` con dark mode). `@main` sirve apenas se
+mergea; para URLs inmutables, pineá el tag posterior al release.
+
+Si hace falta **color arbitrario por URL**, `cdn/` trae un Worker opcional con
+el contrato de `cdn.simpleicons.org` (`/espirangulo/<color>/<dark>?size=`), pero
+requiere deploy en Cloudflare. Detalle, variantes y límites:
+[docs/badge.md](docs/badge.md).
+
 ## Regenerar
 
 Requisitos: Node 20+ y Chrome/Chromium. En Linux/CI, apuntá `CHROME_PATH`.
@@ -103,6 +126,8 @@ npm install
 npm test                    # invariantes de geometría
 npm run logo:generate       # regenera los 89 assets (áurea + base)
 npm run logo:favicons       # sólo favicons (16 sólo -teal; 32 las 3)
+npm run badge:generate      # regenera el icono del CDN desde el favicon
+npm run badge:check         # verifica que el icono del CDN no derive
 CHROME_PATH=/usr/bin/google-chrome npm run logo:verify   # gate ≡ DOM aprobado
 ```
 

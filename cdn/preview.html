@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Espirángulo — badge CDN (preview local)</title>
+  <style>
+    :root {
+      --night: #050810;
+      --deep: #0b1120;
+      --gold: #c9a84c;
+      --teal: #00c9c0;
+      --amber: #d99a2b;
+      --coral: #ff8a70;
+      --ink: #e8e6df;
+      --ink-dim: #9aa3b2;
+      --paper: #f5f2ea;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1100px 780px at 50% 0%, var(--deep), var(--night) 62%);
+      color: var(--ink);
+      font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 32px 72px; }
+    header { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #ffffff14; padding-bottom: 28px; }
+    header img { width: 64px; height: 64px; }
+    h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: .02em; }
+    h1 span { color: var(--gold); }
+    .sub { margin: 6px 0 0; color: var(--ink-dim); font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+    .banner { margin: 28px 0 0; padding: 12px 16px; border: 1px solid #c9a84c55; border-radius: 8px; color: var(--gold); font-size: 13px; }
+    h2 { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-dim); margin: 44px 0 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .card { background: #ffffff06; border: 1px solid #ffffff12; border-radius: 12px; padding: 20px; }
+    .card.light { background: var(--paper); border-color: #00000014; color: #17191f; }
+    .row { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; }
+    .sample { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .sample small { color: var(--ink-dim); font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .light .sample small { color: #6b7280; }
+    .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+    .swatch { width: 116px; border-radius: 10px; overflow: hidden; border: 1px solid #ffffff1a; }
+    .swatch .chip { height: 64px; display: grid; place-items: center; }
+    .swatch code { display: block; padding: 8px 10px; font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; background: #ffffff08; color: var(--ink-dim); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    td, th { text-align: left; padding: 10px 12px; border-bottom: 1px solid #ffffff10; vertical-align: top; }
+    th { color: var(--ink-dim); font-weight: 500; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    code { color: var(--teal); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+    .urls code { display: block; margin: 4px 0; word-break: break-all; color: var(--ink); }
+    footer { margin-top: 52px; padding-top: 20px; border-top: 1px solid #ffffff10; color: var(--ink-dim); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="/espirangulo/c9a84c" alt="Espirángulo">
+      <div>
+        <h1>Espirángulo <span>·</span> badge CDN</h1>
+        <p class="sub">Preview local · contrato tipo cdn.simpleicons.org</p>
+      </div>
+    </header>
+
+    <p class="banner">Esta página la sirve <code>cdn/preview-server.mjs</code>. El Worker es el mismo que se despliega; acá no hay URLs públicas todavía.</p>
+
+    <h2>1 · Tamaños reales</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="row">
+          <div class="sample"><img src="/espirangulo?size=16" width="16" height="16" alt=""><small>16</small></div>
+          <div class="sample"><img src="/espirangulo?size=24" width="24" height="24" alt=""><small>24</small></div>
+          <div class="sample"><img src="/espirangulo?size=32" width="32" height="32" alt=""><small>32</small></div>
+          <div class="sample"><img src="/espirangulo?size=48" width="48" height="48" alt=""><small>48</small></div>
+          <div class="sample"><img src="/espirangulo?size=96" width="96" height="96" alt=""><small>96</small></div>
+        </div>
+      </div>
+      <div class="card light">
+        <div class="row">
+          <div class="sample"><img src="/espirangulo/050810?size=16" width="16" height="16" alt=""><small>16</small></div>
+          <div class="sample"><img src="/espirangulo/050810?size=24" width="24" height="24" alt=""><small>24</small></div>
+          <div class="sample"><img src="/espirangulo/050810?size=32" width="32" height="32" alt=""><small>32</small></div>
+          <div class="sample"><img src="/espirangulo/050810?size=48" width="48" height="48" alt=""><small>48</small></div>
+          <div class="sample"><img src="/espirangulo/050810?size=96" width="96" height="96" alt=""><small>96</small></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>2 · Color por URL</h2>
+    <div class="swatches">
+      <div class="swatch"><div class="chip" style="background:#0b1120"><img src="/espirangulo/c9a84c?size=40" width="40" height="40" alt=""></div><code>/c9a84c</code></div>
+      <div class="swatch"><div class="chip" style="background:#0b1120"><img src="/espirangulo/00c9c0?size=40" width="40" height="40" alt=""></div><code>/00c9c0</code></div>
+      <div class="swatch"><div class="chip" style="background:#0b1120"><img src="/espirangulo/ffffff?size=40" width="40" height="40" alt=""></div><code>/ffffff</code></div>
+      <div class="swatch"><div class="chip" style="background:#050810"><img src="/espirangulo/d99a2b?size=40" width="40" height="40" alt=""></div><code>/d99a2b</code></div>
+      <div class="swatch"><div class="chip" style="background:#f5f2ea"><img src="/espirangulo/c9a84c?size=40" width="40" height="40" alt=""></div><code>/c9a84c · light</code></div>
+      <div class="swatch"><div class="chip" style="background:#f5f2ea"><img src="/espirangulo/8a5a1c?size=40" width="40" height="40" alt=""></div><code>/8a5a1c · light</code></div>
+    </div>
+
+    <h2>3 · Dark mode (prefers-color-scheme)</h2>
+    <div class="grid">
+      <div class="card">
+        <p style="margin:0 0 12px;color:var(--ink-dim);font-size:13px">Esta tarjeta siempre es night: el icono cambia solo según el sistema.</p>
+        <div class="row">
+          <picture>
+            <source media="(prefers-color-scheme: dark)" srcset="/espirangulo/c9a84c/ffffff?size=48">
+            <img src="/espirangulo/c9a84c?size=48" width="48" height="48" alt="">
+          </picture>
+          <code>/espirangulo/c9a84c/ffffff</code>
+        </div>
+      </div>
+      <div class="card">
+        <p style="margin:0 0 12px;color:var(--ink-dim);font-size:13px">Contrato: <code>/:color/:darkColor</code>. Con dark definido, el fill viaja en <code>&lt;style&gt;</code> y respeta <code>prefers-color-scheme: dark</code>.</p>
+      </div>
+    </div>
+
+    <h2>4 · Contrato</h2>
+    <table>
+      <tr><th>Ruta / query</th><th>Qué hace</th></tr>
+      <tr><td><code>/espirangulo</code></td><td>Oro de marca <code>#c9a84c</code>.</td></tr>
+      <tr><td><code>/espirangulo/00c9c0</code></td><td>Hex 3/4/6/8 o keyword CSS; inválido cae al default.</td></tr>
+      <tr><td><code>/espirangulo/c9a84c/ffffff</code></td><td>Color claro + color para dark mode.</td></tr>
+      <tr><td><code>?size=24</code></td><td>Width/height en px, clamp 3–16383.</td></tr>
+      <tr><td><code>?viewbox=auto</code></td><td>Aceptado; el icono ya es cuadrado (no-op).</td></tr>
+    </table>
+
+    <h2>5 · URLs de prueba</h2>
+    <div class="card urls">
+      <code>http://127.0.0.1:8788/espirangulo</code>
+      <code>http://127.0.0.1:8788/espirangulo/00c9c0</code>
+      <code>http://127.0.0.1:8788/espirangulo/c9a84c/ffffff</code>
+      <code>http://127.0.0.1:8788/espirangulo?size=32&amp;viewbox=auto</code>
+    </div>
+
+    <footer>
+      Fuente del icono: <code>assets/logo/favicon-aurea.svg</code> (mini: C + supernova) → <code>cdn/src/icon.generated.mjs</code>. Monocromo, un solo <code>&lt;path&gt;</code>; halos omitidos. No es el mark completo ni reemplaza los assets de <code>assets/logo/</code>.
+    </footer>
+  </div>
+</body>
+</html>
