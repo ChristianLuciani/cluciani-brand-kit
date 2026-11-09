@@ -27,12 +27,11 @@ jsDelivr, que ya es la CDN del brand kit. No hace falta Cloudflare.
 Los archivos viven en `assets/badge/` y se sirven con el resto del repo:
 
 ```text
-https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo.svg
+https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.3.0/assets/badge/espirangulo.svg
 ```
 
-`@main` funciona apenas se mergea. Para que la URL sea inmutable, pineá el tag
-posterior al release (por ejemplo `@v1.3.0`); el repo publica por tags y `main`
-puede cambiar.
+Los ejemplos usan `@v1.3.0`, el tag de este release. Mientras el tag no exista,
+`@main` sirve apenas se mergea; después se pinea, porque `main` puede cambiar.
 
 | Archivo | Color | Uso |
 |---|---|---|
@@ -48,19 +47,19 @@ Ejemplos:
 
 ```html
 <!-- default -->
-<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo.svg" alt="Espirángulo — Christian Luciani">
+<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.3.0/assets/badge/espirangulo.svg" alt="Espirángulo — Christian Luciani">
 
 <!-- teal -->
-<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo-teal.svg" alt="Espirángulo">
+<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.3.0/assets/badge/espirangulo-teal.svg" alt="Espirángulo">
 
 <!-- dark mode: oro en claro, blanco en oscuro -->
-<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo-adaptive.svg" alt="Espirángulo — Christian Luciani">
+<img height="24" src="https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.3.0/assets/badge/espirangulo-adaptive.svg" alt="Espirángulo — Christian Luciani">
 ```
 
 En Markdown:
 
 ```md
-![Espirángulo](https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@main/assets/badge/espirangulo.svg)
+![Espirángulo](https://cdn.jsdelivr.net/gh/ChristianLuciani/cluciani-brand-kit@v1.3.0/assets/badge/espirangulo.svg)
 ```
 
 Render de tamaños y variantes: [`badge-render.png`](badge-render.png) (el HTML
@@ -173,8 +172,9 @@ siete SVG estáticos con el render del Worker.
   `s-maxage` (un año). Un deploy nuevo **no** invalida entradas ya cacheadas: un
   cambio se ve al expirar, con purga manual o con un cambio de URL. El
   versionado de los assets es por tag.
-- **`@main` es mutable:** jsDelivr lo cachea y no es una versión; para
-  reproducibilidad, pineá el tag.
+- **`@main` es mutable:** jsDelivr lo cachea y no es una versión; los ejemplos
+  del manual y el README usan `@v1.3.0`. Si el tag todavía no existe, usá
+  `@main` sólo como prueba.
 - **Sin analytics ni logs de requests** más allá de la observabilidad del
   Worker.
 - **Derechos:** el repo es `UNLICENSED`. Servir el icono no concede licencia de

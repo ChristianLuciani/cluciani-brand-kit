@@ -1,13 +1,18 @@
 # Changelog
 
-## Unreleased
+## v1.3.0 — 2026-11-08
+
+Release del badge: el Espirángulo se publica como **icono estático por
+jsDelivr** (siete variantes) y, opcionalmente, como **Worker colorable**. Es
+aditivo: no toca ningún asset de `assets/logo/` ni la geometría; sólo suma
+`assets/badge/`, el generador y su documentación.
 
 ### Badge (Espirángulo)
 
 - **`assets/badge/`** — siete SVG estáticos del mini monocromo (oro default,
   teal, ámbar, oro profundo, night, blanco y `-adaptive` con dark mode) para
-  consumir por jsDelivr, la CDN que el repo ya usa. Sin cuenta ni deploy; `@main`
-  sirve al mergear y el tag posterior fija la URL.
+  consumir por jsDelivr, la CDN que el repo ya usa. Sin cuenta ni deploy;
+  `@v1.3.0` fija las URLs y `@main` sirve para pruebas mientras el tag no exista.
 - **`tools/badge/generate-badge.mjs`** — deriva el icono (un solo `<path>`) de
   `assets/logo/favicon-aurea.svg` y escribe los estáticos y el módulo del
   Worker con la misma función de render; `npm run badge:check` y el test fallan
